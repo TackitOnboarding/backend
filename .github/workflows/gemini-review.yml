@@ -1,0 +1,9 @@
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    
+    # AI 리뷰어가 main, dev 브랜치 PR 제외하도록
+    branches:
+      - '*'          # 일반적으로는 모든 브랜치 
+      - '!main'      # main 브랜치 제외
+      - '!dev'       # dev 브랜치 제외
