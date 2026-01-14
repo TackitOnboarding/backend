@@ -37,8 +37,8 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:3005", "https://frontend-tackit.vercel.app", "https://frontend-tackit.vercel.app/",
-                "https://www.tackit.site"
+                "https://www.tackit.site", "https://frontend-tackit.vercel.app", "https://frontend-tackit.vercel.app/",
+                "http://localhost:3005"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
