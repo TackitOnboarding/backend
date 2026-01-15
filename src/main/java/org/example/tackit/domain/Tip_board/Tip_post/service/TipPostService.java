@@ -120,6 +120,7 @@ public class TipPostService {
                 .status(Status.ACTIVE)
                 .reportCount(0)
                 .organization(org)
+                .isAnonymous(dto.isAnonymous())
                 .build();
 
         // 3. 이미지 업로드 & 연관관계 매핑 (단일 파일만)
@@ -135,15 +136,20 @@ public class TipPostService {
 
         List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
 
+        boolean anonymous = post.isAnonymous();
+
         // 응답 DTO 구성 (imageUrl 하나만)
         return TipPostRespDto.builder()
                 .id(post.getId())
-                .writer(member.getNickname())
+                .writer(anonymous ? "익명" : member.getNickname())
+                .profileImageUrl(anonymous ? null : member.getProfileImageUrl())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
                 .tags(tagNames)
                 .imageUrl(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+                .isAnonymous(anonymous)
+                .isScrap(false)
                 .build();
     }
 
