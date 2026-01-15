@@ -29,7 +29,7 @@ public class QnAPostController {
     // 게시글 생성
     @PostMapping
     public ResponseEntity<QnAPostResponseDto> createQnAPost(
-            @RequestPart("request") QnAPostRequestDto dto,
+            @RequestPart("dto") QnAPostRequestDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws IOException {

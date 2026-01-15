@@ -23,20 +23,28 @@ public class QnAPostResponseDto {
 
     private boolean isScrap;
 
+    private boolean isAnonymous;
+
     public static QnAPostResponseDto fromEntity(QnAPost post, List<String> tagNames, boolean isScrap) {
         String imageUrl = post.getImages().isEmpty() ? null
                 : post.getImages().get(0).getImageUrl();
 
+        // 익명 여부 확인
+        boolean anonymous = post.isAnonymous();
+
         return QnAPostResponseDto.builder()
                 .postId(post.getId())
-                .writer(post.getWriter().getNickname())
-                .profileImageUrl(post.getWriter().getProfileImageUrl())
+                .writer(post.isAnonymous() ? "익명" : post.getWriter().getNickname())
+                .profileImageUrl(post.isAnonymous() ? null : post.getWriter().getProfileImageUrl())
+                // .writer(post.getWriter().getNickname())
+                // .profileImageUrl(post.getWriter().getProfileImageUrl())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .tags(tagNames)
                 .createdAt(post.getCreatedAt())
                 .imageUrl(imageUrl)
                 .isScrap(isScrap)
+                .isAnonymous(anonymous)
                 .build();
     }
 }

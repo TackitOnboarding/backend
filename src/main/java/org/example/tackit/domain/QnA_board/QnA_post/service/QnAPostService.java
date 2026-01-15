@@ -54,6 +54,7 @@ public class QnAPostService {
                 .organization(org)
                 .status(Status.ACTIVE)
                 .reportCount(0)
+                .isAnonymous(dto.isAnonymous())
                 .build();
 
         // 이미지가 있으면 추가
