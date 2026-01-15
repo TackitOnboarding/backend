@@ -95,7 +95,6 @@ public class TipCommentService {
                 .orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
 
         boolean isWriter = comment.getWriter().getId().equals(member.getId());
-        //  boolean isAdmin = member.getRole() == Role.ADMIN;
 
         if (!isWriter ) {
             throw new AccessDeniedException("작성자만 수정할 수 있습니다.");
@@ -109,7 +108,7 @@ public class TipCommentService {
     // 댓글 삭제 (작성자, 관리자만 가능)
     @Transactional
     public void deleteComment(long commentId, String email, String org){
-        Member member = tipMemberRepository.findByEmail(email)
+        Member member = tipMemberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         TipComment comment = tipCommentRepository.findById(commentId)
@@ -127,8 +126,8 @@ public class TipCommentService {
 
     // 댓글 신고하기
     @Transactional
-    public void increaseCommentReportCount(long id, String org) {
-        TipComment comment = tipCommentRepository.findById(id)
+    public void increaseCommentReportCount(long commentId, String org) {
+        TipComment comment = tipCommentRepository.findById(commentId)
                 .orElseThrow( () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
         if (!comment.getWriter().getOrganization().equals(org)) {

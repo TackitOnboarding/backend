@@ -55,7 +55,7 @@ public class TipCommentController {
     }
 
     // 댓글 신고
-    @PostMapping("{commentId}/report")
+    @PostMapping("/{commentId}/report")
     public ResponseEntity<String> reportComment(@PathVariable long commentId,  @AuthenticationPrincipal CustomUserDetails userDetails) {
         String org = userDetails.getOrganization();
         tipCommentService.increaseCommentReportCount(commentId, org);
