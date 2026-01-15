@@ -40,7 +40,7 @@ public class SecurityConfig {
                 "https://tackit.site",
                 "https://www.tackit.site",
                 "https://frontend-tackit.vercel.app", "https://frontend-tackit.vercel.app/",
-                "http://localhost:3005"
+                "http://localhost:3005", "http://localhost:3000"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
