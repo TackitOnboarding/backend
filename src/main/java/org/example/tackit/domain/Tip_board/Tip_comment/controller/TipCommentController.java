@@ -1,10 +1,10 @@
-package org.example.tackit.domain.QnA_board.QnA_comment.controller;
+package org.example.tackit.domain.Tip_board.Tip_comment.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.QnA_board.QnA_comment.dto.request.QnACommentCreateDto;
-import org.example.tackit.domain.QnA_board.QnA_comment.dto.request.QnACommentUpdateDto;
-import org.example.tackit.domain.QnA_board.QnA_comment.dto.response.QnACommentResponseDto;
-import org.example.tackit.domain.QnA_board.QnA_comment.service.QnACommentService;
+import org.example.tackit.domain.Tip_board.Tip_comment.dto.req.TipCommentCreateDto;
+import org.example.tackit.domain.Tip_board.Tip_comment.dto.req.TipCommentUpdateDto;
+import org.example.tackit.domain.Tip_board.Tip_comment.dto.resp.TipCommentResponseDto;
+import org.example.tackit.domain.Tip_board.Tip_comment.service.TipCommentService;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,33 +15,33 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/qna-comment")
-public class QnACommentController {
+@RequestMapping("/api/tip-comments")
+public class TipCommentController {
 
-    private final QnACommentService qnACommentService;
+    private final TipCommentService tipCommentService;
 
     // 댓글 작성
-    @PostMapping("/create")
-    public ResponseEntity<QnACommentResponseDto> createComment(@RequestBody QnACommentCreateDto request, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    @PostMapping
+    public ResponseEntity<TipCommentResponseDto> createComment(@RequestBody TipCommentCreateDto request, @AuthenticationPrincipal CustomUserDetails userDetails) {
         String email = userDetails.getUsername();
         String org = userDetails.getOrganization();
-        QnACommentResponseDto response = qnACommentService.createComment(request, email, org);
+        TipCommentResponseDto response = tipCommentService.createComment(request, email, org);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // 댓글 조회
     @GetMapping("/{postId}")
-    public ResponseEntity<List<QnACommentResponseDto>> getComments(@PathVariable long postId,  @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<List<TipCommentResponseDto>> getComments(@PathVariable long postId, @AuthenticationPrincipal CustomUserDetails userDetails){
         String org = userDetails.getOrganization();
-        return ResponseEntity.ok(qnACommentService.getCommentByPost(postId, org));
+        return ResponseEntity.ok(tipCommentService.getCommentByPost(postId, org));
     }
 
     // 댓글 수정
     @PatchMapping("/{commentId}")
-    public ResponseEntity<QnACommentResponseDto> updateComment(@PathVariable long commentId, @RequestBody QnACommentUpdateDto request, @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<TipCommentResponseDto> updateComment(@PathVariable long commentId, @RequestBody TipCommentUpdateDto request, @AuthenticationPrincipal CustomUserDetails userDetails){
         String email = userDetails.getUsername();
         String org = userDetails.getOrganization();
-        QnACommentResponseDto updateResponse = qnACommentService.updateComment(commentId, request, email, org);
+        TipCommentResponseDto updateResponse = tipCommentService.updateComment(commentId, request, email, org);
         return ResponseEntity.ok().body(updateResponse);
     }
 
@@ -50,16 +50,17 @@ public class QnACommentController {
     public ResponseEntity<Void> deleteComment(@PathVariable long commentId, @AuthenticationPrincipal CustomUserDetails userDetails){
         String email = userDetails.getUsername();
         String org = userDetails.getOrganization();
-        qnACommentService.deleteComment(commentId, email, org);
+        tipCommentService.deleteComment(commentId, email, org);
         return ResponseEntity.noContent().build();
     }
 
     // 댓글 신고
-    @PostMapping("{commentId}/report")
+    @PostMapping("/{commentId}/report")
     public ResponseEntity<String> reportComment(@PathVariable long commentId,  @AuthenticationPrincipal CustomUserDetails userDetails) {
         String org = userDetails.getOrganization();
-        qnACommentService.increaseCommentReportCount(commentId, org);
+        tipCommentService.increaseCommentReportCount(commentId, org);
         return ResponseEntity.ok("댓글을 신고하였습니다.");
     }
-
 }
+
+

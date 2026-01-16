@@ -5,7 +5,7 @@ import org.example.tackit.domain.Free_board.Free_comment.repository.FreeCommentR
 import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepository;
 import org.example.tackit.domain.QnA_board.QnA_comment.repository.QnACommentRepository;
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
-import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostJPARepository;
+import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostRepository;
 import org.example.tackit.domain.admin.repository.UserLogRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.report.dto.ReportContentDetailDto;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AdminDashboardService {
-    private final TipPostJPARepository tipPostJPARepository;
+    private final TipPostRepository tipPostRepository;
     private final QnAPostRepository qnAPostRepository;
     private final FreePostJPARepository freePostJPARepository;
 
@@ -41,7 +41,7 @@ public class AdminDashboardService {
 
     // [ 총 게시글 수 계산 ]
     public long getPostsCount() {
-        long tipPostCount = tipPostJPARepository.count();
+        long tipPostCount = tipPostRepository.count();
         long qnAPostCount = qnAPostRepository.count();
         long freePostCount = freePostJPARepository.count();
 
@@ -69,7 +69,7 @@ public class AdminDashboardService {
 
     // [ 신고로 삭제된 게시글 수 계산 ]
     public Long getDeletedPostsByReport() {
-        long deletedTips = tipPostJPARepository.countByStatus(Status.DELETED);
+        long deletedTips = tipPostRepository.countByStatus(Status.DELETED);
         long deletedFrees = freePostJPARepository.countByStatus(Status.DELETED);
         long deletedQnAs = qnAPostRepository.countByStatus(Status.DELETED);
 
@@ -111,7 +111,7 @@ public class AdminDashboardService {
         try {
             switch (targetType) {
                 case TIP_POST:
-                    TipPost tipPost = tipPostJPARepository.findById(targetId).orElse(null);
+                    TipPost tipPost = tipPostRepository.findById(targetId).orElse(null);
                     return (tipPost != null) ?
                             new ReportedContentInfo(tipPost.getTitle(), tipPost.getStatus(), tipPost.getWriter().getNickname()) :
                             ReportedContentInfo.deleted(TargetType.TIP_POST);
