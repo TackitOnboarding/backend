@@ -2,10 +2,10 @@ package org.example.tackit.domain.QnA_board.QnA_post.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.config.S3.S3UploadService;
-import org.example.tackit.domain.QnA_board.QnA_post.dto.request.QnAPostRequestDto;
+import org.example.tackit.domain.QnA_board.QnA_post.dto.request.QnAPostReqDto;
 import org.example.tackit.domain.QnA_board.QnA_post.dto.request.UpdateQnARequestDto;
 import org.example.tackit.domain.QnA_board.QnA_post.dto.response.QnAPopularPostRespDto;
-import org.example.tackit.domain.QnA_board.QnA_post.dto.response.QnAPostResponseDto;
+import org.example.tackit.domain.QnA_board.QnA_post.dto.response.QnAPostRespDto;
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAMemberRepository;
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostReportRepository;
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
@@ -37,7 +37,7 @@ public class QnAPostService {
 
     // 게시글 작성 (NEWBIE만 가능)
     @Transactional
-    public QnAPostResponseDto createPost(QnAPostRequestDto dto, String email, String org) throws IOException {
+    public QnAPostRespDto createPost(QnAPostReqDto dto, String email, String org) throws IOException {
         Member member = qnAMemberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
@@ -54,6 +54,7 @@ public class QnAPostService {
                 .organization(org)
                 .status(Status.ACTIVE)
                 .reportCount(0)
+                .isAnonymous(dto.isAnonymous())
                 .build();
 
         // 이미지가 있으면 추가
@@ -69,12 +70,12 @@ public class QnAPostService {
 
         List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
 
-        return QnAPostResponseDto.fromEntity(post, tagNames, false);
+        return QnAPostRespDto.fromEntity(post, tagNames, false);
     }
 
     // 게시글 수정 (작성자만 가능)
     @Transactional
-    public QnAPostResponseDto update(long id, UpdateQnARequestDto request, String email, String org) throws IOException {
+    public QnAPostRespDto update(long id, UpdateQnARequestDto request, String email, String org) throws IOException {
         Member member = qnAMemberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
@@ -113,7 +114,7 @@ public class QnAPostService {
             post.addImage(image);
         } // 이미지 유지
 
-        return QnAPostResponseDto.fromEntity(post, tagNames, false);
+        return QnAPostRespDto.fromEntity(post, tagNames, false);
     }
 
     // 게시글 삭제 (작성자, 관리자만 가능)
@@ -136,7 +137,7 @@ public class QnAPostService {
     }
 
     // 게시글 전체 조회
-    public PageResponseDTO<QnAPostResponseDto> findAll(String org, Pageable pageable) {
+    public PageResponseDTO<QnAPostRespDto> findAll(String org, Pageable pageable) {
         Page<QnAPost> page = qnAPostRepository.findAllByStatusAndWriter_Organization(Status.ACTIVE, org, pageable);
         List<QnAPost> posts = page.getContent();
 
@@ -145,13 +146,13 @@ public class QnAPostService {
         return PageResponseDTO.from(page, post -> {
             List<String> tagNames = tagMap.getOrDefault(post.getId(), List.of());
             // 전체 조회 시에는 스크랩 여부 false 값으로 고정
-            return QnAPostResponseDto.fromEntity(post, tagNames, false);
+            return QnAPostRespDto.fromEntity(post, tagNames, false);
         });
     }
 
 
     // 게시글 상세 조회
-    public QnAPostResponseDto getPostById(Long id, String org, Long memberId) {
+    public QnAPostRespDto getPostById(Long id, String org, Long memberId) {
         QnAPost post = qnAPostRepository.findById(id)
                 .orElseThrow( () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
@@ -165,7 +166,7 @@ public class QnAPostService {
         // 스크랩 여부 조회
         boolean isScrap = qnAScrapRepository.existsByQnaPostIdAndMemberId(id, memberId);
 
-        return QnAPostResponseDto.fromEntity(post, tagNames, isScrap);
+        return QnAPostRespDto.fromEntity(post, tagNames, isScrap);
     }
 
     // 게시글 신고하기

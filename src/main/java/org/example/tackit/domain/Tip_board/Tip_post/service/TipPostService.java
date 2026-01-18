@@ -52,15 +52,18 @@ public class TipPostService {
                             .map(mapping -> mapping.getTag().getTagName())
                             .toList();
 
+                    boolean anonymous = post.isAnonymous();
+
                     return TipPostRespDto.builder()
                             .id(post.getId())
-                            .writer(post.getWriter().getNickname())
-                            .profileImageUrl(post.getWriter().getProfileImageUrl())
+                            .writer(anonymous ? "익명" : post.getWriter().getNickname())
+                            .profileImageUrl(anonymous ? null : post.getWriter().getProfileImageUrl())
                             .title(post.getTitle())
                             .content(post.getContent())
                             .createdAt(post.getCreatedAt())
                             .tags(tags)
                             .imageUrl(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+                            .isAnonymous(anonymous)
                             .build();
         });
     }
@@ -86,16 +89,20 @@ public class TipPostService {
         // 스크랩 여부 조회
         boolean isScrap = tipScrapRepository.existsByTipPostIdAndMemberId(id, memberId);
 
+        // 익명 여부 조회
+        boolean anonymous = tipPost.isAnonymous();
+
         return TipPostRespDto.builder()
                 .id(tipPost.getId())
-                .writer(tipPost.getWriter().getNickname())
-                .profileImageUrl(tipPost.getWriter().getProfileImageUrl())
+                .writer(anonymous ? "익명" : tipPost.getWriter().getNickname())
+                .profileImageUrl(anonymous ? null : tipPost.getWriter().getProfileImageUrl())
                 .title(tipPost.getTitle())
                 .content(tipPost.getContent())
                 .tags(tagNames)
                 .imageUrl(tipPost.getImages().isEmpty() ? null : tipPost.getImages().get(0).getImageUrl())
                 .createdAt(tipPost.getCreatedAt())
                 .isScrap(isScrap)
+                .isAnonymous(anonymous)
                 .build();
     }
 
@@ -120,6 +127,7 @@ public class TipPostService {
                 .status(Status.ACTIVE)
                 .reportCount(0)
                 .organization(org)
+                .isAnonymous(dto.isAnonymous())
                 .build();
 
         // 3. 이미지 업로드 & 연관관계 매핑 (단일 파일만)
@@ -135,15 +143,20 @@ public class TipPostService {
 
         List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
 
+        boolean anonymous = post.isAnonymous();
+
         // 응답 DTO 구성 (imageUrl 하나만)
         return TipPostRespDto.builder()
                 .id(post.getId())
-                .writer(member.getNickname())
+                .writer(anonymous ? "익명" : member.getNickname())
+                .profileImageUrl(anonymous ? null : member.getProfileImageUrl())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
                 .tags(tagNames)
                 .imageUrl(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+                .isAnonymous(anonymous)
+                .isScrap(false)
                 .build();
     }
 
@@ -193,14 +206,18 @@ public class TipPostService {
         tagService.deleteTagsByPost(post);
         List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
 
+        boolean anonymous = post.isAnonymous();
+
         return TipPostRespDto.builder()
                 .id(post.getId())
-                .writer(post.getWriter().getNickname())
+                .writer(anonymous ? "익명" : post.getWriter().getNickname())
+                .profileImageUrl(anonymous ? null : post.getWriter().getProfileImageUrl())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
                 .tags(tagNames)
                 .imageUrl(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+                .isAnonymous(anonymous)
                 .build();
     }
 

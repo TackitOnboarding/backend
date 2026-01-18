@@ -65,7 +65,7 @@ public class FreePostController {
     @PutMapping("/{id}")
     public ResponseEntity<FreePostRespDto> updateFreePost(
             @PathVariable Long id,
-            @RequestPart("req") UpdateFreeReqDto req,
+            @RequestPart("dto") UpdateFreeReqDto req,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails user) throws IOException {
 

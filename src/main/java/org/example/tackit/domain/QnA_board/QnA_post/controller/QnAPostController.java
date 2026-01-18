@@ -1,10 +1,10 @@
 package org.example.tackit.domain.QnA_board.QnA_post.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.QnA_board.QnA_post.dto.request.QnAPostRequestDto;
+import org.example.tackit.domain.QnA_board.QnA_post.dto.request.QnAPostReqDto;
 import org.example.tackit.domain.QnA_board.QnA_post.dto.request.UpdateQnARequestDto;
 import org.example.tackit.domain.QnA_board.QnA_post.dto.response.QnAPopularPostRespDto;
-import org.example.tackit.domain.QnA_board.QnA_post.dto.response.QnAPostResponseDto;
+import org.example.tackit.domain.QnA_board.QnA_post.dto.response.QnAPostRespDto;
 import org.example.tackit.domain.QnA_board.QnA_post.service.QnAPostService;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.example.tackit.common.dto.PageResponseDTO;
@@ -28,8 +28,8 @@ public class QnAPostController {
 
     // 게시글 생성
     @PostMapping
-    public ResponseEntity<QnAPostResponseDto> createQnAPost(
-            @RequestPart("request") QnAPostRequestDto dto,
+    public ResponseEntity<QnAPostRespDto> createQnAPost(
+            @RequestPart("dto") QnAPostReqDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws IOException {
@@ -37,29 +37,29 @@ public class QnAPostController {
         String org = userDetails.getOrganization();
 
         dto.setImageUrl(image);
-        QnAPostResponseDto response = qnAPostService.createPost(dto, email, org);
+        QnAPostRespDto response = qnAPostService.createPost(dto, email, org);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // 게시글 수정
     @PutMapping("/{QnAPostId}")
-    public ResponseEntity<QnAPostResponseDto> updateQnAPost(
+    public ResponseEntity<QnAPostRespDto> updateQnAPost(
             @PathVariable("QnAPostId") long QnAPostId,
-            @RequestPart("request") UpdateQnARequestDto request,
+            @RequestPart("dto") UpdateQnARequestDto request,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws IOException {
         String email = userDetails.getUsername();
         String org = userDetails.getOrganization();
         request.setImage(image);
-        QnAPostResponseDto updateResponse = qnAPostService.update(QnAPostId, request, email, org);
+        QnAPostRespDto updateResponse = qnAPostService.update(QnAPostId, request, email, org);
 
         return ResponseEntity.ok().body(updateResponse);
     }
 
     // 게시글 삭제
     @DeleteMapping("/{QnAPostId}")
-    public ResponseEntity<QnAPostResponseDto> deleteQnAPost(
+    public ResponseEntity<QnAPostRespDto> deleteQnAPost(
             @PathVariable("QnAPostId") long QnAPostId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
@@ -72,25 +72,25 @@ public class QnAPostController {
 
     // 게시글 전체 조회
     @GetMapping
-    public ResponseEntity<PageResponseDTO<QnAPostResponseDto>> findAllQnAPost(
+    public ResponseEntity<PageResponseDTO<QnAPostRespDto>> findAllQnAPost(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC, size = 5) Pageable pageable
     ) {
         String org = userDetails.getOrganization();
-        PageResponseDTO<QnAPostResponseDto> page = qnAPostService.findAll(org, pageable);
+        PageResponseDTO<QnAPostRespDto> page = qnAPostService.findAll(org, pageable);
         return ResponseEntity.ok(page);
     }
 
 
     // 게시글 상세 조회
     @GetMapping("/{QnAPostId}")
-    public ResponseEntity<QnAPostResponseDto> findQnAPost(
+    public ResponseEntity<QnAPostRespDto> findQnAPost(
             @PathVariable("QnAPostId") long QnAPostId ,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         String org = userDetails.getOrganization();
         Long memberId = userDetails.getId();
-        QnAPostResponseDto post = qnAPostService.getPostById(QnAPostId, org, memberId);
+        QnAPostRespDto post = qnAPostService.getPostById(QnAPostId, org, memberId);
         return ResponseEntity.ok(post);
     }
 
