@@ -36,8 +36,6 @@ public class QnAPostRespDto {
                 .postId(post.getId())
                 .writer(post.isAnonymous() ? "익명" : post.getWriter().getNickname())
                 .profileImageUrl(post.isAnonymous() ? null : post.getWriter().getProfileImageUrl())
-                // .writer(post.getWriter().getNickname())
-                // .profileImageUrl(post.getWriter().getProfileImageUrl())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .tags(tagNames)

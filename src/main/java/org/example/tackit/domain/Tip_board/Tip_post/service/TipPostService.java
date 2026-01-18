@@ -210,8 +210,8 @@ public class TipPostService {
 
         return TipPostRespDto.builder()
                 .id(post.getId())
-
                 .writer(anonymous ? "익명" : post.getWriter().getNickname())
+                .profileImageUrl(anonymous ? null : post.getWriter().getProfileImageUrl())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
