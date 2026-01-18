@@ -19,4 +19,5 @@ public class FreePostRespDto {
     private String imageUrl;
 
     private boolean isScrap;
+    private final boolean isAnonymous;
 }

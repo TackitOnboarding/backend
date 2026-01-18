@@ -1,6 +1,5 @@
 package org.example.tackit.domain.Free_board.Free_post.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.config.S3.S3UploadService;
 import org.example.tackit.domain.Free_board.Free_post.dto.request.FreePostReqDto;
@@ -16,7 +15,6 @@ import org.example.tackit.common.dto.PageResponseDTO;
 import org.example.tackit.global.exception.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,13 +56,15 @@ public class FreePostService {
 
             return FreePostRespDto.builder()
                     .id(post.getId())
-                    .writer(post.getWriter().getNickname())
-                    .profileImageUrl(profileImageUrl)
+                    .writer(post.isAnonymous() ? "익명" : post.getWriter().getNickname())
+                    .profileImageUrl(post.isAnonymous() ? null : imageUrl)
+                    .title(post.getTitle())
                     .title(post.getTitle())
                     .content(post.getContent())
                     .createdAt(post.getCreatedAt())
                     .tags(tags)
                     .imageUrl(imageUrl)
+                    .isAnonymous(post.isAnonymous())
                     .build();
         });
     }
@@ -97,14 +97,15 @@ public class FreePostService {
 
         return FreePostRespDto.builder()
                 .id(post.getId())
-                .writer(post.getWriter().getNickname())
-                .profileImageUrl(profileImageUrl)
+                .writer(post.isAnonymous() ? "익명" : post.getWriter().getNickname())
+                .profileImageUrl(post.isAnonymous() ? null : profileImageUrl)
                 .title(post.getTitle())
                 .content(post.getContent())
                 .tags(tagNames)
                 .imageUrl(imageUrl)
                 .createdAt(post.getCreatedAt())
                 .isScrap(isScrap)
+                .isAnonymous(post.isAnonymous())
                 .build();
     }
 
@@ -121,6 +122,7 @@ public class FreePostService {
                         .writer(member)
                         .title(dto.getTitle())
                         .content(dto.getContent())
+                        .isAnonymous(dto.isAnonymous())
                         .createdAt(LocalDateTime.now())
                         .type(Post.Free)
                         .status(Status.ACTIVE)
@@ -147,12 +149,13 @@ public class FreePostService {
 
         return FreePostRespDto.builder()
                 .id(post.getId())
-                .writer(member.getNickname())
+                .writer(post.isAnonymous() ? "익명" : member.getNickname())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
                 .tags(tagNames)
                 .imageUrl(imageUrl)
+                .isAnonymous(post.isAnonymous())
                 .build();
 
     }
@@ -216,12 +219,14 @@ public class FreePostService {
 
         return FreePostRespDto.builder()
                 .id(post.getId())
-                .writer(post.getWriter().getNickname())
+                .writer(post.isAnonymous() ? "익명" : member.getNickname())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
                 .tags(tagNames)
-                .imageUrl(imageUrl)
+                //.imageUrl(imageUrl)
+                .imageUrl(post.isAnonymous() ? null : imageUrl)
+                .isAnonymous(post.isAnonymous())
                 .build();
     }
 

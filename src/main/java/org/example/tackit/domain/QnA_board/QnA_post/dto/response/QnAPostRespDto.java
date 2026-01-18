@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Builder
-public class QnAPostResponseDto {
+public class QnAPostRespDto {
     private final Long postId;
     private final String writer;
     private final String profileImageUrl;
@@ -25,14 +25,14 @@ public class QnAPostResponseDto {
 
     private boolean isAnonymous;
 
-    public static QnAPostResponseDto fromEntity(QnAPost post, List<String> tagNames, boolean isScrap) {
+    public static QnAPostRespDto fromEntity(QnAPost post, List<String> tagNames, boolean isScrap) {
         String imageUrl = post.getImages().isEmpty() ? null
                 : post.getImages().get(0).getImageUrl();
 
         // 익명 여부 확인
         boolean anonymous = post.isAnonymous();
 
-        return QnAPostResponseDto.builder()
+        return QnAPostRespDto.builder()
                 .postId(post.getId())
                 .writer(post.isAnonymous() ? "익명" : post.getWriter().getNickname())
                 .profileImageUrl(post.isAnonymous() ? null : post.getWriter().getProfileImageUrl())

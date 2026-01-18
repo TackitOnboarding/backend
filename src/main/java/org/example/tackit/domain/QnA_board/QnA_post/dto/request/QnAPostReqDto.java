@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class QnAPostRequestDto {
+public class QnAPostReqDto {
     private String title;
     private String content;
     private List<Long> tagIds;
