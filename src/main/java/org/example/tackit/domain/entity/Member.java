@@ -37,9 +37,17 @@ public class Member {
 
     private String profileImageUrl;
 
+    /*
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+     */
+
+    @Enumerated(EnumType.STRING)
+    private MemberRole memberRole;
+
+    @Enumerated(EnumType.STRING)
+    private MemberType memberType;
 
     @Column(nullable = false, name = "joined_year")
     private int joinedYear;
@@ -59,7 +67,8 @@ public class Member {
                 this.nickname,
                 this.email,
                 this.organization,
-                this.getRole(),
+                this.getMemberRole(),
+                this.getMemberType(),
                 this.joinedYear,
                 this.calculateYearsOfService(),
                 this.profileImageUrl

@@ -1,9 +1,7 @@
 package org.example.tackit.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Role;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.auth.login.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,7 +28,9 @@ public class AdminDataInitializer implements CommandLineRunner {
                     .nickname("관리자")
                     .organization("ADMIN")
                     .joinedYear(2025)
-                    .role(Role.ADMIN)
+                    .memberRole(MemberRole.ADMIN)
+                    .memberType(MemberType.ADMIN)
+                    // .role(Role.ADMIN)
                     .status(Status.ACTIVE)
                     .createdAt(LocalDateTime.now())
                     .build();

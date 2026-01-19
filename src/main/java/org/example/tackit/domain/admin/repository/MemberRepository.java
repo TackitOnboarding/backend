@@ -1,7 +1,7 @@
 package org.example.tackit.domain.admin.repository;
 
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Role;
+import org.example.tackit.domain.entity.MemberType;
 import org.example.tackit.domain.entity.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -33,11 +33,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // 1년마다 뉴비 -> 시니어 자동 갱신
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Member m " +
-            "SET m.role = :newRole " +
-            "WHERE m.role = :oldRole " +
+            "SET m.memberType = :newType " +  // memberType 필드 업데이트
+            "WHERE m.memberType = :oldType " + // 기존 memberType 조건
             "AND m.joinedYear <= :thresholdYear")
-    int bulkUpdateRole(@Param("oldRole") Role oldRole,
-                       @Param("newRole") Role newRole,
+    int bulkUpdateType(@Param("oldType") MemberType oldType,
+                       @Param("newType") MemberType newType,
                        @Param("thresholdYear") int thresholdYear);
     // 닉네임 중복확인
     boolean existsByNickname(String nickname);

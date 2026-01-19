@@ -1,7 +1,7 @@
 package org.example.tackit.domain.entity;
 
-public enum Role {
-    NEWBIE,
-    SENIOR,
+public enum MemberRole {
+    EXECUTIVE,
+    GENERAL,
     ADMIN
 }

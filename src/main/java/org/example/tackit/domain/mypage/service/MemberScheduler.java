@@ -3,7 +3,7 @@ package org.example.tackit.domain.mypage.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.admin.repository.MemberRepository;
-import org.example.tackit.domain.entity.Role;
+import org.example.tackit.domain.entity.MemberType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class MemberScheduler {
     @Scheduled(cron = "0 0 0 1 1 *")
     public void updateSeniorMembers() {
         int currentYear = LocalDate.now().getYear();
-        int updatedCount = memberRepository.bulkUpdateRole(Role.NEWBIE, Role.SENIOR, currentYear);
+        int updatedCount = memberRepository.bulkUpdateType(MemberType.NEWBIE, MemberType.SENIOR, currentYear);
         System.out.println("업데이트된 멤버 수 = " + updatedCount);
     }
 

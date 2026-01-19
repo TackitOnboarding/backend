@@ -106,14 +106,14 @@ public class TipPostService {
                 .build();
     }
 
-    // [ 게시글 작성 ] : 선임자만 가능
+    // [ 게시글 작성 ] : 선배만 가능
     @Transactional
     public TipPostRespDto createPost(TipPostReqDto dto, String email, String org, MultipartFile image) throws IOException {
         // 1. 유저 조회
         Member member = tipMemberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new IllegalArgumentException("작성자가 DB에 존재하지 않습니다."));
 
-        if (member.getRole() != Role.SENIOR) {
+        if (member.getMemberType() != MemberType.SENIOR) {
             throw new AccessDeniedException("SENIOR만 게시글을 작성할 수 있습니다.");
         }
 

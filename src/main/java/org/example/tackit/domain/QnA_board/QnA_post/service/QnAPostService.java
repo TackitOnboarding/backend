@@ -41,7 +41,7 @@ public class QnAPostService {
         Member member = qnAMemberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        if (member.getRole() != Role.NEWBIE) {
+        if (member.getMemberType() != MemberType.NEWBIE) {
             throw new AccessDeniedException("NEWBIE만 질문을 작성할 수 있습니다.");
         }
 
@@ -83,7 +83,6 @@ public class QnAPostService {
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
         boolean isWriter = post.getWriter().getId().equals(member.getId());
-      //  boolean isAdmin = member.getRole() == Role.ADMIN;
 
         if (!isWriter) {
             throw new AccessDeniedException("작성자만 수정할 수 있습니다.");
@@ -127,7 +126,8 @@ public class QnAPostService {
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
         boolean isWriter = post.getWriter().getId().equals(member.getId());
-        boolean isAdmin = member.getRole() == Role.ADMIN;
+        boolean isAdmin = (member.getMemberRole() == MemberRole.ADMIN)
+                && (member.getMemberType() == MemberType.ADMIN);
 
         if (!isWriter && !isAdmin) {
             throw new AccessDeniedException("작성자 또는 관리자만 삭제할 수 있습니다.");

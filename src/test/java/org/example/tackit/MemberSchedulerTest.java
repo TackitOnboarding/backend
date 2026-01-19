@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.example.tackit.domain.admin.repository.MemberRepository;
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Role;
+import org.example.tackit.domain.entity.MemberType;
 import org.example.tackit.domain.entity.Status;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ class MemberSchedulerTest {
                 .password("pw")
                 .nickname("뉴비")
                 .organization("ORG")
-                .role(Role.NEWBIE)
+                .memberType(MemberType.NEWBIE)
                 .joinedYear(2024)
                 .status(Status.ACTIVE)
                 .build();
@@ -40,7 +40,7 @@ class MemberSchedulerTest {
         int thresholdYear = currentYear - 1;
 
         // when: bulk update 실행
-        int updatedCount = memberRepository.bulkUpdateRole(Role.NEWBIE, Role.SENIOR, thresholdYear);
+        int updatedCount = memberRepository.bulkUpdateType(MemberType.NEWBIE, MemberType.SENIOR, thresholdYear);
 
         // then: 업데이트된 row 수 확인
         assertThat(updatedCount).isEqualTo(1);
@@ -50,7 +50,7 @@ class MemberSchedulerTest {
         Member updatedMember = memberRepository.findById(newbie.getId()).orElseThrow();
 
         // role이 SENIOR로 바뀌었는지 확인
-        assertThat(updatedMember.getRole()).isEqualTo(Role.SENIOR);
+        assertThat(updatedMember.getMemberType()).isEqualTo(MemberType.SENIOR);
     }
 }
 

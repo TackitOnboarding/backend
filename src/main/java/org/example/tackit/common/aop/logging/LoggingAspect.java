@@ -9,9 +9,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.example.tackit.domain.Free_board.Free_post.repository.FreeMemberJPARepository;
 import org.example.tackit.domain.admin.repository.UserLogRepository;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Role;
-import org.example.tackit.domain.entity.UserLog;
+import org.example.tackit.domain.entity.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -45,12 +43,15 @@ public class LoggingAspect {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth != null ? auth.getName() : "anonymous";
 
-        Role role = null;
+        MemberRole memberRole = null;
+        MemberType memberType = null;
         String org = null;
         if (!"anonymous".equals(email)) {
             Member member = freeMemberJPARepository.findByEmail(email).orElse(null);
             if (member != null) {
-                role = member.getRole();
+                memberRole = member.getMemberRole();
+                memberType = member.getMemberType();
+                // role = member.getRole();
                 org = member.getOrganization();
             }
         }
@@ -68,7 +69,8 @@ public class LoggingAspect {
 
             // 로그저장
             UserLog userLog = UserLog.builder()
-                    .role(role)
+                    .memberRole(memberRole)
+                    .memberType(memberType)
                     .memberId(email)
                     .organization(org)
                     .ipAddress(ip)
