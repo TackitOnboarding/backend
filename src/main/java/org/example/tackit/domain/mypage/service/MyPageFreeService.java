@@ -5,7 +5,7 @@ import org.example.tackit.domain.Free_board.Free_comment.repository.FreeCommentR
 import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepository;
 import org.example.tackit.domain.Free_board.Free_post.repository.FreeScrapJPARepository;
 import org.example.tackit.domain.Free_board.Free_tag.repository.FreePostTagMapRepository;
-import org.example.tackit.domain.admin.repository.MemberRepository;
+import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.mypage.dto.response.FreeMyCommentResponseDto;
 import org.example.tackit.domain.mypage.dto.response.FreeMyPostResponseDto;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MyPageFreeService {
     private final FreeScrapJPARepository freeScrapJPARepository;
-    private final MemberRepository memberRepository;
+    private final AdminMemberRepository adminMemberRepository;
     private final FreePostJPARepository freePostJPARepository;
     private final FreePostTagMapRepository freePostTagMapRepository;
     private final FreeCommentRepository freeCommentRepository;
@@ -30,7 +30,7 @@ public class MyPageFreeService {
     // 스크랩한 자유 게시글 조회
     @Transactional
     public PageResponseDTO<FreeScrapResponse> getScrapListByMember(String email, Pageable pageable) {
-        Member member = memberRepository.findByEmail(email)
+        Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         Page<FreeScrap> page = freeScrapJPARepository.findByMemberAndType(member, Post.Free, pageable);
@@ -50,7 +50,7 @@ public class MyPageFreeService {
     // 내가 쓴 자유 게시글 조회
     @Transactional(readOnly = true)
     public PageResponseDTO<FreeMyPostResponseDto> getMyPosts(String email, Pageable pageable) {
-        Member member = memberRepository.findByEmail(email)
+        Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         Page<FreePost> page = freePostJPARepository.findByWriterAndStatus(member, Status.ACTIVE, pageable);
@@ -67,7 +67,7 @@ public class MyPageFreeService {
     // 내가 쓴 댓글 조회
     @Transactional(readOnly = true)
     public PageResponseDTO<FreeMyCommentResponseDto> getMyComments(String email, Pageable pageable) {
-        Member member = memberRepository.findByEmail(email)
+        Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         Page<FreeComment> comments = freeCommentRepository.findByWriter(member, pageable);

@@ -2,7 +2,7 @@ package org.example.tackit;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import org.example.tackit.domain.admin.repository.MemberRepository;
+import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.entity.MemberType;
 import org.example.tackit.domain.entity.Status;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MemberSchedulerTest {
 
     @Autowired
-    private MemberRepository memberRepository;
+    private AdminMemberRepository adminMemberRepository;
 
     @Autowired
     private EntityManager em; // 영속성 컨텍스트 선언
@@ -34,20 +34,20 @@ class MemberSchedulerTest {
                 .joinedYear(2024)
                 .status(Status.ACTIVE)
                 .build();
-        memberRepository.save(newbie);
+        adminMemberRepository.save(newbie);
 
         int currentYear = 2025;
         int thresholdYear = currentYear - 1;
 
         // when: bulk update 실행
-        int updatedCount = memberRepository.bulkUpdateType(MemberType.NEWBIE, MemberType.SENIOR, thresholdYear);
+        int updatedCount = adminMemberRepository.bulkUpdateType(MemberType.NEWBIE, MemberType.SENIOR, thresholdYear);
 
         // then: 업데이트된 row 수 확인
         assertThat(updatedCount).isEqualTo(1);
 
         // 캐시 초기화 후 DB에서 다시 조회 (영속성 컨텍스트)
         em.clear();
-        Member updatedMember = memberRepository.findById(newbie.getId()).orElseThrow();
+        Member updatedMember = adminMemberRepository.findById(newbie.getId()).orElseThrow();
 
         // role이 SENIOR로 바뀌었는지 확인
         assertThat(updatedMember.getMemberType()).isEqualTo(MemberType.SENIOR);
