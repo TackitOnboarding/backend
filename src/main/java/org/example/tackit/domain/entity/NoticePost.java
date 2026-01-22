@@ -32,8 +32,14 @@ public class NoticePost {
     private Post type;
     private String organization;
 
+    @Builder.Default
     private Long viewCount = 0L;
+
+    @Builder.Default
     private Long scrapCount = 0L;
+
+    @Version
+    private Long version;
 
     // 이미지 연관관계 추가
     @OneToMany(mappedBy = "noticePost", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -42,11 +48,6 @@ public class NoticePost {
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
-    }
-
-    public void addImage(NoticePostImage image) {
-        images.add(image);
-        image.setNoticePost(this);
     }
 
     public void increaseViewCount() {

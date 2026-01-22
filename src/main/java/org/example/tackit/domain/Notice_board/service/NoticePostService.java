@@ -171,10 +171,11 @@ public class NoticePostService {
         // 1. "이미지 제거" 요청
         if (req.isRemoveImage()) {
             deleteExistingImages(post);
+            imageUrl = null;
         }
 
         // 2. 새 이미지 업로드
-        else if (req.getImage() != null && !req.getImage().isEmpty()) {
+        else if (image != null && !image.isEmpty()) {
             // 기존 이미지 제거
             deleteExistingImages(post);
             imageUrl = s3UploadService.saveFile(image);
@@ -190,7 +191,10 @@ public class NoticePostService {
         // 3. 아무 요청 없으면 기존 이미지 유지
         else {
             imageUrl = noticePostImageRepository.findByNoticePostId(post.getId())
-                    .stream().findFirst().map(NoticePostImage::getImageUrl).orElse(null);
+                    .stream()
+                    .findFirst()
+                    .map(NoticePostImage::getImageUrl)
+                    .orElse(null);
         }
 
         return NoticePostRespDto.from(post, imageUrl);

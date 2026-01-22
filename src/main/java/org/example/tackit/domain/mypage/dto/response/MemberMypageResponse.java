@@ -13,13 +13,10 @@ public class MemberMypageResponse {
     private String nickname;
     private String email;
     private String organization;
-    // private Role role;
     private MemberRole memberRole;
     private MemberType memberType;
     private int joinedYear;
     private int yearsOfService;
     private String profileImageUrl;
 
-    public MemberMypageResponse(String nickname, String email, String organization, MemberRole memberRole, MemberType memberType) {
-    }
 }
