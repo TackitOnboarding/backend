@@ -44,14 +44,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         // 2. memberRole 추가
         authorities.add(new SimpleGrantedAuthority("ROLE_" + member.getMemberRole().name()));
 
-        // 3. memberType 추가
-        authorities.add((new SimpleGrantedAuthority(member.getMemberType().name())));
-
         return new CustomUserDetails(
                 member.getId(),
                 member.getEmail(),
                 member.getPassword(),
                 member.getOrganization(),
+                member.getMemberType(),
                 authorities
         );
     }

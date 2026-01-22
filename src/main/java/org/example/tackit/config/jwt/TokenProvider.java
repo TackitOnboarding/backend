@@ -184,6 +184,7 @@ public class TokenProvider {
                 member.getEmail(),
                 member.getPassword(),
                 member.getOrganization().toString(),
+                member.getMemberType(),
                 authorities
         );
 

@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -98,7 +99,7 @@ public class NoticePostService {
 
     // [ 게시글 작성 ]
     @Transactional
-    public NoticePostRespDto createPost(NoticePostReqDto dto, String email, String org) throws IOException {
+    public NoticePostRespDto createPost(NoticePostReqDto dto, MultipartFile image, String email, String org) throws IOException {
 
         // 1. 유저 조회
         Member member = memberRepository.findByEmailAndOrganization(email, org)
@@ -117,6 +118,7 @@ public class NoticePostService {
         noticePostRepository.save(post);
 
         // 3. 이미지 업로드 → PostImage 저장
+        /*
         String imageUrl = null;
         if (dto.getImage() != null && !dto.getImage().isEmpty()) {
             imageUrl = s3UploadService.saveFile(dto.getImage());
@@ -128,21 +130,28 @@ public class NoticePostService {
 
             noticePostImageRepository.save(image); // 따로 JPARepository 필요
         }
+         */
 
-        return NoticePostRespDto.builder()
-                .id(post.getId())
-                .writer(member.getNickname())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .createdAt(post.getCreatedAt())
-                .imageUrl(imageUrl)
-                .build();
+        // 3. 이미지 업로드 -> 인자로 받은 image 직접 사용
+        String imageUrl = null;
+        if(image != null && !image.isEmpty()) {
+            imageUrl = s3UploadService.saveFile(image);
+
+            NoticePostImage postImage = NoticePostImage.builder()
+                    .imageUrl(imageUrl)
+                    .noticePost(post)
+                    .build();
+
+            noticePostImageRepository.save(postImage);
+        }
+
+        return NoticePostRespDto.from(post, imageUrl);
 
     }
 
     // [ 게시글 수정 ] : 작성자만
     @Transactional
-    public NoticePostRespDto update(Long id, UpdateNoticeReqDto req, String email, String org) throws IOException {
+    public NoticePostRespDto update(Long id, UpdateNoticeReqDto req, MultipartFile image, String email, String org) throws IOException {
         Member member = memberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
@@ -158,26 +167,18 @@ public class NoticePostService {
         post.update(req.getTitle(), req.getContent());
 
         String imageUrl = null;
+
         // 1. "이미지 제거" 요청
         if (req.isRemoveImage()) {
-            noticePostImageRepository.findByNoticePostId(post.getId())
-                    .forEach(oldImage -> {
-                        s3UploadService.deleteImage(oldImage.getImageUrl()); // S3 삭제
-                        noticePostImageRepository.delete(oldImage);           // DB 삭제
-                    });
+            deleteExistingImages(post);
         }
 
         // 2. 새 이미지 업로드
         else if (req.getImage() != null && !req.getImage().isEmpty()) {
             // 기존 이미지 제거
-            noticePostImageRepository.findByNoticePostId(post.getId())
-                    .forEach(oldImage -> {
-                        s3UploadService.deleteImage(oldImage.getImageUrl());
-                        noticePostImageRepository.delete(oldImage);
-                    });
+            deleteExistingImages(post);
+            imageUrl = s3UploadService.saveFile(image);
 
-            // 새 이미지 저장
-            imageUrl = s3UploadService.saveFile(req.getImage());
             NoticePostImage newImage = NoticePostImage.builder()
                     .imageUrl(imageUrl)
                     .noticePost(post)
@@ -188,21 +189,11 @@ public class NoticePostService {
 
         // 3. 아무 요청 없으면 기존 이미지 유지
         else {
-            List<NoticePostImage> images = noticePostImageRepository.findByNoticePostId(post.getId());
-            if (!images.isEmpty()) {
-                imageUrl = images.get(0).getImageUrl();
-            }
+            imageUrl = noticePostImageRepository.findByNoticePostId(post.getId())
+                    .stream().findFirst().map(NoticePostImage::getImageUrl).orElse(null);
         }
 
-        return NoticePostRespDto.builder()
-                .id(post.getId())
-                .writer(member.getNickname())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .createdAt(post.getCreatedAt())
-                //.imageUrl(imageUrl)
-                .imageUrl(imageUrl)
-                .build();
+        return NoticePostRespDto.from(post, imageUrl);
     }
 
     // [ 게시글 삭제 ] : 작성자, 관리자만
@@ -275,6 +266,14 @@ public class NoticePostService {
             notificationService.send(notification);
         }
         return new NoticeScrapRespDto(true, scrap.getSavedAt());
+    }
+
+    public void deleteExistingImages(NoticePost post) {
+        noticePostImageRepository.findByNoticePostId(post.getId())
+                .forEach(oldImage -> {
+                    s3UploadService.deleteImage(oldImage.getImageUrl());
+                    noticePostImageRepository.delete(oldImage);
+                });
     }
 
 }

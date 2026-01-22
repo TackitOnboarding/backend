@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/notice-posts")
@@ -52,10 +51,10 @@ public class NoticePostController {
             @RequestPart("dto") NoticePostReqDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails user) throws IOException {
-        String email = user.getEmail();
-        String org = user.getOrganization();
-        dto.setImage(image);
-        NoticePostRespDto resp = noticePostService.createPost(dto, email, org);
+
+        // dto.setImage(image);
+        // NoticePostRespDto resp = noticePostService.createPost(dto, email, org);
+        NoticePostRespDto resp = noticePostService.createPost(dto, image, user.getEmail(), user.getOrganization());
         return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
 
@@ -67,17 +66,15 @@ public class NoticePostController {
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails user) throws IOException {
 
-        req.setImage(image);
-        String email = user.getEmail();
-        String org = user.getOrganization();
-        NoticePostRespDto updateResp = noticePostService.update(id, req, email, org);
+        // req.setImage(image);
+        NoticePostRespDto resp = noticePostService.update(id, req, image, user.getEmail(), user.getOrganization());
 
-        return ResponseEntity.ok(updateResp);
+        return ResponseEntity.ok(resp);
     }
 
     // 5. 게시글 삭제
     @DeleteMapping("{id}")
-    public ResponseEntity<NoticeScrapRespDto> deleteNoticePost(
+    public ResponseEntity<Void> deleteNoticePost(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails user) {
         String email = user.getEmail();

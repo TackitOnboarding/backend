@@ -2,6 +2,7 @@ package org.example.tackit.domain.Notice_board.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.example.tackit.domain.entity.NoticePost;
 
 import java.time.LocalDateTime;
 
@@ -16,5 +17,18 @@ public class NoticePostRespDto {
     private final LocalDateTime createdAt;
     private String imageUrl;
 
-    private boolean isScrap;
+    @Builder.Default
+    private boolean isScrap = false; // 기본값
+
+    public static NoticePostRespDto from(NoticePost post, String imageUrl) {
+        return NoticePostRespDto.builder()
+                .id(post.getId())
+                .writer(post.getWriter().getNickname())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .createdAt(post.getCreatedAt())
+                .imageUrl(imageUrl)
+                .isScrap(false)
+                .build();
+    }
 }
