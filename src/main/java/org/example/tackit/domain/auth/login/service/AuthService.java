@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tackit.config.Redis.RedisUtil;
 import org.example.tackit.config.jwt.TokenProvider;
-import org.example.tackit.domain.admin.repository.MemberRepository;
+import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.auth.login.dto.*;
+import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.entity.Status;
-import org.example.tackit.domain.auth.login.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -28,20 +28,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
     private final RedisUtil redisUtil;
-    private final MemberRepository memberRepository;
+    private final AdminMemberRepository adminMemberRepository;
 
     @Transactional
     public void signup(SignUpDto signUpDto) {
-        if (userRepository.existsByEmail(signUpDto.getEmail())) {
+        if (memberRepository.existsByEmail(signUpDto.getEmail())) {
             throw new RuntimeException("이미 가입되어 있는 유저입니다");
         }
 
-        if (userRepository.existsByNickname(signUpDto.getNickname())) {
+        if (memberRepository.existsByNickname(signUpDto.getNickname())) {
             throw new RuntimeException("이미 사용 중인 닉네임입니다");
         }
 
@@ -51,13 +51,14 @@ public class AuthService {
                 .name(signUpDto.getName())
                 .nickname(signUpDto.getNickname())
                 .organization(signUpDto.getOrganization())
-                .role(signUpDto.getRole())
+                .memberRole(signUpDto.getMemberRole())
+                .memberType(signUpDto.getMemberType())
                 .joinedYear(signUpDto.getJoinedYear())
                 .status(Status.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        userRepository.save(member);
+        memberRepository.save(member);
     }
 
     @Transactional
@@ -96,7 +97,7 @@ public class AuthService {
     // 이메일 찾기
     @Transactional
     public FindEmailRespDto findEmailbyOrgAndNickname(String organization, String name) {
-        Optional<Member> memberOptional = userRepository.findByOrganizationAndName(organization, name);
+        Optional<Member> memberOptional = memberRepository.findByOrganizationAndName(organization, name);
 
         Member member = memberOptional.orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다.")
@@ -114,7 +115,7 @@ public class AuthService {
             // 1. 정보 일치 확인 및 회원 조회
             log.info("비밀번호 찾기 본인 확인 시도: 이름={}, 소속={}, 이메일={}", name, organization, email);
 
-            Optional<Member> memberOptional = userRepository.findByNameAndOrganizationAndEmail(name, organization, email);
+            Optional<Member> memberOptional = memberRepository.findByNameAndOrganizationAndEmail(name, organization, email);
 
             // 2. 일치하는 회원이 없을 경우 예외
             Member member = memberOptional.orElseThrow( () -> {
@@ -173,7 +174,7 @@ public class AuthService {
         }
 
         // 5. 비밀번호 업데이트
-        Member member = memberRepository.findByEmail(email)
+        Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email + " not found"));
 
         String encodedNewPassword = passwordEncoder.encode(newPassword);

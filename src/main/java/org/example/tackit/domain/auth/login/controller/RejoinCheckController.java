@@ -1,23 +1,16 @@
 package org.example.tackit.domain.auth.login.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.auth.login.repository.UserRepository;
-import org.example.tackit.domain.auth.login.service.CheckService;
 import org.example.tackit.domain.auth.login.service.RejoinCheckService;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Status;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class RejoinCheckController {
-
-    private final UserRepository userRepository;
     private final RejoinCheckService rejoinCheckService;
 
     // 이메일 중복 확인 + 탈퇴 이력 조회 

@@ -239,7 +239,8 @@ public class FreePostService {
                 .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
         boolean isWriter = post.getWriter().getId().equals(member.getId());
-        boolean isAdmin = member.getRole() == Role.ADMIN;
+        boolean isAdmin = (member.getMemberRole() == MemberRole.ADMIN)
+                && (member.getMemberType() == MemberType.ADMIN);
 
         if (!isAdmin && !isWriter) {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_DELETE);

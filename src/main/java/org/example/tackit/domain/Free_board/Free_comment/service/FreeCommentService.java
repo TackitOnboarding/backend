@@ -112,7 +112,8 @@ public class FreeCommentService {
                 .orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
 
         boolean isWriter = comment.getWriter().getId().equals(member.getId());
-        boolean isAdmin = member.getRole() == Role.ADMIN;
+        boolean isAdmin = (member.getMemberRole() == MemberRole.ADMIN)
+                && (member.getMemberType() == MemberType.ADMIN);
 
         if (!isWriter && !isAdmin) {
             throw new AccessDeniedException("작성자 또는 관리자만 삭제할 수 있습니다.");

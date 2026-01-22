@@ -4,7 +4,8 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.tackit.domain.entity.Role;
+import org.example.tackit.domain.entity.MemberRole;
+import org.example.tackit.domain.entity.MemberType;
 
 @Data
 @NoArgsConstructor
@@ -20,7 +21,8 @@ public class SignUpDto {
     private String name;
     private String nickname;
     private String organization;
-    private Role role;
+    private MemberRole memberRole;
+    private MemberType memberType;
     private int joinedYear;
 }
 

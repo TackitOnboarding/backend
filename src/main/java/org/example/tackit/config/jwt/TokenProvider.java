@@ -6,7 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tackit.config.Redis.RedisUtil;
-import org.example.tackit.domain.admin.repository.MemberRepository;
+import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.entity.Status;
@@ -38,13 +38,13 @@ public class TokenProvider {
     private static final long RESET_TOKEN_EXPIRE_TIME = 1000 * 60 * 5;
     private final Key key;
     private final RedisUtil redisUtil;
-    private final MemberRepository memberRepository;
+    private final AdminMemberRepository adminMemberRepository;
 
-    public TokenProvider(@Value("${custom.jwt.secret}") String secretKey, RedisUtil redisUtil, MemberRepository memberRepository) {
+    public TokenProvider(@Value("${custom.jwt.secret}") String secretKey, RedisUtil redisUtil, AdminMemberRepository adminMemberRepository) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.redisUtil = redisUtil;
-        this.memberRepository = memberRepository;
+        this.adminMemberRepository = adminMemberRepository;
     }
 
     public TokenDto generateTokenDto(Authentication authentication) {
@@ -171,7 +171,7 @@ public class TokenProvider {
 
         // 이메일로 Member 조회
         String email = claims.getSubject();
-        Member member = memberRepository.findByEmail(email)
+        Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 탈퇴 회원 차단
@@ -184,6 +184,7 @@ public class TokenProvider {
                 member.getEmail(),
                 member.getPassword(),
                 member.getOrganization().toString(),
+                member.getMemberType(),
                 authorities
         );
 

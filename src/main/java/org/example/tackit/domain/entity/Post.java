@@ -1,5 +1,5 @@
 package org.example.tackit.domain.entity;
 
 public enum Post {
-    Free, QnA, Tip
+    Free, QnA, Tip, Notice
 }

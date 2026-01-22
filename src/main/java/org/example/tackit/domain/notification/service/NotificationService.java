@@ -2,7 +2,7 @@ package org.example.tackit.domain.notification.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.admin.repository.MemberRepository;
+import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.entity.Notification;
 import org.example.tackit.domain.notification.dto.NotificationEventDto;
@@ -38,7 +38,7 @@ public class NotificationService {
     private final EmitterRepository emitterRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final NotificationRepository notificationRepository;
-    private final MemberRepository memberRepository;
+    private final AdminMemberRepository adminMemberRepository;
 
     // [ 클라이언트 -> 알림 구독 신청 ]
     // 클라이언트가 서버에 처음 연결 요청
@@ -113,7 +113,7 @@ public class NotificationService {
                 .collect(Collectors.toList());
 
         // 3. 추출된 ID로 유저 아이디 조회
-        Map<Long, String> memberNameMap = memberRepository.findAllById(fromMemberIds).stream()
+        Map<Long, String> memberNameMap = adminMemberRepository.findAllById(fromMemberIds).stream()
                 .collect(Collectors.toMap(Member::getId, Member::getNickname));
 
         return notifications.stream()

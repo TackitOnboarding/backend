@@ -19,7 +19,8 @@ public class UserLog {
     private Long id;
 
     private String memberId;
-    private Role role;
+    private MemberRole memberRole;
+    private MemberType memberType;
     private String organization;
 
     private String action;              // view_Post, search, ..

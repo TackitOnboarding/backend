@@ -7,11 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class QnAPostImage {
+public class NoticePostImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,11 +19,11 @@ public class QnAPostImage {
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "qna_post_id")
-    private QnAPost qnaPost;
+    @JoinColumn(name = "notice_post_id")
+    private NoticePost noticePost;
 
-    public void setPost(QnAPost qnaPost) {
-        this.qnaPost = qnaPost;
+    public void setNoticePost(NoticePost noticePost) {
+        this.noticePost = noticePost;
     }
 
     public void setImageUrl(String imageUrl) {
