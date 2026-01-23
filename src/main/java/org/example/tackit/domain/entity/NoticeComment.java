@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "free_comment")
-public class FreeComment {
+@Table(name = "notice_comment")
+public class NoticeComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,9 +25,9 @@ public class FreeComment {
     private Member writer;
 
     @ManyToOne
-    @JoinColumn(name = "free_id", nullable = false)
+    @JoinColumn(name = "notice_id", nullable = false)
     // 게시글 Id
-    private FreePost freePost;
+    private NoticePost noticePost;
 
     private String content;
 
@@ -41,4 +41,5 @@ public class FreeComment {
     public void increaseReportCount() {
         this.reportCount++;
     }
+
 }

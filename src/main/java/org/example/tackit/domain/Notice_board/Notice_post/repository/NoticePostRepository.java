@@ -1,4 +1,4 @@
-package org.example.tackit.domain.Notice_board.repository;
+package org.example.tackit.domain.Notice_board.Notice_post.repository;
 
 import org.example.tackit.domain.entity.NoticePost;
 import org.springframework.data.domain.Page;

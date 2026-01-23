@@ -1,14 +1,14 @@
-package org.example.tackit.domain.Free_board.Free_comment.service;
+package org.example.tackit.domain.Notice_board.Notice_comment.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Free_board.Free_comment.dto.req.FreeCommentCreateDto;
-import org.example.tackit.domain.Free_board.Free_comment.dto.req.FreeCommentUpdateDto;
-import org.example.tackit.domain.Free_board.Free_comment.dto.resp.FreeCommentRespDto;
-import org.example.tackit.domain.Free_board.Free_comment.repository.FreeCommentRepository;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreeMemberJPARepository;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepository;
+import org.example.tackit.domain.Notice_board.Notice_comment.dto.req.NoticeCommentCreateDto;
+import org.example.tackit.domain.Notice_board.Notice_comment.dto.req.NoticeCommentUpdateDto;
+import org.example.tackit.domain.Notice_board.Notice_comment.dto.resp.NoticeCommentRespDto;
+import org.example.tackit.domain.Notice_board.Notice_comment.repository.NoticeCommentRepository;
+import org.example.tackit.domain.Notice_board.Notice_post.repository.NoticePostRepository;
+import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,36 +19,36 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class FreeCommentService {
-    private final FreeCommentRepository freeCommentRepository;
-    private final FreePostJPARepository freePostJPARepository;
-    private final FreeMemberJPARepository freeMemberJPARepository;
+public class NoticeCommentService {
+    private final NoticeCommentRepository noticeCommentRepository;
+    private final NoticePostRepository noticePostRepository;
+    private final MemberRepository memberRepository;
     private final NotificationService notificationService;
 
     // [ 댓글 생성 ]
     @Transactional
-    public FreeCommentRespDto createComment(FreeCommentCreateDto dto, String email, String org){
-        Member member = freeMemberJPARepository.findByEmailAndOrganization(email, org)
+    public NoticeCommentRespDto createComment(NoticeCommentCreateDto dto, String email, String org){
+        Member member = memberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        FreePost post = freePostJPARepository.findById(dto.getFreePostId())
+        NoticePost post = noticePostRepository.findById(dto.getNoticePostId())
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
-        FreeComment comment = FreeComment.builder()
+        NoticeComment comment = NoticeComment.builder()
                 .writer(member)
-                .freePost(post)
+                .noticePost(post)
                 .content(dto.getContent())
                 .createdAt(LocalDateTime.now())
                 .build();
 
         // 1. 댓글 DB 저장
-        FreeComment savedComment = freeCommentRepository.save(comment);
+        NoticeComment savedComment = noticeCommentRepository.save(comment);
 
         // 2. 알림 전송
         if(!post.getWriter().getId().equals(member.getId())){
             Member postWriter = post.getWriter(); // 알림 받을 대상(게시글 작성자)
             String message = member.getNickname() + "님이 글에 댓글을 남겼습니다.";
-            String url = "/api/free-posts/" + post.getId();
+            String url = "/api/notice-posts/" + post.getId();
 
             // 3. 알림 엔티티 생성
             Notification notification = Notification.builder()
@@ -63,32 +63,32 @@ public class FreeCommentService {
             notificationService.send(notification);
         }
 
-        return new FreeCommentRespDto(savedComment);
+        return new NoticeCommentRespDto(savedComment);
     }
 
     // [ 게시글 댓글 조회 ]
     @Transactional
-    public List<FreeCommentRespDto> getCommentByPost(Long postId, String org){
-        FreePost post = freePostJPARepository.findById(postId)
+    public List<NoticeCommentRespDto> getCommentByPost(Long postId, String org){
+        NoticePost post = noticePostRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
         if (!post.getWriter().getOrganization().equals(org)) {
             throw new AccessDeniedException("해당 조직의 게시글만 조회할 수 있습니다.");
         }
 
-        return freeCommentRepository.findByFreePost(post)
+        return noticeCommentRepository.findByNoticePost(post)
                 .stream()
-                .map(FreeCommentRespDto::new)
+                .map(NoticeCommentRespDto::new)
                 .toList();
     }
 
     // [ 댓글 수정 ] : 작성자만 가능
     @Transactional
-    public FreeCommentRespDto updateComment(Long commentId, FreeCommentUpdateDto dto, String email, String org){
-        Member member = freeMemberJPARepository.findByEmailAndOrganization(email, org)
+    public NoticeCommentRespDto updateComment(Long commentId, NoticeCommentUpdateDto dto, String email, String org){
+        Member member = memberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        FreeComment comment = freeCommentRepository.findById(commentId)
+        NoticeComment comment = noticeCommentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
 
         boolean isWriter = comment.getWriter().getId().equals(member.getId());
@@ -99,16 +99,16 @@ public class FreeCommentService {
 
         comment.updateContent(dto.getContent());
 
-        return new FreeCommentRespDto(comment);
+        return new NoticeCommentRespDto(comment);
     }
 
     // [ 댓글 삭제 ] : 작성자, 관리자만 가능
     @Transactional
     public void deleteComment(Long commentId, String email, String org){
-        Member member = freeMemberJPARepository.findByEmail(email)
+        Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        FreeComment comment = freeCommentRepository.findById(commentId)
+        NoticeComment comment = noticeCommentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
 
         boolean isWriter = comment.getWriter().getId().equals(member.getId());
@@ -120,13 +120,13 @@ public class FreeCommentService {
         }
 
         // Hard Delete
-        freeCommentRepository.delete(comment);
+        noticeCommentRepository.delete(comment);
     }
 
     // [ 댓글 신고 ]
     @Transactional
     public void increaseCommentReportCount(long id, String org){
-        FreeComment comment = freeCommentRepository.findById(id)
+        NoticeComment comment = noticeCommentRepository.findById(id)
                 .orElseThrow( () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
         if (!comment.getWriter().getOrganization().equals(org)) {
@@ -135,7 +135,9 @@ public class FreeCommentService {
         comment.increaseReportCount();
 
         if (comment.getReportCount() >= 3) {
-            freeCommentRepository.delete(comment); // Hard Delete
+            noticeCommentRepository.delete(comment); // Hard Delete
         }
     }
 }
+
+
