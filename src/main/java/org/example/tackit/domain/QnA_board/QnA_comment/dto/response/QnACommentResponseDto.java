@@ -2,8 +2,8 @@ package org.example.tackit.domain.QnA_board.QnA_comment.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.example.tackit.domain.entity.MemberType;
 import org.example.tackit.domain.entity.QnAComment;
-import org.example.tackit.domain.entity.Role;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +15,7 @@ public class QnACommentResponseDto {
     private final String profileImageUrl;
     private final String content;
     private final LocalDateTime createdAt;
-    private final Role role;
+    private final MemberType memberType;
     private final int joinedYear;
 
     public QnACommentResponseDto(QnAComment comment) {
@@ -24,7 +24,7 @@ public class QnACommentResponseDto {
         this.profileImageUrl = comment.getWriter().getProfileImageUrl();
         this.content = comment.getContent();
         this.createdAt = comment.getCreatedAt();
-        this.role = comment.getWriter().getRole();
+        this.memberType = comment.getWriter().getMemberType();
         this.joinedYear = comment.getWriter().getJoinedYear();
     }
 }

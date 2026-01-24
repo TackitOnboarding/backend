@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface TipPostJPARepository extends JpaRepository<TipPost, Long> {
+public interface TipPostRepository extends JpaRepository<TipPost, Long> {
 
     Page<TipPost> findByOrganizationAndStatus(String organization, Status status, Pageable pageable);
 

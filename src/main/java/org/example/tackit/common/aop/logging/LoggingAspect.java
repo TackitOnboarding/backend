@@ -9,9 +9,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.example.tackit.domain.Free_board.Free_post.repository.FreeMemberJPARepository;
 import org.example.tackit.domain.admin.repository.UserLogRepository;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Role;
-import org.example.tackit.domain.entity.UserLog;
+import org.example.tackit.domain.entity.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -45,12 +43,15 @@ public class LoggingAspect {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth != null ? auth.getName() : "anonymous";
 
-        Role role = null;
+        MemberRole memberRole = null;
+        MemberType memberType = null;
         String org = null;
         if (!"anonymous".equals(email)) {
             Member member = freeMemberJPARepository.findByEmail(email).orElse(null);
             if (member != null) {
-                role = member.getRole();
+                memberRole = member.getMemberRole();
+                memberType = member.getMemberType();
+                // role = member.getRole();
                 org = member.getOrganization();
             }
         }
@@ -67,8 +68,9 @@ public class LoggingAspect {
             String action = method.toLowerCase() + "_" + (uriParts.length > 2 ? uriParts[2] : "default");
 
             // 로그저장
-            UserLog userLog = UserLog.builder()
-                    .role(role)
+            MemberLog memberLog = MemberLog.builder()
+                    .memberRole(memberRole)
+                    .memberType(memberType)
                     .memberId(email)
                     .organization(org)
                     .ipAddress(ip)
@@ -80,7 +82,7 @@ public class LoggingAspect {
                     .resource(resource)
                     .build();
 
-            userLogRepository.save(userLog);
+            userLogRepository.save(memberLog);
 
             log.info("User [{}] performed [{}] on [{}] in {}ms from [{}]",
                     email, action, uri, execTime, ip);

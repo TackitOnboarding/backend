@@ -41,6 +41,8 @@ public class QnAPost implements ReportablePost {
     private Long viewCount = 0L;
     private Long scrapCount = 0L;
 
+    @Column(nullable = false)
+    private boolean isAnonymous;
 
     // QnATagMap 연관관계 추가
     @OneToMany(mappedBy = "qnaPost", cascade = CascadeType.ALL, orphanRemoval = true)

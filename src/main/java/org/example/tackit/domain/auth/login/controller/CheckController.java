@@ -1,7 +1,6 @@
 package org.example.tackit.domain.auth.login.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.auth.login.repository.UserRepository;
 import org.example.tackit.domain.auth.login.service.CheckService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class CheckController {
 
-    private final UserRepository userRepository;
     private final CheckService checkService;
 
     // 기본 이메일 중복 확인

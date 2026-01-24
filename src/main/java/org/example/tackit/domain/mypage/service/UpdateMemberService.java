@@ -3,7 +3,7 @@ package org.example.tackit.domain.mypage.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.config.S3.S3UploadService;
-import org.example.tackit.domain.admin.repository.MemberRepository;
+import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.mypage.dto.response.UpdateNicknameResponse;
 import org.example.tackit.domain.mypage.dto.response.UpdatePasswordResponse;
@@ -18,17 +18,17 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Service
 public class UpdateMemberService {
-    private final MemberRepository memberRepository;
+    private final AdminMemberRepository adminMemberRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3UploadService s3UploadService;
 
     // 닉네임 변경 서비스
     @Transactional
     public UpdateNicknameResponse changeNickname(String email, String newNickname) {
-        Member member = memberRepository.findByEmail(email)
+        Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email + " not found"));
 
-        if (memberRepository.existsByNickname(newNickname)) {
+        if (adminMemberRepository.existsByNickname(newNickname)) {
             throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
         }
 
@@ -41,7 +41,7 @@ public class UpdateMemberService {
     // 비밀번호 변경 서비스
     @Transactional
     public UpdatePasswordResponse updatePassword(String email, String currentPassword, String newPassword) {
-        Member member = memberRepository.findByEmail(email)
+        Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email + " not found"));
 
         // 기존 비밀번호와 입력받은 현재 비밀번호 일치 여부 확인
@@ -58,7 +58,7 @@ public class UpdateMemberService {
     // 프로필 이미지 업로드
     @Transactional
     public UpdateProfileImageResponse uploadProfileImage(String email, MultipartFile file) throws IOException {
-        Member member = memberRepository.findByEmail(email)
+        Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email + " not found"));
 
         // 기존 이미지 있으면 삭제
@@ -76,7 +76,7 @@ public class UpdateMemberService {
     //  프로필 이미지 삭제
     @Transactional
     public void deleteProfileImage(String email) {
-        Member member = memberRepository.findByEmail(email)
+        Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email + " not found"));
 
         if (member.getProfileImageUrl() != null) {

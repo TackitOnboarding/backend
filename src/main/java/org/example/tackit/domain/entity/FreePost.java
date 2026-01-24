@@ -43,6 +43,9 @@ public class FreePost implements ReportablePost {
     private Long viewCount = 0L;
     private Long scrapCount = 0L;
 
+    @Column(nullable = false)
+    private boolean isAnonymous;
+
     // FreeTagMap 연관관계 추가
     @OneToMany(mappedBy = "freePost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FreeTagMap> tagMaps = new ArrayList<>();

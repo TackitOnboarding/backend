@@ -29,7 +29,7 @@ public class MyPageQnAService {
     private final QnACommentRepository qnACommentRepository;
     private final QnAPostTagMapRepository qnAPostTagMapRepository;
 
-    // 질문게시판) 내가 쓴 게시글 조회
+    // 내가 쓴 게시글 조회
     @Transactional(readOnly = true)
     public PageResponseDTO<QnAMyPostResponseDto> getMyPosts(String email, Pageable pageable) {
         Member member = qnAMemberRepository.findByEmail(email)
@@ -51,7 +51,7 @@ public class MyPageQnAService {
     }
 
 
-    // 질문게시판) 내가 쓴 댓글 조회
+    // 내가 쓴 댓글 조회
     @Transactional(readOnly = true)
     public PageResponseDTO<QnAMyCommentResponseDto> getMyComments(String email, Pageable pageable) {
         Member member = qnAMemberRepository.findByEmail(email)

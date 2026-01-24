@@ -3,7 +3,7 @@ package org.example.tackit.common.homePopular;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepository;
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
-import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostJPARepository;
+import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostRepository;
 import org.example.tackit.domain.entity.Status;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,7 @@ public class HomePopularPostService {
 
     private final FreePostJPARepository freePostRepository;
     private final QnAPostRepository qnaPostRepository;
-    private final TipPostJPARepository tipPostRepository;
+    private final TipPostRepository tipPostRepository;
 
     public List<HomePopularPostRespDto> getPopularPosts(String organization) {
         LocalDateTime startOfWeek = LocalDate.now()

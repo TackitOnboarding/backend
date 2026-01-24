@@ -7,14 +7,14 @@ import org.example.tackit.config.S3.S3UploadService;
 import org.example.tackit.domain.Tip_board.Tip_post.dto.response.TipPopularPostRespDto;
 import org.example.tackit.domain.Tip_board.Tip_post.dto.response.TipPostRespDto;
 import org.example.tackit.domain.Tip_board.Tip_post.dto.response.TipScrapRespDto;
-import org.example.tackit.domain.Tip_board.Tip_post.repository.TipMemberJPARepository;
+import org.example.tackit.domain.Tip_board.Tip_post.repository.TipMemberRepository;
 import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostReportRepository;
+import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostRepository;
 import org.example.tackit.domain.Tip_board.Tip_tag.repository.TipPostTagMapRepository;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.Tip_board.Tip_post.dto.request.TipPostReqDto;
 import org.example.tackit.domain.Tip_board.Tip_post.dto.request.TipPostUpdateDto;
-import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostJPARepository;
 import org.example.tackit.domain.Tip_board.Tip_post.repository.TipScrapRepository;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.example.tackit.common.dto.PageResponseDTO;
@@ -35,8 +35,8 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class TipPostService {
-    private final TipPostJPARepository tipPostJPARepository;
-    private final TipMemberJPARepository tipMemberJPARepository;
+    private final TipPostRepository tipPostRepository;
+    private final TipMemberRepository tipMemberRepository;
     private final TipScrapRepository tipScrapRepository;
     private final TipPostReportRepository tipPostReportRepository;
     private final TipPostTagMapRepository tipPostTagMapRepository;
@@ -45,22 +45,25 @@ public class TipPostService {
     private final NotificationService notificationService;
 
     public PageResponseDTO<TipPostRespDto> getActivePostsByOrganization(String org, Pageable pageable) {
-        Page<TipPost> page = tipPostJPARepository.findByOrganizationAndStatus(org, Status.ACTIVE, pageable);
+        Page<TipPost> page = tipPostRepository.findByOrganizationAndStatus(org, Status.ACTIVE, pageable);
 
         return PageResponseDTO.from(page, post -> {
                     List<String> tags = tipPostTagMapRepository.findByTipPost(post).stream()
                             .map(mapping -> mapping.getTag().getTagName())
                             .toList();
 
+                    boolean anonymous = post.isAnonymous();
+
                     return TipPostRespDto.builder()
                             .id(post.getId())
-                            .writer(post.getWriter().getNickname())
-                            .profileImageUrl(post.getWriter().getProfileImageUrl())
+                            .writer(anonymous ? "익명" : post.getWriter().getNickname())
+                            .profileImageUrl(anonymous ? null : post.getWriter().getProfileImageUrl())
                             .title(post.getTitle())
                             .content(post.getContent())
                             .createdAt(post.getCreatedAt())
                             .tags(tags)
                             .imageUrl(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+                            .isAnonymous(anonymous)
                             .build();
         });
     }
@@ -68,7 +71,7 @@ public class TipPostService {
     // [ 게시글 상세 조회 ]
     @Transactional
     public TipPostRespDto getPostById(Long id, String org, Long memberId) {
-        TipPost tipPost = tipPostJPARepository.findById(id)
+        TipPost tipPost = tipPostRepository.findById(id)
                 .orElseThrow( () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
         if (!tipPost.getOrganization().equals(org)) {
@@ -86,27 +89,31 @@ public class TipPostService {
         // 스크랩 여부 조회
         boolean isScrap = tipScrapRepository.existsByTipPostIdAndMemberId(id, memberId);
 
+        // 익명 여부 조회
+        boolean anonymous = tipPost.isAnonymous();
+
         return TipPostRespDto.builder()
                 .id(tipPost.getId())
-                .writer(tipPost.getWriter().getNickname())
-                .profileImageUrl(tipPost.getWriter().getProfileImageUrl())
+                .writer(anonymous ? "익명" : tipPost.getWriter().getNickname())
+                .profileImageUrl(anonymous ? null : tipPost.getWriter().getProfileImageUrl())
                 .title(tipPost.getTitle())
                 .content(tipPost.getContent())
                 .tags(tagNames)
                 .imageUrl(tipPost.getImages().isEmpty() ? null : tipPost.getImages().get(0).getImageUrl())
                 .createdAt(tipPost.getCreatedAt())
                 .isScrap(isScrap)
+                .isAnonymous(anonymous)
                 .build();
     }
 
-    // [ 게시글 작성 ] : 선임자만 가능
+    // [ 게시글 작성 ] : 선배만 가능
     @Transactional
     public TipPostRespDto createPost(TipPostReqDto dto, String email, String org, MultipartFile image) throws IOException {
         // 1. 유저 조회
-        Member member = tipMemberJPARepository.findByEmailAndOrganization(email, org)
+        Member member = tipMemberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new IllegalArgumentException("작성자가 DB에 존재하지 않습니다."));
 
-        if (member.getRole() != Role.SENIOR) {
+        if (member.getMemberType() != MemberType.SENIOR) {
             throw new AccessDeniedException("SENIOR만 게시글을 작성할 수 있습니다.");
         }
 
@@ -120,6 +127,7 @@ public class TipPostService {
                 .status(Status.ACTIVE)
                 .reportCount(0)
                 .organization(org)
+                .isAnonymous(dto.isAnonymous())
                 .build();
 
         // 3. 이미지 업로드 & 연관관계 매핑 (단일 파일만)
@@ -131,19 +139,24 @@ public class TipPostService {
             post.addImage(imageEntity); // 기존 이미지 clear 후 하나만 저장
         }
 
-        tipPostJPARepository.save(post);
+        tipPostRepository.save(post);
 
         List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
+
+        boolean anonymous = post.isAnonymous();
 
         // 응답 DTO 구성 (imageUrl 하나만)
         return TipPostRespDto.builder()
                 .id(post.getId())
-                .writer(member.getNickname())
+                .writer(anonymous ? "익명" : member.getNickname())
+                .profileImageUrl(anonymous ? null : member.getProfileImageUrl())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
                 .tags(tagNames)
                 .imageUrl(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+                .isAnonymous(anonymous)
+                .isScrap(false)
                 .build();
     }
 
@@ -152,10 +165,10 @@ public class TipPostService {
     // [ 게시글 수정 ] : 작성자만
     @Transactional
     public TipPostRespDto update(Long id, TipPostUpdateDto dto, String email, String org, MultipartFile image) throws IOException {
-        Member member = tipMemberJPARepository.findByEmailAndOrganization(email, org)
+        Member member = tipMemberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        TipPost post = tipPostJPARepository.findById(id)
+        TipPost post = tipPostRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
         if (!post.getWriter().getId().equals(member.getId())) {
@@ -193,14 +206,18 @@ public class TipPostService {
         tagService.deleteTagsByPost(post);
         List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
 
+        boolean anonymous = post.isAnonymous();
+
         return TipPostRespDto.builder()
                 .id(post.getId())
-                .writer(post.getWriter().getNickname())
+                .writer(anonymous ? "익명" : post.getWriter().getNickname())
+                .profileImageUrl(anonymous ? null : post.getWriter().getProfileImageUrl())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
                 .tags(tagNames)
                 .imageUrl(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+                .isAnonymous(anonymous)
                 .build();
     }
 
@@ -208,7 +225,7 @@ public class TipPostService {
     // [ 게시글 삭제 ]
     @Transactional
     public void deletePost(Long id, CustomUserDetails user) {
-        TipPost post = tipPostJPARepository.findById(id)
+        TipPost post = tipPostRepository.findById(id)
                 .orElseThrow( () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
         // 권한 체크 : 요청 유저가 작성자인지
@@ -221,10 +238,10 @@ public class TipPostService {
     // [ 게시글 스크랩 ]
     @Transactional
     public TipScrapRespDto toggleScrap(Long id, String email, String memberOrg) {
-        Member member = tipMemberJPARepository.findByEmail(email)
+        Member member = tipMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        TipPost post = tipPostJPARepository.findById(id)
+        TipPost post = tipPostRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
         if(!post.getWriter().getOrganization().equals(memberOrg)) {
@@ -273,10 +290,10 @@ public class TipPostService {
     // [ 게시글 신고 ]
     @Transactional
     public String report(Long postId, Long userId) {
-        TipPost post = tipPostJPARepository.findById(postId)
+        TipPost post = tipPostRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 게시글이 존재하지 않습니다."));
 
-        Member member = tipMemberJPARepository.findById(userId)
+        Member member = tipMemberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.") );
 
         boolean alreadyReported = tipPostReportRepository.existsByMemberAndTipPost(member, post);
@@ -298,7 +315,7 @@ public class TipPostService {
     // 인기 3개
     @Transactional
     public List<TipPopularPostRespDto> getPopularPosts(String organization) {
-        return tipPostJPARepository.findTop3ByStatusOrderByViewCountDescScrapCountDesc(Status.ACTIVE)
+        return tipPostRepository.findTop3ByStatusOrderByViewCountDescScrapCountDesc(Status.ACTIVE)
                 .stream()
                 .filter(post -> post.getWriter().getOrganization().equals(organization))
                 .sorted(Comparator

@@ -13,13 +13,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserLog {
+public class MemberLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String memberId;
-    private Role role;
+    private MemberRole memberRole;
+    private MemberType memberType;
     private String organization;
 
     private String action;              // view_Post, search, ..

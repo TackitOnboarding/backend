@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email); //그 유저 실제 정보 추출
     boolean existsByEmail(String email); // 이메일 존재 확인
     boolean existsByNickname(String nickname); //닉네임 중복 확인
