@@ -38,7 +38,6 @@ public class NoticeCommentService {
                 .writer(member)
                 .noticePost(post)
                 .content(dto.getContent())
-                .createdAt(LocalDateTime.now())
                 .build();
 
         // 1. 댓글 DB 저장
@@ -127,7 +126,7 @@ public class NoticeCommentService {
     @Transactional
     public void increaseCommentReportCount(long id, String org){
         NoticeComment comment = noticeCommentRepository.findById(id)
-                .orElseThrow( () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow( () -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
 
         if (!comment.getWriter().getOrganization().equals(org)) {
             throw new AccessDeniedException("해당 조직의 댓글만 신고할 수 있습니다.");

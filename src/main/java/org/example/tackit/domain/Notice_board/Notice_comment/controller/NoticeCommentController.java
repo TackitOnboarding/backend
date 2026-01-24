@@ -41,7 +41,7 @@ public class NoticeCommentController {
     }
 
     // 3. 댓글 수정
-    @PatchMapping("{commentId}")
+    @PatchMapping("/{commentId}")
     public ResponseEntity<NoticeCommentRespDto> updateComment(
             @PathVariable long commentId,
             @RequestBody NoticeCommentUpdateDto req,
