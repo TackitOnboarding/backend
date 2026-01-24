@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserLog {
+public class MemberLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
