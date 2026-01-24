@@ -124,8 +124,8 @@ public class NoticeCommentService {
 
     // [ 댓글 신고 ]
     @Transactional
-    public void increaseCommentReportCount(long id, String org){
-        NoticeComment comment = noticeCommentRepository.findById(id)
+    public void increaseCommentReportCount(long commmentId, String org){
+        NoticeComment comment = noticeCommentRepository.findById(commmentId)
                 .orElseThrow( () -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
 
         if (!comment.getWriter().getOrganization().equals(org)) {
