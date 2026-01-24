@@ -1,4 +1,4 @@
-package org.example.tackit.domain.Notice_board.dto.response;
+package org.example.tackit.domain.Notice_board.Notice_post.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +20,8 @@ public class NoticePostRespDto {
     @Builder.Default
     private boolean isScrap = false; // 기본값
 
+    private boolean commentEnabled;
+
     public static NoticePostRespDto from(NoticePost post, String imageUrl) {
         return NoticePostRespDto.builder()
                 .id(post.getId())
@@ -29,6 +31,7 @@ public class NoticePostRespDto {
                 .createdAt(post.getCreatedAt())
                 .imageUrl(imageUrl)
                 .isScrap(false)
+                .commentEnabled(post.isCommentEnabled())
                 .build();
     }
 }

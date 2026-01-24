@@ -38,6 +38,8 @@ public class NoticePost {
     @Builder.Default
     private Long scrapCount = 0L;
 
+    private boolean commentEnabled = true;
+
     @Version
     private Long version;
 
@@ -45,9 +47,10 @@ public class NoticePost {
     @OneToMany(mappedBy = "noticePost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoticePostImage> images = new ArrayList<>();
 
-    public void update(String title, String content) {
+    public void update(String title, String content, boolean commentEnabled) {
         this.title = title;
         this.content = content;
+        this.commentEnabled = commentEnabled;
     }
 
     public void increaseViewCount() {

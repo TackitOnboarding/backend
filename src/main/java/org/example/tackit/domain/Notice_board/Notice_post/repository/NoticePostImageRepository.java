@@ -1,4 +1,4 @@
-package org.example.tackit.domain.Notice_board.repository;
+package org.example.tackit.domain.Notice_board.Notice_post.repository;
 
 import org.example.tackit.domain.entity.NoticePostImage;
 import org.springframework.data.jpa.repository.JpaRepository;

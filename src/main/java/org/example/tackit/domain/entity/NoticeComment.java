@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -13,9 +14,9 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Table(name = "free_comment")
-public class FreeComment {
+@Table(name = "notice_comment")
+@EntityListeners(AuditingEntityListener.class)
+public class NoticeComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,9 +26,9 @@ public class FreeComment {
     private Member writer;
 
     @ManyToOne
-    @JoinColumn(name = "free_id", nullable = false)
+    @JoinColumn(name = "notice_id", nullable = false)
     // 게시글 Id
-    private FreePost freePost;
+    private NoticePost noticePost;
 
     private String content;
 
@@ -37,8 +38,19 @@ public class FreeComment {
 
     private int reportCount;
 
+    @Builder
+    public NoticeComment(Member writer, NoticePost noticePost, String content) {
+        this.writer = writer;
+        this.noticePost = noticePost;
+        this.content = content;
+        this.reportCount = 0;
+    }
+
     public void updateContent(String content) { this.content = content; }
     public void increaseReportCount() {
         this.reportCount++;
     }
+
+
+
 }

@@ -1,4 +1,4 @@
-package org.example.tackit.domain.Notice_board.dto.request;
+package org.example.tackit.domain.Notice_board.Notice_post.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +13,7 @@ public class NoticePostReqDto {
     private String content;
     private MultipartFile image;
 
+    private boolean commentEnabled;
 
     public void setImage(MultipartFile image) {
         this.image = image;

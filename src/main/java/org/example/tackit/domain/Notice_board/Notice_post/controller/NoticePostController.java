@@ -1,12 +1,12 @@
-package org.example.tackit.domain.Notice_board.controller;
+package org.example.tackit.domain.Notice_board.Notice_post.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.common.dto.PageResponseDTO;
-import org.example.tackit.domain.Notice_board.dto.request.NoticePostReqDto;
-import org.example.tackit.domain.Notice_board.dto.request.UpdateNoticeReqDto;
-import org.example.tackit.domain.Notice_board.dto.response.NoticePostRespDto;
-import org.example.tackit.domain.Notice_board.dto.response.NoticeScrapRespDto;
-import org.example.tackit.domain.Notice_board.service.NoticePostService;
+import org.example.tackit.domain.Notice_board.Notice_post.dto.request.NoticePostReqDto;
+import org.example.tackit.domain.Notice_board.Notice_post.dto.request.UpdateNoticeReqDto;
+import org.example.tackit.domain.Notice_board.Notice_post.dto.response.NoticePostRespDto;
+import org.example.tackit.domain.Notice_board.Notice_post.dto.response.NoticeScrapRespDto;
+import org.example.tackit.domain.Notice_board.Notice_post.service.NoticePostService;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

@@ -1,29 +1,28 @@
-package org.example.tackit.domain.Notice_board.service;
+package org.example.tackit.domain.Notice_board.Notice_post.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.common.dto.PageResponseDTO;
 import org.example.tackit.config.S3.S3UploadService;
-import org.example.tackit.domain.Notice_board.dto.request.NoticePostReqDto;
-import org.example.tackit.domain.Notice_board.dto.request.UpdateNoticeReqDto;
-import org.example.tackit.domain.Notice_board.dto.response.NoticePostRespDto;
-import org.example.tackit.domain.Notice_board.dto.response.NoticeScrapRespDto;
-import org.example.tackit.domain.Notice_board.repository.NoticePostImageRepository;
-import org.example.tackit.domain.Notice_board.repository.NoticePostRepository;
-import org.example.tackit.domain.Notice_board.repository.NoticeScrapRepository;
+import org.example.tackit.domain.Notice_board.Notice_post.dto.request.NoticePostReqDto;
+import org.example.tackit.domain.Notice_board.Notice_post.dto.request.UpdateNoticeReqDto;
+import org.example.tackit.domain.Notice_board.Notice_post.dto.response.NoticePostRespDto;
+import org.example.tackit.domain.Notice_board.Notice_post.dto.response.NoticeScrapRespDto;
+import org.example.tackit.domain.Notice_board.Notice_post.repository.NoticePostImageRepository;
+import org.example.tackit.domain.Notice_board.Notice_post.repository.NoticePostRepository;
+import org.example.tackit.domain.Notice_board.Notice_post.repository.NoticeScrapRepository;
 import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.example.tackit.global.exception.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
 import static org.example.tackit.global.exception.ErrorCode.MEMBER_NOT_FOUND;
@@ -55,6 +54,7 @@ public class NoticePostService {
                             .content(post.getContent())
                             .imageUrl(imageUrl)
                             .createdAt(post.getCreatedAt())
+                            .commentEnabled(post.isCommentEnabled())
                             .build();
         });
     }
@@ -94,6 +94,7 @@ public class NoticePostService {
                 .imageUrl(imageUrl)
                 .createdAt(post.getCreatedAt())
                 .isScrap(isScrap)
+                .commentEnabled(post.isCommentEnabled())
                 .build();
     }
 
@@ -101,9 +102,13 @@ public class NoticePostService {
     @Transactional
     public NoticePostRespDto createPost(NoticePostReqDto dto, MultipartFile image, String email, String org) throws IOException {
 
-        // 1. 유저 조회
+        // 1. 유저 조회 및 권한 확인
         Member member = memberRepository.findByEmailAndOrganization(email, org)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
+
+        if (member.getMemberRole() != MemberRole.EXECUTIVE) {
+            throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_NOTICE);
+        }
 
         // 2. 게시글 생성
         NoticePost post = NoticePost.builder()
@@ -113,24 +118,10 @@ public class NoticePostService {
                         .createdAt(LocalDateTime.now())
                         .type(Post.Notice)
                         .organization(org)
+                        .commentEnabled(dto.isCommentEnabled())
                         .build();
 
         noticePostRepository.save(post);
-
-        // 3. 이미지 업로드 → PostImage 저장
-        /*
-        String imageUrl = null;
-        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
-            imageUrl = s3UploadService.saveFile(dto.getImage());
-
-            NoticePostImage image = NoticePostImage.builder()
-                    .imageUrl(imageUrl)
-                    .noticePost(post)
-                    .build();
-
-            noticePostImageRepository.save(image); // 따로 JPARepository 필요
-        }
-         */
 
         // 3. 이미지 업로드 -> 인자로 받은 image 직접 사용
         String imageUrl = null;
@@ -164,7 +155,7 @@ public class NoticePostService {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_EDIT);
         }
 
-        post.update(req.getTitle(), req.getContent());
+        post.update(req.getTitle(), req.getContent(), req.isCommentEnabled());
 
         String imageUrl = null;
 

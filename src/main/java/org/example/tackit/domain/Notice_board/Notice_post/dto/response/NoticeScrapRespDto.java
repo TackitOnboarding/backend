@@ -1,4 +1,4 @@
-package org.example.tackit.domain.Notice_board.dto.response;
+package org.example.tackit.domain.Notice_board.Notice_post.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

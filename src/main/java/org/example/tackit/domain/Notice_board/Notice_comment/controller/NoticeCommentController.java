@@ -1,10 +1,10 @@
-package org.example.tackit.domain.Free_board.Free_comment.controller;
+package org.example.tackit.domain.Notice_board.Notice_comment.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Free_board.Free_comment.dto.req.FreeCommentCreateDto;
-import org.example.tackit.domain.Free_board.Free_comment.dto.req.FreeCommentUpdateDto;
-import org.example.tackit.domain.Free_board.Free_comment.dto.resp.FreeCommentRespDto;
-import org.example.tackit.domain.Free_board.Free_comment.service.FreeCommentService;
+import org.example.tackit.domain.Notice_board.Notice_comment.dto.req.NoticeCommentCreateDto;
+import org.example.tackit.domain.Notice_board.Notice_comment.dto.req.NoticeCommentUpdateDto;
+import org.example.tackit.domain.Notice_board.Notice_comment.dto.resp.NoticeCommentRespDto;
+import org.example.tackit.domain.Notice_board.Notice_comment.service.NoticeCommentService;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,40 +15,40 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/free-comments")
-public class FreeCommentController {
-    private final FreeCommentService freeCommentService;
+@RequestMapping("/api/notice-comments")
+public class NoticeCommentController {
+    private final NoticeCommentService noticeCommentService;
 
     // 1. 댓글 작성
     @PostMapping
-    public ResponseEntity<FreeCommentRespDto> createComment(
-            @RequestBody FreeCommentCreateDto req,
+    public ResponseEntity<NoticeCommentRespDto> createComment(
+            @RequestBody NoticeCommentCreateDto req,
             @AuthenticationPrincipal CustomUserDetails user) {
         String email = user.getUsername();
         String org = user.getOrganization();
 
-        FreeCommentRespDto response = freeCommentService.createComment(req, email, org);
+        NoticeCommentRespDto response = noticeCommentService.createComment(req, email, org);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // 2. 댓글 조회
     @GetMapping("/{postId}")
-    public ResponseEntity<List<FreeCommentRespDto>> getComments(
+    public ResponseEntity<List<NoticeCommentRespDto>> getComments(
             @PathVariable Long postId,
             @AuthenticationPrincipal CustomUserDetails user) {
         String org = user.getOrganization();
-        return ResponseEntity.ok(freeCommentService.getCommentByPost(postId, org));
+        return ResponseEntity.ok(noticeCommentService.getCommentByPost(postId, org));
     }
 
     // 3. 댓글 수정
-    @PatchMapping("{commentId}")
-    public ResponseEntity<FreeCommentRespDto> updateComment(
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<NoticeCommentRespDto> updateComment(
             @PathVariable long commentId,
-            @RequestBody FreeCommentUpdateDto req,
+            @RequestBody NoticeCommentUpdateDto req,
             @AuthenticationPrincipal CustomUserDetails user) {
         String email = user.getUsername();
         String org = user.getOrganization();
-        FreeCommentRespDto updateResp = freeCommentService.updateComment(commentId, req, email, org);
+        NoticeCommentRespDto updateResp = noticeCommentService.updateComment(commentId, req, email, org);
 
         return ResponseEntity.ok(updateResp);
     }
@@ -58,7 +58,7 @@ public class FreeCommentController {
     public ResponseEntity<Void> deleteComment(@PathVariable long commentId, @AuthenticationPrincipal CustomUserDetails user) {
         String email = user.getUsername();
         String org = user.getOrganization();
-        freeCommentService.deleteComment(commentId, email, org);
+        noticeCommentService.deleteComment(commentId, email, org);
 
         return ResponseEntity.noContent().build();
     }
@@ -67,9 +67,7 @@ public class FreeCommentController {
     @PostMapping("/{commentId}/report")
     public ResponseEntity<String> reportComment(@PathVariable long commentId, @AuthenticationPrincipal CustomUserDetails user) {
         String org = user.getOrganization();
-        freeCommentService.increaseCommentReportCount(commentId, org);
+        noticeCommentService.increaseCommentReportCount(commentId, org);
         return ResponseEntity.ok("댓글을 신고하였습니다.");
     }
-
 }
-

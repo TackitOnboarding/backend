@@ -68,7 +68,7 @@ public class LoggingAspect {
             String action = method.toLowerCase() + "_" + (uriParts.length > 2 ? uriParts[2] : "default");
 
             // 로그저장
-            UserLog userLog = UserLog.builder()
+            MemberLog memberLog = MemberLog.builder()
                     .memberRole(memberRole)
                     .memberType(memberType)
                     .memberId(email)
@@ -82,7 +82,7 @@ public class LoggingAspect {
                     .resource(resource)
                     .build();
 
-            userLogRepository.save(userLog);
+            userLogRepository.save(memberLog);
 
             log.info("User [{}] performed [{}] on [{}] in {}ms from [{}]",
                     email, action, uri, execTime, ip);
