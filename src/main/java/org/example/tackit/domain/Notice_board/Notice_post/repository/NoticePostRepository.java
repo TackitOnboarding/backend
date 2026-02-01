@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NoticePostRepository extends JpaRepository<NoticePost, Long> {
 
-    Page<NoticePost> findByOrganization(String organization, Pageable pageable);
-
+    Page<NoticePost> findByWriterId(Long memberOrgId, Pageable pageable);
 
 }

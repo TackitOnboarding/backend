@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -19,8 +17,8 @@ public class TipReport {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "member_org_id", nullable = false)
+    private MemberOrg reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tip_post_id", nullable = false)
@@ -33,8 +31,8 @@ public class TipReport {
     private Post type;
 
     @Builder
-    public TipReport(Member member, TipPost tipPost) {
-        this.member = member;
+    public TipReport(MemberOrg reporter, TipPost tipPost) {
+        this.reporter = reporter;
         this.tipPost = tipPost;
         this.reportedAt = LocalDateTime.now();
         this.type = Post.Tip;

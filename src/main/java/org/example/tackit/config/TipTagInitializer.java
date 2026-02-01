@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+// @Component
 @RequiredArgsConstructor
 public class TipTagInitializer implements CommandLineRunner {
     private final TipTagRepository tagRepository;

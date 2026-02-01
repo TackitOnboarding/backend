@@ -16,8 +16,8 @@ public class TipScrap {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "member_org_id", nullable = false)
+    private MemberOrg memberOrg;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tip_id", nullable = false)
@@ -29,8 +29,8 @@ public class TipScrap {
     private Post type = Post.Tip;
 
     @Builder
-    public TipScrap(Member member, TipPost tipPost, LocalDateTime savedAt) {
-        this.member = member;
+    public TipScrap(MemberOrg memberOrg, TipPost tipPost, LocalDateTime savedAt) {
+        this.memberOrg = memberOrg;
         this.tipPost = tipPost;
         this.savedAt = LocalDateTime.now();
     }

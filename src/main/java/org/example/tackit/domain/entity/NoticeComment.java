@@ -22,8 +22,8 @@ public class NoticeComment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member writer;
+    @JoinColumn(name = "member_org_id", nullable = false)
+    private MemberOrg writer;
 
     @ManyToOne
     @JoinColumn(name = "notice_id", nullable = false)
@@ -39,7 +39,7 @@ public class NoticeComment {
     private int reportCount;
 
     @Builder
-    public NoticeComment(Member writer, NoticePost noticePost, String content) {
+    public NoticeComment(MemberOrg writer, NoticePost noticePost, String content) {
         this.writer = writer;
         this.noticePost = noticePost;
         this.content = content;

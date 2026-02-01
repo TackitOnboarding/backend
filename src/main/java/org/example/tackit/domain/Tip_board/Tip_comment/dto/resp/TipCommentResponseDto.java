@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 public class TipCommentResponseDto {
-    private final long id;
+    private final Long id;
     private final String writer;
     private final String profileImageUrl;
     private final String content;

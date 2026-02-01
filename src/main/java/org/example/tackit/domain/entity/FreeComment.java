@@ -21,8 +21,8 @@ public class FreeComment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member writer;
+    @JoinColumn(name = "member_org_id", nullable = false)
+    private MemberOrg writer;
 
     @ManyToOne
     @JoinColumn(name = "free_id", nullable = false)

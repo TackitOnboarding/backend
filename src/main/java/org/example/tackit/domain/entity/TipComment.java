@@ -23,8 +23,8 @@ public class TipComment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member writer;
+    @JoinColumn(name = "member_org_id", nullable = false)
+    private MemberOrg writer;
 
     @ManyToOne
     @JoinColumn(name = "tip_id", nullable = false)
@@ -36,7 +36,7 @@ public class TipComment {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private Status status;
+    private AccountStatus accountStatus;
     private int reportCount;
 
     public void updateContent(String content) {

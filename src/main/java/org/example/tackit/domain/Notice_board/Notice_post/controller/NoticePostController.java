@@ -1,7 +1,9 @@
 package org.example.tackit.domain.Notice_board.Notice_post.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
 import org.example.tackit.common.dto.PageResponseDTO;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.Notice_board.Notice_post.dto.request.NoticePostReqDto;
 import org.example.tackit.domain.Notice_board.Notice_post.dto.request.UpdateNoticeReqDto;
 import org.example.tackit.domain.Notice_board.Notice_post.dto.response.NoticePostRespDto;
@@ -29,9 +31,10 @@ public class NoticePostController {
     @GetMapping
     public ResponseEntity<PageResponseDTO<NoticePostRespDto>> getAllPosts(
             @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
-        String org = user.getOrganization();
-        PageResponseDTO<NoticePostRespDto> pageResponse = noticePostService.findAll(org, pageable);
+
+        PageResponseDTO<NoticePostRespDto> pageResponse = noticePostService.findAll(profile.id(), pageable);
         return ResponseEntity.ok(pageResponse);
     }
 
@@ -39,9 +42,10 @@ public class NoticePostController {
     @GetMapping("/{id}")
     public ResponseEntity<NoticePostRespDto> findNoticePost(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
-        NoticePostRespDto post = noticePostService.getPostById(id, org, user.getId());
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+
+        NoticePostRespDto post = noticePostService.getPostById(id, profile.id(), user.getId());
         return ResponseEntity.ok(post);
     }
 
@@ -50,11 +54,12 @@ public class NoticePostController {
     public ResponseEntity<NoticePostRespDto> createNoticePost(
             @RequestPart("dto") NoticePostReqDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal CustomUserDetails user) throws IOException {
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) throws IOException {
 
         // dto.setImage(image);
         // NoticePostRespDto resp = noticePostService.createPost(dto, email, org);
-        NoticePostRespDto resp = noticePostService.createPost(dto, image, user.getEmail(), user.getOrganization());
+        NoticePostRespDto resp = noticePostService.createPost(dto, image, user.getEmail(), profile.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
 
@@ -64,22 +69,24 @@ public class NoticePostController {
             @PathVariable Long id,
             @RequestPart("dto") UpdateNoticeReqDto req,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal CustomUserDetails user) throws IOException {
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) throws IOException {
 
         // req.setImage(image);
-        NoticePostRespDto resp = noticePostService.update(id, req, image, user.getEmail(), user.getOrganization());
+        NoticePostRespDto resp = noticePostService.update(id, req, image, user.getEmail(), profile.id());
 
         return ResponseEntity.ok(resp);
     }
 
     // 5. 게시글 삭제
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNoticePost(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+
         String email = user.getEmail();
-        String org = user.getOrganization();
-        noticePostService.delete(id, email, org);
+        noticePostService.delete(id, email, profile.id());
 
         return ResponseEntity.noContent().build();
     }
@@ -88,10 +95,10 @@ public class NoticePostController {
     @PostMapping("/{id}/scrap")
     public ResponseEntity<NoticeScrapRespDto> scrapPost(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
         String email = user.getEmail();
-        NoticeScrapRespDto response = noticePostService.toggleScrap(id, email, org);
+        NoticeScrapRespDto response = noticePostService.toggleScrap(id, email, profile.id());
 
         return ResponseEntity.ok(response);
     }

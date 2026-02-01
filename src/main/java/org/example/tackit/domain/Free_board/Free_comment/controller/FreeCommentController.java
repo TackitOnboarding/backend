@@ -1,6 +1,8 @@
 package org.example.tackit.domain.Free_board.Free_comment.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.Free_board.Free_comment.dto.req.FreeCommentCreateDto;
 import org.example.tackit.domain.Free_board.Free_comment.dto.req.FreeCommentUpdateDto;
 import org.example.tackit.domain.Free_board.Free_comment.dto.resp.FreeCommentRespDto;
@@ -23,11 +25,10 @@ public class FreeCommentController {
     @PostMapping
     public ResponseEntity<FreeCommentRespDto> createComment(
             @RequestBody FreeCommentCreateDto req,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String email = user.getUsername();
-        String org = user.getOrganization();
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
 
-        FreeCommentRespDto response = freeCommentService.createComment(req, email, org);
+        FreeCommentRespDto response = freeCommentService.createComment(req, user.getUsername(), profile.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -35,39 +36,41 @@ public class FreeCommentController {
     @GetMapping("/{postId}")
     public ResponseEntity<List<FreeCommentRespDto>> getComments(
             @PathVariable Long postId,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
-        return ResponseEntity.ok(freeCommentService.getCommentByPost(postId, org));
+            @ActiveProfile ProfileContext profile
+            ) {
+        return ResponseEntity.ok(freeCommentService.getCommentByPost(postId, profile.id()));
     }
 
     // 3. 댓글 수정
-    @PatchMapping("{commentId}")
+    @PatchMapping("/{commentId}")
     public ResponseEntity<FreeCommentRespDto> updateComment(
-            @PathVariable long commentId,
+            @PathVariable Long commentId,
             @RequestBody FreeCommentUpdateDto req,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String email = user.getUsername();
-        String org = user.getOrganization();
-        FreeCommentRespDto updateResp = freeCommentService.updateComment(commentId, req, email, org);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        FreeCommentRespDto updateResp = freeCommentService.updateComment(commentId, req, user.getEmail(), profile.id());
 
         return ResponseEntity.ok(updateResp);
     }
 
     // 4. 댓글 삭제
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable long commentId, @AuthenticationPrincipal CustomUserDetails user) {
-        String email = user.getUsername();
-        String org = user.getOrganization();
-        freeCommentService.deleteComment(commentId, email, org);
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        freeCommentService.deleteComment(commentId, user.getUsername(), profile.id());
 
         return ResponseEntity.noContent().build();
     }
 
     // 5. 댓글 신고
     @PostMapping("/{commentId}/report")
-    public ResponseEntity<String> reportComment(@PathVariable long commentId, @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
-        freeCommentService.increaseCommentReportCount(commentId, org);
+    public ResponseEntity<String> reportComment(
+            @PathVariable Long commentId,
+            @ActiveProfile ProfileContext profile
+            ) {
+        freeCommentService.increaseCommentReportCount(commentId, profile.id());
         return ResponseEntity.ok("댓글을 신고하였습니다.");
     }
 

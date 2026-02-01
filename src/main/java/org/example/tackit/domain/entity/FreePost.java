@@ -22,8 +22,8 @@ public class FreePost implements ReportablePost {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member writer;
+    @JoinColumn(name = "member_org_id", nullable = false)
+    private MemberOrg writer;
 
     private String title;
 
@@ -37,11 +37,12 @@ public class FreePost implements ReportablePost {
     private String tag;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private AccountStatus accountStatus;
     private int reportCount = 0;
 
     private Long viewCount = 0L;
     private Long scrapCount = 0L;
+
 
     @Column(nullable = false)
     private boolean isAnonymous;
@@ -62,6 +63,8 @@ public class FreePost implements ReportablePost {
         this.title = title;
         this.content = content;
     }
+
+
     /*
     public void update(String title, String content, String tag) {
         this.title = title;
@@ -76,22 +79,22 @@ public class FreePost implements ReportablePost {
      */
 
     public void delete() {
-        this.status = Status.DELETED;
+        this.accountStatus = AccountStatus.DELETED;
     }
 
     public void increaseReportCount() {
         this.reportCount++;
         if (this.reportCount >= 3) {
-            this.status = Status.DELETED;
+            this.accountStatus = AccountStatus.DELETED;
         }
     }
 
     public void activate(){
-        if (this.status != Status.DELETED) {
+        if (this.accountStatus != AccountStatus.DELETED) {
             throw new IllegalStateException("삭제되지 않은 게시글은 활성화할 수 없습니다.");
         }
 
-        this.status = Status.ACTIVE;
+        this.accountStatus = AccountStatus.ACTIVE;
         this.reportCount = 0;
     }
 

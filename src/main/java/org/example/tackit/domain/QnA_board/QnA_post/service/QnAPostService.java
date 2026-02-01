@@ -6,12 +6,14 @@ import org.example.tackit.domain.QnA_board.QnA_post.dto.request.QnAPostReqDto;
 import org.example.tackit.domain.QnA_board.QnA_post.dto.request.UpdateQnARequestDto;
 import org.example.tackit.domain.QnA_board.QnA_post.dto.response.QnAPopularPostRespDto;
 import org.example.tackit.domain.QnA_board.QnA_post.dto.response.QnAPostRespDto;
-import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAMemberRepository;
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostReportRepository;
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAScrapRepository;
+import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.common.dto.PageResponseDTO;
+import org.example.tackit.global.exception.ErrorCode;
+import org.example.tackit.global.exception.MemberNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ import java.util.Map;
 public class QnAPostService {
 
     private final QnAPostRepository qnAPostRepository;
-    private final QnAMemberRepository qnAMemberRepository;
+    private final MemberOrgRepository memberOrgRepository;
     private final QnAPostTagService tagService;
     private final QnAPostReportRepository qnAPostReportRepository;
     private final S3UploadService s3UploadService;
@@ -37,9 +38,9 @@ public class QnAPostService {
 
     // 게시글 작성 (NEWBIE만 가능)
     @Transactional
-    public QnAPostRespDto createPost(QnAPostReqDto dto, String email, String org) throws IOException {
-        Member member = qnAMemberRepository.findByEmailAndOrganization(email, org)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    public QnAPostRespDto createPost(QnAPostReqDto dto, String email, Long orgId) throws IOException {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (member.getMemberType() != MemberType.NEWBIE) {
             throw new AccessDeniedException("NEWBIE만 질문을 작성할 수 있습니다.");
@@ -51,8 +52,7 @@ public class QnAPostService {
                 .content(dto.getContent())
                 .createdAt(LocalDateTime.now())
                 .type(Post.QnA)
-                .organization(org)
-                .status(Status.ACTIVE)
+                .accountStatus(AccountStatus.ACTIVE)
                 .reportCount(0)
                 .isAnonymous(dto.isAnonymous())
                 .build();
@@ -75,9 +75,9 @@ public class QnAPostService {
 
     // 게시글 수정 (작성자만 가능)
     @Transactional
-    public QnAPostRespDto update(long id, UpdateQnARequestDto request, String email, String org) throws IOException {
-        Member member = qnAMemberRepository.findByEmailAndOrganization(email, org)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    public QnAPostRespDto update(Long id, UpdateQnARequestDto request, String email, Long orgId) throws IOException {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         QnAPost post = qnAPostRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
@@ -118,9 +118,9 @@ public class QnAPostService {
 
     // 게시글 삭제 (작성자, 관리자만 가능)
     @Transactional
-    public void delete(long id, String email, String org){
-        Member member = qnAMemberRepository.findByEmailAndOrganization(email, org)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    public void delete(long id, String email, Long orgId){
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         QnAPost post = qnAPostRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
@@ -137,8 +137,8 @@ public class QnAPostService {
     }
 
     // 게시글 전체 조회
-    public PageResponseDTO<QnAPostRespDto> findAll(String org, Pageable pageable) {
-        Page<QnAPost> page = qnAPostRepository.findAllByStatusAndWriter_Organization(Status.ACTIVE, org, pageable);
+    public PageResponseDTO<QnAPostRespDto> findAll(Long orgId, Pageable pageable) {
+        Page<QnAPost> page = qnAPostRepository.findByWriterIdAndAccountStatus(orgId, AccountStatus.ACTIVE, pageable);
         List<QnAPost> posts = page.getContent();
 
         Map<Long, List<String>> tagMap = tagService.getTagNamesByPosts(posts);
@@ -152,11 +152,11 @@ public class QnAPostService {
 
 
     // 게시글 상세 조회
-    public QnAPostRespDto getPostById(Long id, String org, Long memberId) {
+    public QnAPostRespDto getPostById(Long id, Long orgId, Long memberId) {
         QnAPost post = qnAPostRepository.findById(id)
                 .orElseThrow( () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-        if (!post.getWriter().getOrganization().equals(org)) {
+        if (!post.getWriter().getId().equals(orgId)) {
             throw new AccessDeniedException("해당 조직의 게시글만 조회할 수 있습니다.");
         }
 
@@ -171,12 +171,12 @@ public class QnAPostService {
 
     // 게시글 신고하기
     @Transactional
-    public String reportQnAPost(Long postId, Long userId) {
+    public String reportQnAPost(Long postId, Long orgId) {
         QnAPost post = qnAPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-        Member member = qnAMemberRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+        MemberOrg member = memberOrgRepository.findById(orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (qnAPostReportRepository.existsByMemberAndQnaPost(member, post)) {
             return "이미 신고한 게시글입니다.";
@@ -194,8 +194,12 @@ public class QnAPostService {
 
     // 인기 3개
     @Transactional(readOnly = true)
-    public List<QnAPopularPostRespDto> getPopularPosts(String organization) {
-        return qnAPostRepository.findTop3ByStatusOrderByViewCountDescScrapCountDesc(Status.ACTIVE)
+    public List<QnAPopularPostRespDto> getPopularPosts(Long orgId) {
+        return qnAPostRepository.findTop3ByWriterIdAndAccountStatusOrderByViewCountDescScrapCountDesc(orgId, AccountStatus.ACTIVE)
+                .stream()
+                .map(QnAPopularPostRespDto::from)
+                .toList();
+                /*
                 .stream()
                 .filter(post -> post.getWriter().getOrganization().equals(organization))
                 .sorted(Comparator
@@ -211,6 +215,8 @@ public class QnAPostService {
                 .limit(3)
                 .map(QnAPopularPostRespDto::from)
                 .toList();
+
+                 */
     }
 
 

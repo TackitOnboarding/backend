@@ -10,13 +10,13 @@ import org.example.tackit.domain.Notice_board.Notice_post.dto.response.NoticeScr
 import org.example.tackit.domain.Notice_board.Notice_post.repository.NoticePostImageRepository;
 import org.example.tackit.domain.Notice_board.Notice_post.repository.NoticePostRepository;
 import org.example.tackit.domain.Notice_board.Notice_post.repository.NoticeScrapRepository;
+import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.example.tackit.global.exception.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,18 +31,17 @@ import static org.example.tackit.global.exception.ErrorCode.MEMBER_NOT_FOUND;
 @RequiredArgsConstructor
 public class NoticePostService {
     private final NoticePostRepository noticePostRepository;
-    private final MemberRepository memberRepository;
     private final NoticeScrapRepository noticeScrapRepository;
     private final S3UploadService s3UploadService;
     private final NoticePostImageRepository noticePostImageRepository;
     private final NotificationService notificationService;
+    private final MemberOrgRepository memberOrgRepository;
 
     // [ 게시글 전체 조회 ]
     @Transactional
-    public PageResponseDTO<NoticePostRespDto> findAll(String org, Pageable pageable ) {
+    public PageResponseDTO<NoticePostRespDto> findAll(Long orgId, Pageable pageable ) {
 
-        Page<NoticePost> page = noticePostRepository.findByOrganization(org, pageable);
-
+        Page<NoticePost> page = noticePostRepository.findByWriterId(orgId, pageable);
         return PageResponseDTO.from(page, post -> {
                     String imageUrl = post.getImages().isEmpty() ? null
                             : post.getImages().get(0).getImageUrl();
@@ -61,20 +60,14 @@ public class NoticePostService {
 
     // [ 게시글 상세 조회 ]
     @Transactional
-    public NoticePostRespDto getPostById(Long id, String org, Long memberId) {
+    public NoticePostRespDto getPostById(Long id, Long orgId, Long memberId) {
         NoticePost post = noticePostRepository.findById(id)
                 .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-        if (!post.getOrganization().equals(org)) {
+        // 해당 게시글이 현재 접속한 소속의 글인지 검증
+        if (!post.getWriter().getId().equals(orgId)) {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_ORGANIZATION);
         }
-
-        /*
-        if (!post.getStatus().equals(Status.ACTIVE)) {
-            throw new PostInactiveException(ErrorCode.POST_IS_INACTIVE);
-        }
-         */
-
         post.increaseViewCount();
 
         String imageUrl = post.getImages().isEmpty() ? null
@@ -88,7 +81,7 @@ public class NoticePostService {
         return NoticePostRespDto.builder()
                 .id(post.getId())
                 .writer(post.getWriter().getNickname())
-                .profileImageUrl(profileImageUrl)
+                .profileImageUrl(post.getWriter().getProfileImageUrl())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .imageUrl(imageUrl)
@@ -100,24 +93,24 @@ public class NoticePostService {
 
     // [ 게시글 작성 ]
     @Transactional
-    public NoticePostRespDto createPost(NoticePostReqDto dto, MultipartFile image, String email, String org) throws IOException {
+    public NoticePostRespDto createPost(NoticePostReqDto dto, MultipartFile image, String email, Long orgId) throws IOException {
 
-        // 1. 유저 조회 및 권한 확인
-        Member member = memberRepository.findByEmailAndOrganization(email, org)
+        // 현재 접속한 프로필 조회
+        MemberOrg writerProfile = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
-        if (member.getMemberRole() != MemberRole.EXECUTIVE) {
+        // 권한 확인 = 동아리 운영진만 작성 가능
+        if (writerProfile.getMemberRole() != MemberRole.EXECUTIVE) {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_NOTICE);
         }
 
         // 2. 게시글 생성
         NoticePost post = NoticePost.builder()
-                        .writer(member)
+                        .writer(writerProfile)
                         .title(dto.getTitle())
                         .content(dto.getContent())
                         .createdAt(LocalDateTime.now())
                         .type(Post.Notice)
-                        .organization(org)
                         .commentEnabled(dto.isCommentEnabled())
                         .build();
 
@@ -142,16 +135,16 @@ public class NoticePostService {
 
     // [ 게시글 수정 ] : 작성자만
     @Transactional
-    public NoticePostRespDto update(Long id, UpdateNoticeReqDto req, MultipartFile image, String email, String org) throws IOException {
-        Member member = memberRepository.findByEmailAndOrganization(email, org)
-                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
+    public NoticePostRespDto update(Long id, UpdateNoticeReqDto req, MultipartFile image, String email, Long orgId) throws IOException {
+
+        MemberOrg memberProfile = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         NoticePost post = noticePostRepository.findById(id)
                 .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-        boolean isWriter = post.getWriter().getId().equals(member.getId());
-
-        if (!isWriter) {
+        // 작성자 본인(프로필 ID 기준)인지 확인
+        if (!post.getWriter().getId().equals(memberProfile.getId())) {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_EDIT);
         }
 
@@ -193,16 +186,15 @@ public class NoticePostService {
 
     // [ 게시글 삭제 ] : 작성자, 관리자만
     @Transactional
-    public void delete(Long id, String email, String org) {
-        Member member = memberRepository.findByEmailAndOrganization(email, org)
-                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
+    public void delete(Long id, String email, Long orgId) {
+        MemberOrg memberProfile = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         NoticePost post = noticePostRepository.findById(id)
                 .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-        boolean isWriter = post.getWriter().getId().equals(member.getId());
-        boolean isAdmin = (member.getMemberRole() == MemberRole.ADMIN)
-                && (member.getMemberType() == MemberType.ADMIN);
+        boolean isWriter = post.getWriter().getId().equals(memberProfile.getId());
+        boolean isAdmin = (memberProfile.getMemberRole() == MemberRole.ADMIN);
 
         if (!isAdmin && !isWriter) {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_DELETE);
@@ -214,18 +206,19 @@ public class NoticePostService {
 
     // [ 게시글 스크랩 ]
     @Transactional
-    public NoticeScrapRespDto toggleScrap(Long postId, String email, String org) {
-        Member member = memberRepository.findByEmailAndOrganization(email, org)
-                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
+    public NoticeScrapRespDto toggleScrap(Long postId, String email, Long orgId) {
+        MemberOrg memberProfile = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         NoticePost post = noticePostRepository.findById(postId)
                 .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-        if (!post.getOrganization().equals(org)) {
+        // 같은 소속인지 체크
+        if (!post.getWriter().getId().equals(orgId)) {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_ORGANIZATION);
         }
 
-        Optional<NoticeScrap> existing = noticeScrapRepository.findByMemberAndNoticePost(member, post);
+        Optional<NoticeScrap> existing = noticeScrapRepository.findByMemberAndNoticePost(memberProfile.getMember(), post);
 
         if (existing.isPresent()) {
             noticeScrapRepository.delete(existing.get());
@@ -234,7 +227,7 @@ public class NoticePostService {
         }
 
         NoticeScrap scrap = NoticeScrap.builder()
-                .member(member)
+                .member(memberProfile.getMember())
                 .noticePost(post)
                 .savedAt(LocalDateTime.now())
                 .build();
@@ -243,18 +236,18 @@ public class NoticePostService {
         post.increaseScrapCount();
 
         // 1. 알림 전송
-        if(!post.getWriter().getId().equals(member.getId())){
-            Member postWriter = post.getWriter();
-            String message = member.getNickname() + "님이 글을 스크랩하였습니다.";
-            String url = "/api/notice-posts/" + post.getId();
+        if(!post.getWriter().getId().equals(memberProfile.getId())){
+
+            String message = memberProfile.getNickname() + "님이 글을 스크랩하였습니다.";
 
             // 2. 알림 엔티티 생성
             Notification notification = Notification.builder()
-                    .member(postWriter)
+                    .member(post.getWriter().getMember())
+                    .memberOrgId(post.getWriter().getId())
                     .type(NotificationType.SCRAP)
                     .message(message)
-                    .relatedUrl(url)
-                    .fromMemberId(member.getId())
+                    .fromMemberOrgId(memberProfile.getId())
+                    .relatedUrl("/api/notice-posts/" + post.getId())
                     .build();
 
             //3. 알림 저장 및 전송을 위해 NotificationService 호출

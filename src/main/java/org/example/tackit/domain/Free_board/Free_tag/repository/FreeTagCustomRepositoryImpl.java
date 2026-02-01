@@ -5,7 +5,7 @@ import org.example.tackit.domain.Free_board.Free_tag.dto.response.FreeTagPostRes
 import org.example.tackit.domain.entity.FreePost;
 import org.example.tackit.domain.entity.FreePostImage;
 import org.example.tackit.domain.entity.FreeTagMap;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.AccountStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -44,10 +44,10 @@ public class FreeTagCustomRepositoryImpl implements FreeTagCustomRepository{
         // 2. 게시글 + 작성자 정보 조회 (페이징 적용)
         List<FreePost> posts = jpaQueryFactory
                 .selectFrom(freePost)
-                .join(freePost.writer, member).fetchJoin()
+                .join(freePost.writer).fetchJoin()
                 .where(freePost.id.in(postIds),
-                        freePost.status.eq(Status.ACTIVE),
-                        freePost.writer.organization.eq(organization)
+                        freePost.accountStatus.eq(AccountStatus.ACTIVE)
+                        // freePost.writer.organization.eq(organization)
                 )
                 .orderBy(freePost.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -105,12 +105,10 @@ public class FreeTagCustomRepositoryImpl implements FreeTagCustomRepository{
                 .join(freeTagMap.tag, freeTag)
                 .where(
                         freeTag.id.eq(tagId),
-                        freePost.status.eq(Status.ACTIVE)
+                        freePost.accountStatus.eq(AccountStatus.ACTIVE)
                 )
                 .fetchOne();
-
         return new PageImpl<>(content, pageable, total);
     }
-
 
 }

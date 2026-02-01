@@ -1,6 +1,8 @@
 package org.example.tackit.domain.QnA_board.QnA_post.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.QnA_board.QnA_post.dto.request.QnAPostReqDto;
 import org.example.tackit.domain.QnA_board.QnA_post.dto.request.UpdateQnARequestDto;
 import org.example.tackit.domain.QnA_board.QnA_post.dto.response.QnAPopularPostRespDto;
@@ -31,13 +33,12 @@ public class QnAPostController {
     public ResponseEntity<QnAPostRespDto> createQnAPost(
             @RequestPart("dto") QnAPostReqDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) throws IOException {
-        String email = userDetails.getUsername(); // userDetails로부터 이메일 획득
-        String org = userDetails.getOrganization();
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
+            ) throws IOException {
 
         dto.setImageUrl(image);
-        QnAPostRespDto response = qnAPostService.createPost(dto, email, org);
+        QnAPostRespDto response = qnAPostService.createPost(dto, user.getEmail(), profile.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -47,12 +48,11 @@ public class QnAPostController {
             @PathVariable("QnAPostId") long QnAPostId,
             @RequestPart("dto") UpdateQnARequestDto request,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
     ) throws IOException {
-        String email = userDetails.getUsername();
-        String org = userDetails.getOrganization();
         request.setImage(image);
-        QnAPostRespDto updateResponse = qnAPostService.update(QnAPostId, request, email, org);
+        QnAPostRespDto updateResponse = qnAPostService.update(QnAPostId, request, user.getEmail(), profile.id());
 
         return ResponseEntity.ok().body(updateResponse);
     }
@@ -61,11 +61,10 @@ public class QnAPostController {
     @DeleteMapping("/{QnAPostId}")
     public ResponseEntity<QnAPostRespDto> deleteQnAPost(
             @PathVariable("QnAPostId") long QnAPostId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
     ){
-        String email = userDetails.getUsername();
-        String org = userDetails.getOrganization();
-        qnAPostService.delete(QnAPostId, email, org);
+        qnAPostService.delete(QnAPostId, user.getEmail(), profile.id());
 
         return ResponseEntity.noContent().build();
     }
@@ -73,11 +72,11 @@ public class QnAPostController {
     // 게시글 전체 조회
     @GetMapping
     public ResponseEntity<PageResponseDTO<QnAPostRespDto>> findAllQnAPost(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC, size = 5) Pageable pageable
     ) {
-        String org = userDetails.getOrganization();
-        PageResponseDTO<QnAPostRespDto> page = qnAPostService.findAll(org, pageable);
+        PageResponseDTO<QnAPostRespDto> page = qnAPostService.findAll(profile.id(), pageable);
         return ResponseEntity.ok(page);
     }
 
@@ -85,33 +84,32 @@ public class QnAPostController {
     // 게시글 상세 조회
     @GetMapping("/{QnAPostId}")
     public ResponseEntity<QnAPostRespDto> findQnAPost(
-            @PathVariable("QnAPostId") long QnAPostId ,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @PathVariable("QnAPostId") Long QnAPostId ,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
     ) {
-        String org = userDetails.getOrganization();
-        Long memberId = userDetails.getId();
-        QnAPostRespDto post = qnAPostService.getPostById(QnAPostId, org, memberId);
+        QnAPostRespDto post = qnAPostService.getPostById(QnAPostId, profile.id(), user.getId());
         return ResponseEntity.ok(post);
     }
 
     // 게시글 신고
     @PostMapping("{QnAPostId}/report")
     public ResponseEntity<String> reportPost(
-            @PathVariable long QnAPostId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @PathVariable Long QnAPostId,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
     ) {
-        String org = userDetails.getOrganization();
-        String message = qnAPostService.reportQnAPost(QnAPostId, userDetails.getId());
+        String message = qnAPostService.reportQnAPost(QnAPostId, profile.id());
         return ResponseEntity.ok(message);
     }
 
     // 인기 3개
     @GetMapping("/popular")
     public ResponseEntity<List<QnAPopularPostRespDto>> getPopularPosts(
-            @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
     ) {
-        String organization = user.getOrganization();
-        List<QnAPopularPostRespDto> result = qnAPostService.getPopularPosts(organization);
+        List<QnAPopularPostRespDto> result = qnAPostService.getPopularPosts(profile.id());
         return ResponseEntity.ok(result);
     }
     

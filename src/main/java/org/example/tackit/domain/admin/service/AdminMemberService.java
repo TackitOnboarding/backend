@@ -7,7 +7,7 @@ import org.example.tackit.domain.admin.dto.MemberDTO;
 import org.example.tackit.domain.admin.dto.MemberStatisticsDTO;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.AccountStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +23,7 @@ public class AdminMemberService {
     private final AdminMemberRepository adminMemberRepository;
 
     // [ 모든 멤버 조회 ]
+    /*
     @Transactional(readOnly = true)
     public List<MemberDTO> getAllMembersOrderByStatus() {
         return adminMemberRepository.findAllOrderByStatus().stream()
@@ -30,7 +31,7 @@ public class AdminMemberService {
                         .nickname(member.getNickname())
                         .email(member.getEmail())
                         .organization(member.getOrganization())
-                        .status(member.getStatus())
+                        .accountStatus(member.getAccountStatus())
                         .createdAt(member.getCreatedAt().toLocalDate())
                         .build())
                 .collect(Collectors.toList());
@@ -53,7 +54,7 @@ public class AdminMemberService {
     // [ 탈퇴 회원 수 조회 ]
     @Transactional(readOnly = true)
     public DeletedMemberResp getDeletedMembers() {
-        List<Member> deletedMembers = adminMemberRepository.findByStatus(Status.DELETED);
+        List<Member> deletedMembers = adminMemberRepository.findByStatus(AccountStatus.DELETED);
 
         List<DeletedMemberDTO> deletedMemberDTOS = deletedMembers.stream()
                 .map(member -> DeletedMemberDTO.from(member))
@@ -64,5 +65,6 @@ public class AdminMemberService {
         return new DeletedMemberResp(deletedMemberDTOS, deletedCount);
     }
 
+     */
 
 }

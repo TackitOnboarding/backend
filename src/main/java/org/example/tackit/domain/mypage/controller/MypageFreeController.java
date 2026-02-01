@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MypageFreeController {
     private final MyPageFreeService myPageFreeService;
 
+    /*
     // 스크랩한 자유 게시글
     @GetMapping("/free-scraps")
     public ResponseEntity<PageResponseDTO<FreeScrapResponse>> getMyFreeScraps(
@@ -47,5 +48,7 @@ public class MypageFreeController {
         return ResponseEntity.ok(myPageFreeService.getMyComments(user.getUsername(), pageable));
 
     }
+
+     */
 
 }

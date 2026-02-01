@@ -6,14 +6,18 @@ import org.example.tackit.config.Redis.RedisUtil;
 import org.example.tackit.config.jwt.TokenProvider;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.auth.login.dto.*;
+import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.MemberOrg;
+import org.example.tackit.domain.entity.OrgType;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,7 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,6 +42,7 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final RedisUtil redisUtil;
     private final AdminMemberRepository adminMemberRepository;
+    private final MemberOrgRepository memberOrgRepository;
 
     @Transactional
     public void signup(SignUpDto signUpDto) {
@@ -41,26 +50,18 @@ public class AuthService {
             throw new RuntimeException("이미 가입되어 있는 유저입니다");
         }
 
-        if (memberRepository.existsByNickname(signUpDto.getNickname())) {
-            throw new RuntimeException("이미 사용 중인 닉네임입니다");
-        }
-
         Member member = Member.builder()
                 .email(signUpDto.getEmail())
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .name(signUpDto.getName())
-                .nickname(signUpDto.getNickname())
-                .organization(signUpDto.getOrganization())
-                .memberRole(signUpDto.getMemberRole())
-                .memberType(signUpDto.getMemberType())
-                .joinedYear(signUpDto.getJoinedYear())
-                .status(Status.ACTIVE)
+                .accountStatus(AccountStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
 
         memberRepository.save(member);
     }
 
+    /*
     @Transactional
     public TokenDto signIn(SignInDto signInDto) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(signInDto.getEmail(), signInDto.getPassword());
@@ -75,6 +76,46 @@ public class AuthService {
             return tokenDto;
         } catch (Exception e) {
             log.error("로그인 실패", e);
+            throw e;
+        }
+    }
+     */
+
+    @Transactional
+    public SignInResponse signIn(SignInDto signInDto) {
+        // 인증 토큰 생성
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(signInDto.getEmail(), signInDto.getPassword());
+
+        try {
+            log.info("로그인 시도: {}", signInDto.getEmail());
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            log.info("로그인 성공: {}", authentication.getName());
+
+            TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+            redisUtil.save(signInDto.getEmail(), tokenDto.getRefreshToken());
+
+            // 멀티 프로필 목록 조회
+            List<MemberOrg> memberOrgs = memberOrgRepository.findAllByMemberEmail(signInDto.getEmail());
+
+            List<MultiProfileDto> profiles = memberOrgs.stream()
+                    .map(org -> MultiProfileDto.builder()
+                            .memberOrgId(org.getId())
+                            .orgName(org.getOrgType() == OrgType.CLUB ? org.getClub().getName() : org.getCommunity().getName())
+                            .nickname(org.getNickname())
+                            .profileImage(org.getProfileImageUrl())
+                            .orgType(org.getOrgType().name())
+                            .memberRole(org.getMemberRole().name())
+                            .memberType(org.getMemberType().name())
+                            .build())
+                    .collect(Collectors.toList());
+
+            return new SignInResponse(
+                    tokenDto,
+                    profiles
+            );
+        } catch (Exception e) {
+            log.error("로그인 실패: {}", signInDto.getEmail(), e);
             throw e;
         }
     }
@@ -94,7 +135,30 @@ public class AuthService {
         return tokenProvider.reissueAccessToken(refreshToken);
     }
 
+    // 특정 소속 선택
+    public SignInResponse selectProfile(Long memberOrgId, String email) {
+        // 소속 검증
+        MemberOrg selectedOrg = memberOrgRepository.findById(memberOrgId)
+                .filter(org -> org.getMember().getEmail().equals(email))
+                .orElseThrow( () -> new RuntimeException("해당 소속 권한이 없거나 존재하지 않습니다."));
+
+        // 권한 리스트 생성 : Role + Type
+        List<SimpleGrantedAuthority> authorities = Arrays.asList(
+                new SimpleGrantedAuthority("ROLE_" + selectedOrg.getMemberRole().name()),
+                new SimpleGrantedAuthority("ROLE_" + selectedOrg.getMemberType().name())
+        );
+
+        // 인증 객체 생성
+        Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
+
+        // MemberOrgId 포함하여 토큰 생성
+        TokenDto orgToken = tokenProvider.generateTokenDtoWithProfile(authentication, memberOrgId);
+
+        return SignInResponse.of(orgToken);
+    }
+
     // 이메일 찾기
+    /*
     @Transactional
     public FindEmailRespDto findEmailbyOrgAndNickname(String organization, String name) {
         Optional<Member> memberOptional = memberRepository.findByOrganizationAndName(organization, name);
@@ -151,6 +215,8 @@ public class AuthService {
             throw new RuntimeException("서버 오류가 발생했습니다.", e);
         }
     }
+
+     */
 
     // 비밀번호 찾기 ) 비밀번호 재설정
     @Transactional

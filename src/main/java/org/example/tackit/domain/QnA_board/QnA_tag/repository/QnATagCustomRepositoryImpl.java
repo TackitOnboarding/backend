@@ -5,7 +5,7 @@ import org.example.tackit.domain.QnA_board.QnA_tag.dto.response.QnATagPostRespon
 import org.example.tackit.domain.entity.QnAPost;
 import org.example.tackit.domain.entity.QnAPostImage;
 import org.example.tackit.domain.entity.QnATagMap;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.AccountStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +18,6 @@ import static org.example.tackit.domain.entity.QQnATagMap.qnATagMap;
 import static org.example.tackit.domain.entity.QQnATag.qnATag;
 import static org.example.tackit.domain.entity.QMember.member;
 
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +26,7 @@ import java.util.stream.Collectors;
 public class QnATagCustomRepositoryImpl implements QnATagCustomRepository{
 
     private final JPAQueryFactory jpaQueryFactory;
+
 
     // 스프링이 JPAQueryFactory를 주입
     public QnATagCustomRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
@@ -49,10 +49,10 @@ public class QnATagCustomRepositoryImpl implements QnATagCustomRepository{
         // 2. 게시글 + 작성자 정보 조회 (페이징 적용)
         List<QnAPost> posts = jpaQueryFactory
                 .selectFrom(qnAPost)
-                .join(qnAPost.writer, member).fetchJoin()
+                .join(qnAPost.writer).fetchJoin()
                 .where(qnAPost.id.in(postIds),
-                        qnAPost.status.eq(Status.ACTIVE),
-                        qnAPost.writer.organization.eq(organization)
+                        qnAPost.accountStatus.eq(AccountStatus.ACTIVE)
+                        // qnAPost.writer.organization.eq(organization)
                 )
                 .orderBy(qnAPost.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -110,7 +110,7 @@ public class QnATagCustomRepositoryImpl implements QnATagCustomRepository{
                 .join(qnATagMap.tag, qnATag)
                 .where(
                         qnATag.id.eq(tagId),
-                        qnAPost.status.eq(Status.ACTIVE)
+                        qnAPost.accountStatus.eq(AccountStatus.ACTIVE)
                 )
                 .fetchOne();
 

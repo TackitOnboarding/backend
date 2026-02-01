@@ -1,6 +1,8 @@
 package org.example.tackit.domain.QnA_board.QnA_comment.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.QnA_board.QnA_comment.dto.request.QnACommentCreateDto;
 import org.example.tackit.domain.QnA_board.QnA_comment.dto.request.QnACommentUpdateDto;
 import org.example.tackit.domain.QnA_board.QnA_comment.dto.response.QnACommentResponseDto;
@@ -21,44 +23,52 @@ public class QnACommentController {
     private final QnACommentService qnACommentService;
 
     // 댓글 작성
-    @PostMapping("/create")
-    public ResponseEntity<QnACommentResponseDto> createComment(@RequestBody QnACommentCreateDto request, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        String email = userDetails.getUsername();
-        String org = userDetails.getOrganization();
-        QnACommentResponseDto response = qnACommentService.createComment(request, email, org);
+    @PostMapping
+    public ResponseEntity<QnACommentResponseDto> createComment(
+            @RequestBody QnACommentCreateDto request,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        QnACommentResponseDto response = qnACommentService.createComment(request, user.getEmail(), profile.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // 댓글 조회
     @GetMapping("/{postId}")
-    public ResponseEntity<List<QnACommentResponseDto>> getComments(@PathVariable long postId,  @AuthenticationPrincipal CustomUserDetails userDetails){
-        String org = userDetails.getOrganization();
-        return ResponseEntity.ok(qnACommentService.getCommentByPost(postId, org));
+    public ResponseEntity<List<QnACommentResponseDto>> getComments(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        return ResponseEntity.ok(qnACommentService.getCommentByPost(postId, profile.id()));
     }
 
     // 댓글 수정
     @PatchMapping("/{commentId}")
-    public ResponseEntity<QnACommentResponseDto> updateComment(@PathVariable long commentId, @RequestBody QnACommentUpdateDto request, @AuthenticationPrincipal CustomUserDetails userDetails){
-        String email = userDetails.getUsername();
-        String org = userDetails.getOrganization();
-        QnACommentResponseDto updateResponse = qnACommentService.updateComment(commentId, request, email, org);
+    public ResponseEntity<QnACommentResponseDto> updateComment(
+            @PathVariable Long commentId,
+            @RequestBody QnACommentUpdateDto request,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        QnACommentResponseDto updateResponse = qnACommentService.updateComment(commentId, request, user.getEmail(), profile.id());
         return ResponseEntity.ok().body(updateResponse);
     }
 
     // 댓글 삭제
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable long commentId, @AuthenticationPrincipal CustomUserDetails userDetails){
-        String email = userDetails.getUsername();
-        String org = userDetails.getOrganization();
-        qnACommentService.deleteComment(commentId, email, org);
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        qnACommentService.deleteComment(commentId, user.getEmail(), profile.id());
         return ResponseEntity.noContent().build();
     }
 
     // 댓글 신고
     @PostMapping("{commentId}/report")
-    public ResponseEntity<String> reportComment(@PathVariable long commentId,  @AuthenticationPrincipal CustomUserDetails userDetails) {
-        String org = userDetails.getOrganization();
-        qnACommentService.increaseCommentReportCount(commentId, org);
+    public ResponseEntity<String> reportComment(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        qnACommentService.increaseCommentReportCount(commentId, profile.id());
         return ResponseEntity.ok("댓글을 신고하였습니다.");
     }
 

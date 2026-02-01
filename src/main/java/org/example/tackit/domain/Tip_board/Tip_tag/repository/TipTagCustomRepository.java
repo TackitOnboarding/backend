@@ -5,5 +5,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface TipTagCustomRepository {
-    Page<TipTagPostResponseDto> findPostsByTagId(Long tagId, String organization, Pageable pageable);
+    // Page<TipTagPostResponseDto> findPostsByTagId(Long tagId, Long orgId, Pageable pageable);
 }

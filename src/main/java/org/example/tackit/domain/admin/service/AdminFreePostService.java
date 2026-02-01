@@ -7,7 +7,7 @@ import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepo
 import org.example.tackit.domain.admin.dto.ReportedPostDTO;
 import org.example.tackit.domain.admin.repository.AdminFreePostRepository;
 import org.example.tackit.domain.entity.FreePost;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.AccountStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class AdminFreePostService implements ReportedPostService{
     // 비활성화 자유 게시글 전체 조회
     @Override
     public Page<ReportedPostDTO> getDeletedPosts(Pageable pageable) {
-        return adminFreePostRepository.findAllByStatusAndReportCountGreaterThanEqual(Status.DELETED, 3, pageable)
+        return adminFreePostRepository.findAllByAccountStatusAndReportCountGreaterThanEqual(AccountStatus.DELETED, 3, pageable)
                 .map(ReportedPostDTO::fromEntity);
     }
 

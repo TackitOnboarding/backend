@@ -21,16 +21,17 @@ public class NoticePost {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member writer;
+    @JoinColumn(name = "member_org_id", nullable = false)
+    private MemberOrg writer;
 
     private String title;
 
     @Lob
     private String content;
+
     private LocalDateTime createdAt;
+
     private Post type;
-    private String organization;
 
     @Builder.Default
     private Long viewCount = 0L;

@@ -1,7 +1,8 @@
 package org.example.tackit.domain.mypage.controller;
 
-
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.example.tackit.domain.mypage.dto.response.QnAMyCommentResponseDto;
 import org.example.tackit.domain.mypage.dto.response.QnAMyPostResponseDto;
@@ -27,10 +28,11 @@ public class MypageQnAController {
     @GetMapping("/qna-posts")
     public ResponseEntity<PageResponseDTO<QnAMyPostResponseDto>> getMyQnaPosts(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            @ActiveProfile ProfileContext profile,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC, size = 5) Pageable pageable
     ) {
         return ResponseEntity.ok(
-                myPageQnAService.getMyPosts(userDetails.getUsername(), pageable)
+                myPageQnAService.getMyPosts(userDetails.getUsername(), profile.id(), pageable)
         );
     }
 
@@ -38,10 +40,11 @@ public class MypageQnAController {
     @GetMapping("/qna-comments")
     public ResponseEntity<PageResponseDTO<QnAMyCommentResponseDto>> getMyQnaComments(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            @ActiveProfile ProfileContext profile,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC, size = 5) Pageable pageable
     ) {
         return ResponseEntity.ok(
-                myPageQnAService.getMyComments(userDetails.getUsername(), pageable)
+                myPageQnAService.getMyComments(userDetails.getUsername(), profile.id(), pageable)
         );
     }
 

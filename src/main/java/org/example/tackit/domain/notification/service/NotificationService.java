@@ -2,8 +2,11 @@ package org.example.tackit.domain.notification.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
+import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.Member;
+import org.example.tackit.domain.entity.MemberOrg;
 import org.example.tackit.domain.entity.Notification;
 import org.example.tackit.domain.notification.dto.NotificationEventDto;
 import org.example.tackit.domain.notification.dto.resp.NotificationRespDto;
@@ -39,6 +42,7 @@ public class NotificationService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final NotificationRepository notificationRepository;
     private final AdminMemberRepository adminMemberRepository;
+    private final MemberOrgRepository memberOrgRepository;
 
     // [ 클라이언트 -> 알림 구독 신청 ]
     // 클라이언트가 서버에 처음 연결 요청
@@ -99,29 +103,38 @@ public class NotificationService {
 
     // [ 모든 알림 조회 ]
     @Transactional(readOnly = true)
-    public List<NotificationRespDto> findAllNotifications(Long userId) {
+    public List<NotificationRespDto> findAllNotifications(Long userId, ProfileContext profile) {
         // 1. 읽지 않은 모든 알림 조회
-        List<Notification> notifications = notificationRepository.findAllByMemberIdOrderByCreatedAtDesc(userId);
+        List<Notification> notifications = notificationRepository.findAllByMemberIdAndMemberOrgIdOrderByCreatedAtDesc(userId, profile.id());
+
         if (notifications.isEmpty()) {
             return Collections.emptyList();
         }
 
-        // 2. 알림 목록에서 보낸 사람들의 ID 추출
-        List<Long> fromMemberIds = notifications.stream()
-                .map(Notification::getFromMemberId)
+        // 2. 알림 보낸 프로필들의 ID 추출
+        List<Long> fromOrgIds = notifications.stream()
+                .map(Notification::getFromMemberOrgId)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
-        // 3. 추출된 ID로 유저 아이디 조회
-        Map<Long, String> memberNameMap = adminMemberRepository.findAllById(fromMemberIds).stream()
-                .collect(Collectors.toMap(Member::getId, Member::getNickname));
+
+        // 3. 소속별 닉네임 한 번에 조회
+        Map<Long, String> orgNicknameMap = memberOrgRepository.findAllById(fromOrgIds).stream()
+                .collect(Collectors.toMap(
+                        MemberOrg::getId,
+                        MemberOrg::getNickname
+                ));
+
+        // 4. 알림 데이터와 닉네임 맵 매칭
 
         return notifications.stream()
                 .map(notification -> {
-                    String fromName = memberNameMap.get(notification.getFromMemberId());
-                    return new NotificationRespDto(notification, fromName);
+                    String fromNickname = orgNicknameMap.getOrDefault(
+                            notification.getFromMemberOrgId(), "알 수 없는 사용자"
+                    );
+                    return new NotificationRespDto(notification, fromNickname);
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // [ 알림 읽음 ]

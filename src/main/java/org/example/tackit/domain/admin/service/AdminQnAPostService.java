@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.admin.dto.ReportedPostDTO;
 import org.example.tackit.domain.admin.repository.AdminQnAPostRepository;
 import org.example.tackit.domain.entity.QnAPost;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.AccountStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class AdminQnAPostService implements ReportedPostService {
     @Override
     public Page<ReportedPostDTO> getDeletedPosts(Pageable pageable) {
 
-        return adminQnAPostRepository.findAllByStatusAndReportCountGreaterThanEqual(Status.DELETED, 3, pageable)
+        return adminQnAPostRepository.findAllByAccountStatusAndReportCountGreaterThanEqual(AccountStatus.DELETED, 3, pageable)
                 .map(ReportedPostDTO::fromEntity);
     }
 

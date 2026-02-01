@@ -42,4 +42,5 @@ public class FreePostTagService {
                 .map(mapping -> mapping.getTag().getTagName())
                 .toList();
     }
+
 }

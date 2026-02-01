@@ -9,6 +9,7 @@ import org.example.tackit.domain.Free_board.Free_post.dto.response.FreePostRespD
 import org.example.tackit.domain.Free_board.Free_post.dto.response.FreeScrapResponseDto;
 import org.example.tackit.domain.Free_board.Free_post.repository.*;
 import org.example.tackit.domain.Free_board.Free_tag.repository.FreePostTagMapRepository;
+import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.example.tackit.common.dto.PageResponseDTO;
@@ -20,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +30,7 @@ import static org.example.tackit.global.exception.ErrorCode.MEMBER_NOT_FOUND;
 @RequiredArgsConstructor
 public class FreePostService {
     private final FreePostJPARepository freePostJPARepository;
-    private final FreeMemberJPARepository freeMemberJPARepository;
+    private final MemberOrgRepository memberOrgRepository;
     private final FreePostTagService tagService;
     private final FreeScrapJPARepository freeScrapJPARepository;
     private final FreePostTagMapRepository freePostTagMapRepository;
@@ -41,8 +41,8 @@ public class FreePostService {
 
     // [ 게시글 전체 조회 ]
     @Transactional
-    public PageResponseDTO<FreePostRespDto> findAll(String org, Pageable pageable ) {
-        Page<FreePost> page = freePostJPARepository.findByOrganizationAndStatus(org, Status.ACTIVE, pageable);
+    public PageResponseDTO<FreePostRespDto> findAll(Long orgId, Pageable pageable ) {
+        Page<FreePost> page = freePostJPARepository.findByWriterIdAndAccountStatus(orgId, AccountStatus.ACTIVE, pageable);
 
         return PageResponseDTO.from(page, post -> {
             List<String> tags = freePostTagMapRepository.findByFreePost(post).stream()
@@ -70,15 +70,15 @@ public class FreePostService {
 
     // [ 게시글 상세 조회 ]
     @Transactional
-    public FreePostRespDto getPostById(Long id, String org, Long memberId) {
+    public FreePostRespDto getPostById(Long id, Long orgId, Long memberId) {
         FreePost post = freePostJPARepository.findById(id)
                 .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-        if (!post.getOrganization().equals(org)) {
+        if (!post.getWriter().getId().equals(orgId)) {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_ORGANIZATION);
         }
 
-        if (!post.getStatus().equals(Status.ACTIVE)) {
+        if (!post.getAccountStatus().equals(AccountStatus.ACTIVE)) {
             throw new PostInactiveException(ErrorCode.POST_IS_INACTIVE);
         }
 
@@ -110,10 +110,10 @@ public class FreePostService {
 
     // [ 게시글 작성 ]
     @Transactional
-    public FreePostRespDto createPost(FreePostReqDto dto, String email, String org) throws IOException {
+    public FreePostRespDto createPost(FreePostReqDto dto, String email, Long orgId) throws IOException {
 
         // 1. 유저 조회
-        Member member = freeMemberJPARepository.findByEmailAndOrganization(email, org)
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
         // 2. 게시글 생성
@@ -124,9 +124,8 @@ public class FreePostService {
                         .isAnonymous(dto.isAnonymous())
                         .createdAt(LocalDateTime.now())
                         .type(Post.Free)
-                        .status(Status.ACTIVE)
+                        .accountStatus(AccountStatus.ACTIVE)
                         .reportCount(0)
-                        .organization(org)
                         .build();
 
         freePostJPARepository.save(post);
@@ -161,8 +160,8 @@ public class FreePostService {
 
     // [ 게시글 수정 ] : 작성자만
     @Transactional
-    public FreePostRespDto update(Long id, UpdateFreeReqDto req, String email, String org) throws IOException {
-        Member member = freeMemberJPARepository.findByEmailAndOrganization(email, org)
+    public FreePostRespDto update(Long id, UpdateFreeReqDto req, String email, Long orgId) throws IOException {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
         FreePost post = freePostJPARepository.findById(id)
@@ -231,8 +230,8 @@ public class FreePostService {
 
     // [ 게시글 삭제 ] : 작성자, 관리자만
     @Transactional
-    public void delete(Long id, String email, String org) {
-        Member member = freeMemberJPARepository.findByEmailAndOrganization(email, org)
+    public void delete(Long id, String email, Long orgId) {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
         FreePost post = freePostJPARepository.findById(id)
@@ -251,8 +250,8 @@ public class FreePostService {
 
     // [ 게시글 신고 ]
     @Transactional
-    public String report(Long postId, Long userId) {
-        Member member = freeMemberJPARepository.findById(userId)
+    public String report(Long postId, Long orgId) {
+        MemberOrg member = memberOrgRepository.findById(orgId)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
         FreePost post = freePostJPARepository.findById(postId)
@@ -277,14 +276,14 @@ public class FreePostService {
 
     // [ 게시글 스크랩 ]
     @Transactional
-    public FreeScrapResponseDto toggleScrap(Long postId, String email, String org) {
-        Member member = freeMemberJPARepository.findByEmailAndOrganization(email, org)
+    public FreeScrapResponseDto toggleScrap(Long postId, String email, Long orgId) {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
         FreePost post = freePostJPARepository.findById(postId)
                 .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-        if (!post.getOrganization().equals(org)) {
+        if (!post.getOrganization().equals(orgId)) {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_ORGANIZATION);
         }
 
@@ -305,7 +304,19 @@ public class FreePostService {
         freeScrapJPARepository.save(scrap);
         post.increaseScrapCount();
 
-        // 1. 알림 전송
+        // 알림 전송
+        if( !post.getWriter().getId().equals(member.getId())) {
+            notificationService.send(Notification.builder()
+                            .member(post.getWriter().getMember())
+                            .memberOrgId(post.getWriter().getId())
+                            .type(NotificationType.SCRAP)
+                            .message(member.getNickname() + "님이 글을 스크랩하였습니다.")
+                            .fromMemberOrgId(member.getId())
+                            .relatedUrl("/api/free-posts/" + post.getId())
+                            .build());
+        }
+        return new FreeScrapResponseDto(true, scrap.getSavedAt());
+        /*
         if(!post.getWriter().getId().equals(member.getId())){
             Member postWriter = post.getWriter();
             String message = member.getNickname() + "님이 글을 스크랩하였습니다.";
@@ -324,13 +335,18 @@ public class FreePostService {
             notificationService.send(notification);
         }
         return new FreeScrapResponseDto(true, scrap.getSavedAt());
+
+         */
     }
 
     // 인기 3개
     @Transactional(readOnly = true)
-    public List<FreePopularPostRespDto> getPopularPosts(String organization) {
-        return freePostJPARepository.findTop3ByStatusOrderByViewCountDescScrapCountDesc(Status.ACTIVE)
+    public List<FreePopularPostRespDto> getPopularPosts(Long orgId) {
+        return freePostJPARepository.findTop3ByWriterIdAndAccountStatusOrderByViewCountDescScrapCountDesc(orgId, AccountStatus.ACTIVE)
                 .stream()
+                .map(FreePopularPostRespDto::from)
+                .toList();
+                /*
                 .filter(post -> post.getWriter().getOrganization().equals(organization))
                 .sorted(Comparator
                         .comparing(
@@ -345,6 +361,7 @@ public class FreePostService {
                 .limit(3)
                 .map(FreePopularPostRespDto::from)
                 .toList();
+                 */
     }
 
 }

@@ -1,6 +1,8 @@
 package org.example.tackit.domain.Free_board.Free_post.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.Free_board.Free_post.dto.request.FreePostReqDto;
 import org.example.tackit.domain.Free_board.Free_post.dto.request.UpdateFreeReqDto;
 import org.example.tackit.domain.Free_board.Free_post.dto.response.FreePopularPostRespDto;
@@ -32,9 +34,10 @@ public class FreePostController {
     @GetMapping
     public ResponseEntity<PageResponseDTO<FreePostRespDto>> getAllPosts(
             @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
-        String org = user.getOrganization();
-        PageResponseDTO<FreePostRespDto> pageResponse = freePostService.findAll(org, pageable);
+
+        PageResponseDTO<FreePostRespDto> pageResponse = freePostService.findAll(profile.id(), pageable);
         return ResponseEntity.ok(pageResponse);
     }
 
@@ -42,9 +45,9 @@ public class FreePostController {
     @GetMapping("/{id}")
     public ResponseEntity<FreePostRespDto> findFreePost(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
-        FreePostRespDto post = freePostService.getPostById(id, org, user.getId());
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        FreePostRespDto post = freePostService.getPostById(id, profile.id(), user.getId());
         return ResponseEntity.ok(post);
     }
 
@@ -53,11 +56,11 @@ public class FreePostController {
     public ResponseEntity<FreePostRespDto> createFreePost(
             @RequestPart("dto") FreePostReqDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal CustomUserDetails user) throws IOException {
-        String email = user.getEmail();
-        String org = user.getOrganization();
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
+            ) throws IOException {
         dto.setImage(image);
-        FreePostRespDto resp = freePostService.createPost(dto, email, org);
+        FreePostRespDto resp = freePostService.createPost(dto, user.getEmail(), profile.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
 
@@ -67,12 +70,12 @@ public class FreePostController {
             @PathVariable Long id,
             @RequestPart("dto") UpdateFreeReqDto req,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal CustomUserDetails user) throws IOException {
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
+            ) throws IOException {
 
         req.setImage(image);
-        String email = user.getEmail();
-        String org = user.getOrganization();
-        FreePostRespDto updateResp = freePostService.update(id, req, email, org);
+        FreePostRespDto updateResp = freePostService.update(id, req, user.getEmail(), profile.id());
 
         return ResponseEntity.ok(updateResp);
     }
@@ -81,10 +84,9 @@ public class FreePostController {
     @DeleteMapping("{id}")
     public ResponseEntity<FreePostRespDto> deleteFreePost(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String email = user.getEmail();
-        String org = user.getOrganization();
-        freePostService.delete(id, email, org);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        freePostService.delete(id, user.getEmail(), profile.id());
 
         return ResponseEntity.noContent().build();
     }
@@ -93,9 +95,10 @@ public class FreePostController {
     @PostMapping("{id}/report")
     public ResponseEntity<String> reportPost(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
 
-        String message = freePostService.report(id, user.getId());
+        String message = freePostService.report(id, profile.id());
         return ResponseEntity.ok(message);
     }
 
@@ -103,10 +106,9 @@ public class FreePostController {
     @PostMapping("/{id}/scrap")
     public ResponseEntity<FreeScrapResponseDto> scrapPost(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
-        String email = user.getEmail();
-        FreeScrapResponseDto response = freePostService.toggleScrap(id, email, org);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        FreeScrapResponseDto response = freePostService.toggleScrap(id, user.getEmail(), profile.id());
 
         return ResponseEntity.ok(response);
     }
@@ -114,10 +116,10 @@ public class FreePostController {
     // 인기 3개
     @GetMapping("/popular")
     public ResponseEntity<List<FreePopularPostRespDto>> getPopularPosts(
-            @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
     ) {
-        String organization = user.getOrganization();
-        List<FreePopularPostRespDto> result = freePostService.getPopularPosts(organization);
+        List<FreePopularPostRespDto> result = freePostService.getPopularPosts(profile.id());
         return ResponseEntity.ok(result);
     }
 }

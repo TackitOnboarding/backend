@@ -6,8 +6,8 @@ import org.example.tackit.domain.QnA_board.QnA_comment.dto.request.QnACommentCre
 import org.example.tackit.domain.QnA_board.QnA_comment.dto.request.QnACommentUpdateDto;
 import org.example.tackit.domain.QnA_board.QnA_comment.dto.response.QnACommentResponseDto;
 import org.example.tackit.domain.QnA_board.QnA_comment.repository.QnACommentRepository;
-import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAMemberRepository;
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
+import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,13 +22,13 @@ import java.util.List;
 public class QnACommentService {
     private final QnACommentRepository qnACommentRepository;
     private final QnAPostRepository qnAPostRepository;
-    private final QnAMemberRepository qnAMemberRepository;
+    private final MemberOrgRepository memberOrgRepository;
     private final NotificationService notificationService;
 
     // 댓글 생성
     @Transactional
-    public QnACommentResponseDto createComment(QnACommentCreateDto dto, String email, String org){
-        Member member = qnAMemberRepository.findByEmailAndOrganization(email,org)
+    public QnACommentResponseDto createComment(QnACommentCreateDto dto, String email, Long orgId){
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         QnAPost post = qnAPostRepository.findById(dto.getQnaPostId())
@@ -36,7 +36,7 @@ public class QnACommentService {
 
         QnAComment comment = QnAComment.builder()
                 .writer(member)
-                .status(Status.ACTIVE)
+                .accountStatus(AccountStatus.ACTIVE)
                 .qnAPost(post)
                 .content(dto.getContent())
                 .createdAt(LocalDateTime.now())
@@ -46,36 +46,29 @@ public class QnACommentService {
         QnAComment savedComment = qnACommentRepository.save(comment);
 
         // 알림 전송
-        if(!post.getWriter().getId().equals(member.getId())) {
-            Member postWriter = post.getWriter();
+        if (!post.getWriter().getId().equals(member.getId())) {
+            MemberOrg postWriter = post.getWriter();
 
-            String message = member.getNickname() + "님이 글에 댓글을 남겼습니다.";
-
-            String url = "/api/qna-post/" + post.getId();
-
-            // 알림 엔티티 생성
-            Notification notification = Notification.builder()
-                    .member(postWriter)
+            notificationService.send(Notification.builder()
+                    .member(postWriter.getMember()) // 수신자 계정
+                    .memberOrgId(postWriter.getId()) // 수신자 프로필 ID
                     .type(NotificationType.COMMENT)
-                    .message(message)
-                    .relatedUrl(url)
-                    .fromMemberId(member.getId())
-                    .build();
-
-            // 알림 저장 및 전송
-            notificationService.send(notification);
-        }
+                    .message(member.getNickname() + "님이 QnA 글에 댓글을 남겼습니다.")
+                    .relatedUrl("/api/qna-posts/" + post.getId())
+                    .fromMemberOrgId(member.getId()) // 보낸 사람 프로필 ID
+                    .build());
+            }
         return new QnACommentResponseDto(savedComment);
-    }
 
+    }
 
     // 전체 댓글 조회
     @Transactional (readOnly = true)
-    public List<QnACommentResponseDto> getCommentByPost(long postId, String org){
+    public List<QnACommentResponseDto> getCommentByPost(Long postId, Long orgId){
         QnAPost post = qnAPostRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
-        if (!post.getWriter().getOrganization().equals(org)) {
+        if (!post.getWriter().getId().equals(orgId)) {
             throw new AccessDeniedException("해당 조직의 게시글만 조회할 수 있습니다.");
         }
 
@@ -87,10 +80,9 @@ public class QnACommentService {
 
     // 댓글 수정 (작성자만 가능)
     @Transactional
-    public QnACommentResponseDto updateComment(long commentId, QnACommentUpdateDto dto, String email, String org){
-        Member member = qnAMemberRepository.findByEmailAndOrganization(email, org)
+    public QnACommentResponseDto updateComment(Long commentId, QnACommentUpdateDto dto, String email, Long orgId){
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-
 
         QnAComment comment = qnACommentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
@@ -108,8 +100,8 @@ public class QnACommentService {
 
     // 댓글 삭제 (작성자, 관리자만 가능)
     @Transactional
-    public void deleteComment(long commentId, String email, String org){
-        Member member = qnAMemberRepository.findByEmail(email)
+    public void deleteComment(Long commentId, String email, Long orgId) {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         QnAComment comment = qnACommentRepository.findById(commentId)
@@ -124,16 +116,15 @@ public class QnACommentService {
         }
 
         qnACommentRepository.delete(comment); // hard delete
-       // comment.markAsDeleted(); // soft delete
     }
 
     // 댓글 신고하기
     @Transactional
-    public void increaseCommentReportCount(long id, String org) {
+    public void increaseCommentReportCount(Long id, Long orgId) {
         QnAComment comment = qnACommentRepository.findById(id)
                 .orElseThrow( () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-        if (!comment.getWriter().getOrganization().equals(org)) {
+        if (!comment.getWriter().getId().equals(orgId)) {
             throw new AccessDeniedException("해당 조직의 댓글만 신고할 수 있습니다.");
         }
         comment.increaseReportCount();

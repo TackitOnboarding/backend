@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface TipCommentRepository extends JpaRepository<TipComment, Long> {
     List<TipComment> findByTipPost(TipPost post);
-    Page<TipComment> findByWriter(Member writer, Pageable pageable);
+    Page<TipComment> findByWriter(MemberOrg writer, Pageable pageable);
 }

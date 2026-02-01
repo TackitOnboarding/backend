@@ -1,7 +1,8 @@
 package org.example.tackit.domain.notification.controller;
 
-
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.example.tackit.domain.notification.dto.resp.NotificationRespDto;
 import org.example.tackit.domain.notification.service.NotificationService;
@@ -28,11 +29,10 @@ public class NotificationController {
     // [ 모든 알림 조회 ]
     @GetMapping
     public ResponseEntity<List<NotificationRespDto>> getAllNotifications(
-            @AuthenticationPrincipal CustomUserDetails user
-    ) {
-        Long userId = user.getId();
-
-        List<NotificationRespDto> allNotifications = notificationService.findAllNotifications(userId);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
+            ) {
+        List<NotificationRespDto> allNotifications = notificationService.findAllNotifications(user.getId(), profile);
 
         return ResponseEntity.ok(allNotifications);
     }

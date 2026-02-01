@@ -1,6 +1,8 @@
 package org.example.tackit.common.homePopular;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,10 +21,10 @@ public class HomePopularPostController {
 
     @GetMapping("/popular")
     public ResponseEntity<List<HomePopularPostRespDto>> getPopularPosts(
-            @AuthenticationPrincipal CustomUserDetails user
-    ) {
-        String organization = user.getOrganization();
-        List<HomePopularPostRespDto> result = homePopularPostService.getPopularPosts(organization);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
+            ) {
+        List<HomePopularPostRespDto> result = homePopularPostService.getPopularPosts(profile.id(), profile.type());
         return ResponseEntity.ok(result);
     }
 }

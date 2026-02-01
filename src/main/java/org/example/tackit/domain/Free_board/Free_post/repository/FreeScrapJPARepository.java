@@ -11,9 +11,12 @@ import java.util.Optional;
 
 @Repository
 public interface FreeScrapJPARepository extends JpaRepository<FreeScrap, Long> {
-    Page<FreeScrap> findByMemberAndType(Member member, Post type, Pageable pageable);
+    // Page<FreeScrap> findByMemberAndType(Member member, Post type, Pageable pageable);
 
-    Optional<FreeScrap> findByMemberAndFreePost(Member member, FreePost freePost);
+    // Optional<FreeScrap> findByMemberAndFreePost(Member member, FreePost freePost);
 
     boolean existsByFreePostIdAndMemberId(Long freePostId, Long memberId);
+
+    Optional<FreeScrap> findByMemberAndFreePost(MemberOrg member, FreePost post);
+
 }
