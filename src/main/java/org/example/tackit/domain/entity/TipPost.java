@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.tackit.domain.admin.model.ReportablePost;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

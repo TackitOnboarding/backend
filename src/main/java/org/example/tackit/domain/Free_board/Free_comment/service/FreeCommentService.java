@@ -10,6 +10,7 @@ import org.example.tackit.domain.Free_board.Free_comment.repository.FreeCommentR
 import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepository;
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;

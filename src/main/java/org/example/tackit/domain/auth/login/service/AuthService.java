@@ -10,9 +10,8 @@ import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.entity.AccountStatus;
-import org.example.tackit.domain.entity.MemberOrg;
-import org.example.tackit.domain.entity.OrgType;
-import org.springframework.http.HttpStatus;
+import org.example.tackit.domain.entity.Org.MemberOrg;
+import org.example.tackit.domain.entity.Org.OrgType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,13 +21,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j

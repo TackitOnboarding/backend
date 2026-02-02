@@ -5,6 +5,7 @@ import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepo
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
 import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostRepository;
 import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.OrgType;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

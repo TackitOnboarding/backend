@@ -6,6 +6,7 @@ import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository
 import org.example.tackit.domain.QnA_board.QnA_tag.repository.QnAPostTagMapRepository;
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.mypage.dto.response.QnAMyCommentResponseDto;
 import org.example.tackit.domain.mypage.dto.response.QnAMyPostResponseDto;
 import org.example.tackit.common.dto.PageResponseDTO;

@@ -11,6 +11,7 @@ import org.example.tackit.domain.Free_board.Free_post.repository.*;
 import org.example.tackit.domain.Free_board.Free_tag.repository.FreePostTagMapRepository;
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.example.tackit.common.dto.PageResponseDTO;
 import org.example.tackit.global.exception.*;

@@ -1,4 +1,4 @@
-package org.example.tackit.domain.entity;
+package org.example.tackit.domain.entity.Org;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,9 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Club {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "club_id")
     private Long id;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "org_id")
+    private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_id", nullable = false)

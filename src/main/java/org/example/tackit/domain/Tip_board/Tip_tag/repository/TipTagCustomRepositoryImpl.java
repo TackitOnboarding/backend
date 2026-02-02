@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-import static org.example.tackit.domain.entity.QMemberOrg.memberOrg;
+// import static org.example.tackit.domain.entity.QMemberOrg.memberOrg;
 import static org.example.tackit.domain.entity.QTipPost.tipPost;
 import static org.example.tackit.domain.entity.QTipPostImage.tipPostImage;
 import static org.example.tackit.domain.entity.QTipTagMap.tipTagMap;

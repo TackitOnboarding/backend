@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.Organization.dto.req.OrgCreateReqDto;
 import org.example.tackit.domain.Organization.dto.req.OrgJoinReqDto;
 import org.example.tackit.domain.Organization.service.OrganizationService;
-import org.example.tackit.domain.entity.OrgType;
+import org.example.tackit.domain.entity.Org.OrgType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

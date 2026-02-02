@@ -12,6 +12,7 @@ import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAScrapRepositor
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.common.dto.PageResponseDTO;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.global.exception.ErrorCode;
 import org.example.tackit.global.exception.MemberNotFoundException;
 import org.springframework.data.domain.Page;

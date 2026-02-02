@@ -11,8 +11,8 @@ import org.example.tackit.domain.Notice_board.Notice_post.repository.NoticePostI
 import org.example.tackit.domain.Notice_board.Notice_post.repository.NoticePostRepository;
 import org.example.tackit.domain.Notice_board.Notice_post.repository.NoticeScrapRepository;
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
-import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.example.tackit.global.exception.*;
 import org.springframework.data.domain.Page;

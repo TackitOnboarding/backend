@@ -2,8 +2,7 @@ package org.example.tackit.domain.Free_board.Free_post.repository;
 
 import org.example.tackit.domain.entity.FreePost;
 import org.example.tackit.domain.entity.FreeReport;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.MemberOrg;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FreePostReportRepository extends JpaRepository<FreeReport, Long> {

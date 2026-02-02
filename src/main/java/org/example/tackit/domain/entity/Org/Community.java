@@ -1,4 +1,4 @@
-package org.example.tackit.domain.entity;
+package org.example.tackit.domain.entity.Org;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,9 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Community {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "community_id")
     private Long id;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "org_id")
+    private Organization organization;
 
     @Column(name = "community_name", nullable = false, unique = true)
     private String name; // 서비스 전체에서 유일한 이름

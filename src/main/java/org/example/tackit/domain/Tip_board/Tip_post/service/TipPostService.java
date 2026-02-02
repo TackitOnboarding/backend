@@ -15,6 +15,7 @@ import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.Tip_board.Tip_post.dto.request.TipPostReqDto;
 import org.example.tackit.domain.Tip_board.Tip_post.dto.request.TipPostUpdateDto;
 import org.example.tackit.domain.Tip_board.Tip_post.repository.TipScrapRepository;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.example.tackit.common.dto.PageResponseDTO;
 import org.example.tackit.global.exception.ErrorCode;

@@ -1,4 +1,4 @@
-package org.example.tackit.domain.entity;
+package org.example.tackit.domain.entity.Org;
 
 public enum OrgType {
     CLUB,

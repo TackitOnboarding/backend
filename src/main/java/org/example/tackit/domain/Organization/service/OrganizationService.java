@@ -5,16 +5,19 @@ import org.example.tackit.domain.Organization.dto.req.OrgCreateReqDto;
 import org.example.tackit.domain.Organization.dto.req.OrgJoinReqDto;
 import org.example.tackit.domain.Organization.repository.ClubRepository;
 import org.example.tackit.domain.Organization.repository.CommunityRepository;
+import org.example.tackit.domain.Organization.repository.OrganizationRepository;
 import org.example.tackit.domain.Organization.repository.SchoolRepository;
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.*;
 import org.example.tackit.global.exception.ErrorCode;
 import org.example.tackit.global.exception.MemberNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
 @Service
@@ -26,12 +29,19 @@ public class OrganizationService {
     private final ClubRepository clubRepository;
     private final CommunityRepository communityRepository;
     private final SchoolRepository schoolRepository;
+    private final OrganizationRepository organizationRepository;
 
     // [ 모임 생성 ]
     @Transactional
     public void createOrg(OrgCreateReqDto dto, String email) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // 소속 먼저 생성
+        Organization org = organizationRepository.save(Organization.builder()
+                .type(dto.getOrgType())
+                .createdAt(LocalDateTime.now())
+                .build());
 
         // 동아리 ) 학교 코드(이름) + 해당 동아리가 없으면 생성 가능
         if( dto.getOrgType() == OrgType.CLUB ) {
@@ -41,7 +51,7 @@ public class OrganizationService {
             clubRepository.findByNameAndSchool(dto.getOrgName(), school)
                     .ifPresent(c -> { throw new RuntimeException("해당 학교에 이미 동일한 이름의 동아리가 존재합니다."); });
 
-            Club club = clubRepository.save(dto.toClub(school));
+            Club club = clubRepository.save(dto.toClub(school, org));
         }
 
         // 소모임 ) 동일한 이름이 없으면 생성 가능
@@ -49,7 +59,7 @@ public class OrganizationService {
             communityRepository.findByName(dto.getOrgName())
                     .ifPresent(c -> { throw new RuntimeException("이미 동일한 이름의 소모임이 존재합니다."); });
 
-            Community community = communityRepository.save(dto.toCommunity());
+            Community community = communityRepository.save(dto.toCommunity(org));
         }
     }
 

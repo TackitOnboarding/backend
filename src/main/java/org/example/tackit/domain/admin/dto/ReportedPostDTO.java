@@ -3,7 +3,7 @@ package org.example.tackit.domain.admin.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.example.tackit.domain.admin.model.ReportablePost;
-import org.example.tackit.domain.entity.MemberOrg;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 
 import java.time.LocalDateTime;
 

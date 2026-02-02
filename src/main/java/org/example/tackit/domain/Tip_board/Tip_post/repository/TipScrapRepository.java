@@ -1,6 +1,7 @@
 package org.example.tackit.domain.Tip_board.Tip_post.repository;
 
 import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

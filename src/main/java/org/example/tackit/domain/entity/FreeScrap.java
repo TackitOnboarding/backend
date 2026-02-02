@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.parameters.P;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 
 import java.time.LocalDateTime;
 

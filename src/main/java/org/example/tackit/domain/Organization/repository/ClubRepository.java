@@ -1,7 +1,7 @@
 package org.example.tackit.domain.Organization.repository;
 
-import org.example.tackit.domain.entity.Club;
-import org.example.tackit.domain.entity.School;
+import org.example.tackit.domain.entity.Org.Club;
+import org.example.tackit.domain.entity.Org.School;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

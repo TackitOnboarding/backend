@@ -1,6 +1,6 @@
 package org.example.tackit.domain.admin.model;
 
-import org.example.tackit.domain.entity.MemberOrg;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 
 import java.time.LocalDateTime;
 

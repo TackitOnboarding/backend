@@ -1,6 +1,6 @@
 package org.example.tackit.domain.Organization.repository;
 
-import org.example.tackit.domain.entity.Community;
+import org.example.tackit.domain.entity.Org.Community;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -9,6 +9,7 @@ import org.example.tackit.domain.QnA_board.QnA_comment.repository.QnACommentRepo
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;

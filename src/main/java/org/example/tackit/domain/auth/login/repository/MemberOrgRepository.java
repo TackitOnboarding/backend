@@ -1,7 +1,7 @@
 package org.example.tackit.domain.auth.login.repository;
 
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.MemberOrg;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

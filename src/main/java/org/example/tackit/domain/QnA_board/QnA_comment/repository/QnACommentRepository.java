@@ -1,6 +1,6 @@
 package org.example.tackit.domain.QnA_board.QnA_comment.repository;
 
-import org.example.tackit.domain.entity.MemberOrg;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.entity.QnAComment;
 import org.example.tackit.domain.entity.QnAPost;
 import org.springframework.data.domain.Page;
