@@ -24,7 +24,7 @@ public class HomePopularPostController {
             @AuthenticationPrincipal CustomUserDetails user,
             @ActiveProfile ProfileContext profile
             ) {
-        List<HomePopularPostRespDto> result = homePopularPostService.getPopularPosts(profile.id(), profile.type());
+        List<HomePopularPostRespDto> result = homePopularPostService.getPopularPosts(profile.id());
         return ResponseEntity.ok(result);
     }
 }

@@ -28,7 +28,7 @@ public class HomePopularPostService {
     private final TipPostRepository tipPostRepository;
 
 
-    public List<HomePopularPostRespDto> getPopularPosts(Long orgId, OrgType type) {
+    public List<HomePopularPostRespDto> getPopularPosts(Long orgId) {
         LocalDateTime startOfWeek = LocalDate.now()
                 .with(DayOfWeek.MONDAY)
                 .atStartOfDay();
@@ -38,23 +38,36 @@ public class HomePopularPostService {
         List<HomePopularPostRespDto> combined = new ArrayList<>();
 
         // Free 게시판
-        List<FreePost> freePosts = (type == OrgType.CLUB)
-                ? freePostRepository.findTop3PopularByClub(AccountStatus.ACTIVE, startOfWeek, now, orgId, top3)
-                : freePostRepository.findTop3PopularByCommunity(AccountStatus.ACTIVE, startOfWeek, now, orgId, top3);
+        List<FreePost> freePosts = freePostRepository.findTop3PopularByOrg(
+                AccountStatus.ACTIVE,
+                startOfWeek,
+                now,
+                orgId,
+                top3
+        );
         combined.addAll(freePosts.stream().map(HomePopularPostRespDto::fromFree).toList());
 
-        // QnA
-        List<QnAPost> qnaPosts = (type == OrgType.CLUB)
-                ? qnaPostRepository.findTop3PopularByClub(AccountStatus.ACTIVE, startOfWeek, now, orgId, top3)
-                : qnaPostRepository.findTop3PopularByCommunity(AccountStatus.ACTIVE, startOfWeek, now, orgId, top3);
+        // QnA 게시판
+        List<QnAPost> qnaPosts = qnaPostRepository.findTop3PopularByOrg(
+                AccountStatus.ACTIVE,
+                startOfWeek,
+                now,
+                orgId,
+                top3
+        );
+
         combined.addAll(qnaPosts.stream().map(HomePopularPostRespDto::fromQna).toList());
 
-        // Tip
-        List<TipPost> tipPosts = (type == OrgType.CLUB)
-                ? tipPostRepository.findTop3PopularByClub(AccountStatus.ACTIVE, startOfWeek, now, orgId, top3)
-                : tipPostRepository.findTop3PopularByCommunity(AccountStatus.ACTIVE, startOfWeek, now, orgId, top3);
-        combined.addAll(tipPosts.stream().map(HomePopularPostRespDto::fromTip).toList());
+        // Tip 게시판
+        List<TipPost> tipPosts = tipPostRepository.findTop3PopularByOrg(
+                AccountStatus.ACTIVE,
+                startOfWeek,
+                now,
+                orgId,
+                top3
+        );
 
+        combined.addAll(tipPosts.stream().map(HomePopularPostRespDto::fromTip).toList());
 
         // 최종 인기글 3개
         return combined.stream()
