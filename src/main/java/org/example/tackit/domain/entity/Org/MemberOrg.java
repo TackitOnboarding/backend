@@ -17,12 +17,8 @@ import java.time.LocalDateTime;
 @Table(
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_member_club_nickname",
-                        columnNames = {"club_id", "nickname"}
-                ),
-                @UniqueConstraint(
-                        name = "uk_member_community_nickname",
-                        columnNames = {"community_id", "nickname"}
+                        name = "uk_member_org_nickname",
+                        columnNames = {"org_id", "nickname"}
                 )
         }
 )
@@ -36,12 +32,18 @@ public class MemberOrg {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "org_id")
+    private Organization organization;
+
+    /*
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
     private Club club;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "community_id")
     private Community community;
+     */
 
     @Enumerated(EnumType.STRING)
     private OrgType orgType; // CLUB, COMMUNITY

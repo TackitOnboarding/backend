@@ -19,11 +19,22 @@ public class Organization {
     @Column(name = "org_id")
     private Long id;
 
+    @Column(nullable = false)
+    private String name;
 
     @Enumerated(EnumType.STRING)
     private OrgType type; // CLUB, COMMUNITY
 
-    private LocalDateTime createdAt;
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    // Club 필드
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_id")
+    private School school;
 }
 
 
