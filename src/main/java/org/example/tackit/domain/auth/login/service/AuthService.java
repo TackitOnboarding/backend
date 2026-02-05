@@ -97,7 +97,7 @@ public class AuthService {
             List<MultiProfileDto> profiles = memberOrgs.stream()
                     .map(org -> MultiProfileDto.builder()
                             .memberOrgId(org.getId())
-                            .orgName(org.getOrgType() == OrgType.CLUB ? org.getClub().getName() : org.getCommunity().getName())
+                            .orgName(org.getOrganization().getName())
                             .nickname(org.getNickname())
                             .profileImage(org.getProfileImageUrl())
                             .orgType(org.getOrgType().name())
