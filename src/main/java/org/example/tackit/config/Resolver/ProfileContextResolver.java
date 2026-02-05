@@ -31,7 +31,7 @@ public class ProfileContextResolver implements HandlerMethodArgumentResolver {
         // 2. 값이 없는 경우 처리 (null 방지)
         if (idStr == null) {
             log.warn("멀티 프로필 헤더가 누락되었습니다. ID: {}", idStr);
-            return new ProfileContext(null);
+            throw new IllegalArgumentException("Required 'Active-Profile-Id' header is not present.");
         }
 
         try {
@@ -40,9 +40,9 @@ public class ProfileContextResolver implements HandlerMethodArgumentResolver {
             log.info("성공적으로 프로필을 로드했습니다. ID: {}", id);
             return new ProfileContext(id);
 
-        } catch (IllegalArgumentException e) {
+        } catch (NumberFormatException e) {
             log.error("프로필 헤더 형식이 잘못되었습니다. ID: {}", idStr);
-            return new ProfileContext(null);
+            throw new IllegalArgumentException("Invalid format for 'Active-Profile-Id' header. It must be a number.");
         }
     }
 }
