@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/*
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/tip-tags")
+
 public class TipTagController {
     private final TipTagService tipTagService;
 
@@ -41,3 +43,5 @@ public class TipTagController {
         return ResponseEntity.ok(tipTagService.getPostsByTag(tagId, organization, pageable));
     }
 }
+
+ */

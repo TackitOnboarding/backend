@@ -1,5 +1,7 @@
 package org.example.tackit.domain.Tip_board.Tip_post.controller;
 
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.Tip_board.Tip_post.dto.response.TipPopularPostRespDto;
 import org.example.tackit.domain.Tip_board.Tip_post.dto.response.TipPostRespDto;
 import org.example.tackit.domain.Tip_board.Tip_post.dto.response.TipScrapRespDto;
@@ -34,9 +36,10 @@ public class TipController {
     @GetMapping
     public ResponseEntity<PageResponseDTO<TipPostRespDto>> getAllPosts(
             @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        String org = user.getOrganization();
-        PageResponseDTO<TipPostRespDto> pageResponse = tipService.getActivePostsByOrganization(org, pageable);
+
+        PageResponseDTO<TipPostRespDto> pageResponse = tipService.getActivePostsByOrganization(profile.id(), pageable);
         return ResponseEntity.ok(pageResponse);
     }
 
@@ -44,10 +47,9 @@ public class TipController {
     @GetMapping("/{id}")
     public ResponseEntity<TipPostRespDto> getPostById(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
-
-        TipPostRespDto post = tipService.getPostById(id, org, user.getId());
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        TipPostRespDto post = tipService.getPostById(id, profile.id(), user.getId());
         return ResponseEntity.ok(post);
     }
 
@@ -56,10 +58,9 @@ public class TipController {
     public ResponseEntity<TipPostRespDto> create(
             @RequestPart("dto") TipPostReqDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal CustomUserDetails user) throws IOException {
-        String email = user.getEmail();
-        String org = user.getOrganization();
-        TipPostRespDto post = tipService.createPost(dto, email, org, image);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) throws IOException {
+        TipPostRespDto post = tipService.createPost(dto, user.getEmail(), profile.id(), image);
         return ResponseEntity.status(HttpStatus.CREATED).body(post);
     }
 
@@ -69,22 +70,21 @@ public class TipController {
             @PathVariable Long id,
             @RequestPart("dto") TipPostUpdateDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal CustomUserDetails user) throws IOException {
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) throws IOException {
 
-        String email = user.getEmail();
-        String org = user.getOrganization();
-
-        TipPostRespDto updatedPost = tipService.update(id, dto, email, org, image);
+        TipPostRespDto updatedPost = tipService.update(id, dto, user.getEmail(), profile.id(), image);
         return ResponseEntity.ok(updatedPost);
     }
 
 
     // 5. 게시글 삭제
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        tipService.deletePost(id, user);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        tipService.deletePost(id, user.getEmail(), profile.id());
         return ResponseEntity.noContent().build();
     }
 
@@ -92,31 +92,29 @@ public class TipController {
     @PostMapping("/{id}/scrap")
     public ResponseEntity<TipScrapRespDto> scrapPost(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
-        String email = user.getUsername();
-        TipScrapRespDto response = tipService.toggleScrap(id, email, org);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        TipScrapRespDto response = tipService.toggleScrap(id, user.getEmail(), profile.id());
         return ResponseEntity.ok(response);
     }
 
     // 7. 게시글 신고
-    @PostMapping("{id}/report")
+    @PostMapping("/{id}/report")
     public ResponseEntity<String> reportPost(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
-
-        String message = tipService.report(id, user.getId());
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        String message = tipService.report(id, user.getEmail(), profile.id());
         return ResponseEntity.ok(message);
     }
 
     // 인기 3개
     @GetMapping("/popular")
     public ResponseEntity<List<TipPopularPostRespDto>> getPopularPosts(
-            @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile
     ) {
-        String organization = user.getOrganization();
-        List<TipPopularPostRespDto> result = tipService.getPopularPosts(organization);
+        List<TipPopularPostRespDto> result = tipService.getPopularPosts(profile.id());
         return ResponseEntity.ok(result);
     }
 }

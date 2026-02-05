@@ -8,14 +8,16 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface UserLogRepository extends JpaRepository<MemberLog, Long> {
+public interface MemberLogRepository extends JpaRepository<MemberLog, Long> {
 
-    @Query("SELECT COUNT(DISTINCT ul.memberId) " +
-            "FROM MemberLog ul " +
-            "WHERE ul.action IS NOT NULL " +
-            "AND ul.action NOT IN :excludedActions " +
-            "AND ul.memberId <> 'admin' " +
-            "AND ul.timestamp BETWEEN  :startOfDay AND :endOfDay")
+    /*
+
+    @Query("SELECT COUNT(DISTINCT ml.member) " +
+            "FROM MemberLog ml " +
+            "WHERE ml.action IS NOT NULL " +
+            "AND ml.action NOT IN :excludedActions " +
+            "AND ml.member <> 'admin' " +
+            "AND ml.timestamp BETWEEN  :startOfDay AND :endOfDay")
     Long findDauByTimestampBetween(
             @Param("startOfDay")LocalDateTime startOfDay,
             @Param("endOfDay") LocalDateTime endOfDay,
@@ -23,16 +25,18 @@ public interface UserLogRepository extends JpaRepository<MemberLog, Long> {
             );
 
     // 31일의 데이터까지 포함하기 위해 startTime, endTime으로 정의
-    @Query("SELECT COUNT(DISTINCT ul.memberId) " +
-            "FROM MemberLog ul " +
-            "WHERE ul.action IS NOT NULL " +
-            "AND ul.action NOT IN :excludedActions " +
-            "AND ul.memberId <> 'admin' " +
-            "AND ul.timestamp BETWEEN :startTime AND :endTime")
+    @Query("SELECT COUNT(DISTINCT ml.member) " +
+            "FROM MemberLog ml " +
+            "WHERE ml.action IS NOT NULL " +
+            "AND ml.action NOT IN :excludedActions " +
+            "AND ml.member <> 'admin' " +
+            "AND ml.timestamp BETWEEN :startTime AND :endTime")
     Long findMauByTimestampBetween(
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime,
             @Param("excludedActions") List<String> excludedActions
     );
+
+     */
 
 }

@@ -5,5 +5,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface FreeTagCustomRepository {
-    Page<FreeTagPostResponseDto> findPostsByTagId(Long tagId,String organization, Pageable pageable);
+    Page<FreeTagPostResponseDto> findPostsByTagId(Long tagId, String organization, Pageable pageable);
 }

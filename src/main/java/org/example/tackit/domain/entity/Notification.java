@@ -1,6 +1,5 @@
 package org.example.tackit.domain.entity;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,14 +29,17 @@ public class Notification {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Member member;
 
+    @Column(nullable = false)
+    private Long memberOrgId;
+
     // 알림 유형
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationType type;
 
-    // 누구에 의한 알림인지
-    @Column
-    private Long fromMemberId;
+    // 어떤 프로필 알림인지
+    @Column(nullable = false)
+    private Long fromMemberOrgId;
 
     @Column(nullable = false)
     private String message;

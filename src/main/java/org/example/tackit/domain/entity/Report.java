@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.report.dto.ReportRequestDto;
 
 import java.time.LocalDateTime;
@@ -19,9 +20,10 @@ public class Report {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 신고자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_id")
-    private Member reporter;
+    private MemberOrg reporter;
 
     private Long targetId;
 
@@ -33,7 +35,7 @@ public class Report {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public static Report fromDto(ReportRequestDto dto, Member reporter) {
+    public static Report fromDto(ReportRequestDto dto, MemberOrg reporter) {
         Report report = new Report();
         report.reporter = reporter;
         report.targetId = dto.getTargetId();

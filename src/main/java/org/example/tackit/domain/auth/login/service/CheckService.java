@@ -14,8 +14,11 @@ public class CheckService {
         return memberRepository.existsByEmail(email);
     }
 
+    /*
     public boolean isNicknameDuplicated(String nickname) {
         return memberRepository.existsByNickname(nickname);
     }
+
+     */
 }
 

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
 @Service
 @RequiredArgsConstructor
 public class QnAScrapService {
@@ -30,6 +31,7 @@ public class QnAScrapService {
     private final NotificationService notificationService;
 
 
+    /*
     // 스크랩한적 있으면 스크랩 취소, 없으면 저장
     @Transactional
     public QnAScrapResponseDto toggleScrap(long postId, String email, String userOrg){
@@ -87,7 +89,7 @@ public class QnAScrapService {
         Member user = qnAMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        Page<QnAScrap> page = qnAScrapRepository.findByMemberAndQnaPost_Status(user,Status.ACTIVE, pageable);
+        Page<QnAScrap> page = qnAScrapRepository.findByMemberAndQnaPost_Status(user, AccountStatus.ACTIVE, pageable);
         List<QnAPost> posts = page.getContent().stream() // 실제 스크랩들 꺼냄
                 .map(QnAScrap::getQnaPost) // 각 스크랩에서 게시글 꺼냄
                 .toList(); // 게시글 리스트들 만들기
@@ -102,4 +104,5 @@ public class QnAScrapService {
     }
 
 
+     */
 }

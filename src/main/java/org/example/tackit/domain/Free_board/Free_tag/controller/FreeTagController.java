@@ -1,6 +1,8 @@
 package org.example.tackit.domain.Free_board.Free_tag.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.Free_board.Free_tag.dto.response.FreeTagPostResponseDto;
 import org.example.tackit.domain.Free_board.Free_tag.dto.response.FreeTagResponseDto;
 import org.example.tackit.domain.Free_board.Free_tag.service.FreeTagService;
@@ -31,13 +33,17 @@ public class FreeTagController {
     }
 
     // 특정 태그가 포함된 게시글 리스트 조회
+    /*
     @GetMapping("/{tagId}/posts")
     public ResponseEntity<PageResponseDTO<FreeTagPostResponseDto>> getPostsByTag(
             @PathVariable Long tagId,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        String organization = userDetails.getOrganization();
-        return ResponseEntity.ok(freeTagService.getFreePostsByTag(tagId,organization, pageable));
+            @AuthenticationPrincipal CustomUserDetails user,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @ActiveProfile ProfileContext profile
+            ) {
+        return ResponseEntity.ok(freeTagService.getFreePostsByTag(tagId, profile.id(), pageable));
     }
+
+     */
+
 }

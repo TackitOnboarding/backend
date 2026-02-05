@@ -9,7 +9,7 @@ import org.example.tackit.config.Redis.RedisUtil;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.AccountStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.example.tackit.domain.auth.login.dto.TokenDto;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,7 +65,6 @@ public class TokenProvider {
                 .accessToken(accessToken)
                 .accessTokenExpiresIn(now + ACCESS_TOKEN_EXPIRE_TIME)
                 .refreshToken(refreshToken)
-                .role(role)
                 .build();
     }
 
@@ -129,7 +128,6 @@ public class TokenProvider {
                 .accessToken(newAccessToken)
                 .accessTokenExpiresIn(new Date((new Date()).getTime() + ACCESS_TOKEN_EXPIRE_TIME).getTime())
                 .refreshToken(newRefreshToken)
-                .role(role)
                 .build();
     }
 
@@ -175,7 +173,7 @@ public class TokenProvider {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 탈퇴 회원 차단
-        if (member.getStatus() == Status.DELETED) {
+        if (member.getAccountStatus() == AccountStatus.DELETED) {
             throw new RuntimeException("탈퇴한 회원입니다.");
         }
 
@@ -183,8 +181,6 @@ public class TokenProvider {
                 member.getId(),
                 member.getEmail(),
                 member.getPassword(),
-                member.getOrganization().toString(),
-                member.getMemberType(),
                 authorities
         );
 
@@ -234,6 +230,7 @@ public class TokenProvider {
             return e.getClaims();
         }
     }
+
     // 토큰에서 이메일(subject)을 추출
     // Authentication 필요 없음
     public String getEmailFromToken(String token) {
@@ -248,6 +245,32 @@ public class TokenProvider {
         return expiration.getTime() - System.currentTimeMillis();
     }
 
+    // 특정 소속 선택 시 발급하는 전용 토큰
+    public TokenDto generateTokenDtoWithProfile(Authentication authentication, Long memberOrgId) {
+        // 권한 가져오기
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
+        long now = (new Date()).getTime();
+        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
 
+        // JWT 생성
+        String accessToken = Jwts.builder()
+                .setSubject(authentication.getName())       // 이메일
+                .claim("auth", authorities)             // 권한 : 운영진/일반
+                .claim("orgId", memberOrgId)            // 소속 ID
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+
+        String refreshToken = generateRefreshToken(authentication.getName(), authorities);
+
+        return TokenDto.builder()
+                .grantType(BEARER_TYPE)
+                .accessToken(accessToken)
+                .accessTokenExpiresIn(now + ACCESS_TOKEN_EXPIRE_TIME)
+                .refreshToken(refreshToken)
+                .build();
+    }
 }

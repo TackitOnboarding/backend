@@ -2,7 +2,7 @@ package org.example.tackit.domain.report.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.AccountStatus;
 import org.example.tackit.domain.entity.TargetType;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public class ReportContentDetailDto {
     private String postType;
     private String contentTitle;
     private String contentWriter;
-    private Status status;
+    private AccountStatus accountStatus;
 
     private List<ReportLogDto> reportLogs;
 

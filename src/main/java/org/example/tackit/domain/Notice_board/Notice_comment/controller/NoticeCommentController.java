@@ -1,6 +1,8 @@
 package org.example.tackit.domain.Notice_board.Notice_comment.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.Notice_board.Notice_comment.dto.req.NoticeCommentCreateDto;
 import org.example.tackit.domain.Notice_board.Notice_comment.dto.req.NoticeCommentUpdateDto;
 import org.example.tackit.domain.Notice_board.Notice_comment.dto.resp.NoticeCommentRespDto;
@@ -23,11 +25,9 @@ public class NoticeCommentController {
     @PostMapping
     public ResponseEntity<NoticeCommentRespDto> createComment(
             @RequestBody NoticeCommentCreateDto req,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String email = user.getUsername();
-        String org = user.getOrganization();
-
-        NoticeCommentRespDto response = noticeCommentService.createComment(req, email, org);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        NoticeCommentRespDto response = noticeCommentService.createComment(req, user.getUsername(), profile.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -35,39 +35,40 @@ public class NoticeCommentController {
     @GetMapping("/{postId}")
     public ResponseEntity<List<NoticeCommentRespDto>> getComments(
             @PathVariable Long postId,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
-        return ResponseEntity.ok(noticeCommentService.getCommentByPost(postId, org));
+            @ActiveProfile ProfileContext profile) {
+        return ResponseEntity.ok(noticeCommentService.getCommentByPost(postId, profile.id()));
     }
 
     // 3. 댓글 수정
     @PatchMapping("/{commentId}")
     public ResponseEntity<NoticeCommentRespDto> updateComment(
-            @PathVariable long commentId,
+            @PathVariable Long commentId,
             @RequestBody NoticeCommentUpdateDto req,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        String email = user.getUsername();
-        String org = user.getOrganization();
-        NoticeCommentRespDto updateResp = noticeCommentService.updateComment(commentId, req, email, org);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        NoticeCommentRespDto updateResp = noticeCommentService.updateComment(commentId, req, user.getUsername(), profile.id());
 
         return ResponseEntity.ok(updateResp);
     }
 
     // 4. 댓글 삭제
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable long commentId, @AuthenticationPrincipal CustomUserDetails user) {
-        String email = user.getUsername();
-        String org = user.getOrganization();
-        noticeCommentService.deleteComment(commentId, email, org);
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable long commentId,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        noticeCommentService.deleteComment(commentId, user.getUsername(), profile.id());
 
         return ResponseEntity.noContent().build();
     }
 
     // 5. 댓글 신고
     @PostMapping("/{commentId}/report")
-    public ResponseEntity<String> reportComment(@PathVariable long commentId, @AuthenticationPrincipal CustomUserDetails user) {
-        String org = user.getOrganization();
-        noticeCommentService.increaseCommentReportCount(commentId, org);
+    public ResponseEntity<String> reportComment(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @ActiveProfile ProfileContext profile) {
+        noticeCommentService.increaseCommentReportCount(commentId, profile.id());
         return ResponseEntity.ok("댓글을 신고하였습니다.");
     }
 }

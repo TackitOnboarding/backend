@@ -27,6 +27,7 @@ public class MyPageFreeService {
     private final FreePostTagMapRepository freePostTagMapRepository;
     private final FreeCommentRepository freeCommentRepository;
 
+    /*
     // 스크랩한 자유 게시글 조회
     @Transactional
     public PageResponseDTO<FreeScrapResponse> getScrapListByMember(String email, Pageable pageable) {
@@ -53,7 +54,7 @@ public class MyPageFreeService {
         Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        Page<FreePost> page = freePostJPARepository.findByWriterAndStatus(member, Status.ACTIVE, pageable);
+        Page<FreePost> page = freePostJPARepository.findByWriterAndStatus(member, AccountStatus.ACTIVE, pageable);
 
         return PageResponseDTO.from(page, post -> {
             List<String> tags = freePostTagMapRepository.findByFreePost(post).stream()
@@ -83,4 +84,6 @@ public class MyPageFreeService {
                 .build()
         );
     }
+
+     */
 }

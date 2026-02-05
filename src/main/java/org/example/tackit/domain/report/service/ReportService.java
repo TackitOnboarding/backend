@@ -16,6 +16,7 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
 
+    /*
     @Transactional
     public void createReport(ReportRequestDto dto, String email, String org) {
         Member reporter = memberRepository.findByEmailAndOrganization(email, org)
@@ -25,4 +26,6 @@ public class ReportService {
 
         reportRepository.save(report);
     }
+
+     */
 }
