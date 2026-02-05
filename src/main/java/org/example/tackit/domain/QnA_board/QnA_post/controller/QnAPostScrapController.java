@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+/*
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/qna-posts")
@@ -20,6 +21,7 @@ public class QnAPostScrapController {
     private final QnAScrapService qnAScrapService;
 
     // 찜하기
+
     @PostMapping("/{postId}/scrap")
     public ResponseEntity<QnAScrapResponseDto> toggleScrap(@PathVariable long postId, @AuthenticationPrincipal CustomUserDetails userDetails){
         String org = userDetails.getOrganization();
@@ -38,3 +40,5 @@ public class QnAPostScrapController {
     }
 
 }
+
+ */

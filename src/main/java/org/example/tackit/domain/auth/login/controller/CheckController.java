@@ -27,6 +27,7 @@ public class CheckController {
     }
 
     // 기본 닉네임 중복 확인
+    /*
     @GetMapping("/check-nickname")
     public ResponseEntity<?> checkNickname(@RequestParam String nickname) {
         boolean isDuplicated = checkService.isNicknameDuplicated(nickname);
@@ -35,5 +36,7 @@ public class CheckController {
         }
         return ResponseEntity.ok("사용 가능한 닉네임입니다.");
     }
+
+     */
 
 }

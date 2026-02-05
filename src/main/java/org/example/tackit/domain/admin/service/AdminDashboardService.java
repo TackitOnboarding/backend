@@ -6,7 +6,7 @@ import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepo
 import org.example.tackit.domain.QnA_board.QnA_comment.repository.QnACommentRepository;
 import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
 import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostRepository;
-import org.example.tackit.domain.admin.repository.UserLogRepository;
+import org.example.tackit.domain.admin.repository.MemberLogRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.report.dto.ReportContentDetailDto;
 import org.example.tackit.domain.report.dto.ReportLogDto;
@@ -34,11 +34,12 @@ public class AdminDashboardService {
     private final FreePostJPARepository freePostJPARepository;
 
     private static final List<String> EXCLUDED_ACTIONS = Arrays.asList("sign-in", "sign-up", "sign-out");
-    private final UserLogRepository userLogRepository;
+    private final MemberLogRepository memberLogRepository;
     private final ReportRepository reportRepository;
     private final FreeCommentRepository freeCommentRepository;
     private final QnACommentRepository qnACommentRepository;
 
+    /*
     // [ 총 게시글 수 계산 ]
     public long getPostsCount() {
         long tipPostCount = tipPostRepository.count();
@@ -53,7 +54,7 @@ public class AdminDashboardService {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
-        return userLogRepository.findDauByTimestampBetween(startOfDay, endOfDay, EXCLUDED_ACTIONS);
+        return memberLogRepository.findDauByTimestampBetween(startOfDay, endOfDay, EXCLUDED_ACTIONS);
     }
 
     // [ MAU 계산 ]
@@ -64,26 +65,26 @@ public class AdminDashboardService {
         LocalDateTime startTime = firstDayOfMonth.atStartOfDay();
         LocalDateTime endTime = lastDayOfMonth.atTime(LocalTime.MAX);
 
-        return userLogRepository.findMauByTimestampBetween(startTime, endTime, EXCLUDED_ACTIONS);
+        return memberLogRepository.findMauByTimestampBetween(startTime, endTime, EXCLUDED_ACTIONS);
     }
 
     // [ 신고로 삭제된 게시글 수 계산 ]
     public Long getDeletedPostsByReport() {
-        long deletedTips = tipPostRepository.countByStatus(Status.DELETED);
-        long deletedFrees = freePostJPARepository.countByStatus(Status.DELETED);
-        long deletedQnAs = qnAPostRepository.countByStatus(Status.DELETED);
+        long deletedTips = tipPostRepository.countByStatus(AccountStatus.DELETED);
+        long deletedFrees = freePostJPARepository.countByStatus(AccountStatus.DELETED);
+        long deletedQnAs = qnAPostRepository.countByStatus(AccountStatus.DELETED);
 
         return deletedTips + deletedFrees + deletedQnAs;
     }
 
     // [ 헬퍼 메서드 ]
-    private record ReportedContentInfo(String content, Status status, String writer) {
+    private record ReportedContentInfo(String content, AccountStatus accountStatus, String writer) {
         public static ReportedContentInfo deleted(TargetType targetType) {
             String typeName = targetType.name();
             String content = typeName.endsWith("_POST") ? "삭제된 게시글" : "삭제된 댓글";
 
             // writer에 기본값 추가
-            return new ReportedContentInfo(content, Status.DELETED, "-");
+            return new ReportedContentInfo(content, AccountStatus.DELETED, "-");
         }
     }
 
@@ -98,7 +99,7 @@ public class AdminDashboardService {
                     .targetId(target.getTargetId())
                     .targetType(target.getTargetType())
                     .title(info.content())
-                    .status(info.status())
+                    .accountStatus(info.accountStatus())
                     .reportCount(target.getReportCount().intValue())
                     .lastReportedAt(target.getLastReportedAt())
                     .build();
@@ -113,37 +114,37 @@ public class AdminDashboardService {
                 case TIP_POST:
                     TipPost tipPost = tipPostRepository.findById(targetId).orElse(null);
                     return (tipPost != null) ?
-                            new ReportedContentInfo(tipPost.getTitle(), tipPost.getStatus(), tipPost.getWriter().getNickname()) :
+                            new ReportedContentInfo(tipPost.getTitle(), tipPost.getAccountStatus(), tipPost.getWriter().getNickname()) :
                             ReportedContentInfo.deleted(TargetType.TIP_POST);
 
                 case FREE_POST:
                     FreePost freePost = freePostJPARepository.findById(targetId).orElse(null);
                     return (freePost != null) ?
-                            new ReportedContentInfo(freePost.getTitle(), freePost.getStatus(), freePost.getWriter().getNickname()) :
+                            new ReportedContentInfo(freePost.getTitle(), freePost.getAccountStatus(), freePost.getWriter().getNickname()) :
                             ReportedContentInfo.deleted(TargetType.FREE_POST);
 
                 case QNA_POST:
                     QnAPost qnAPost = qnAPostRepository.findById(targetId).orElse(null);
                     return (qnAPost != null) ?
-                            new ReportedContentInfo(qnAPost.getTitle(), qnAPost.getStatus(), qnAPost.getWriter().getNickname()) :
+                            new ReportedContentInfo(qnAPost.getTitle(), qnAPost.getAccountStatus(), qnAPost.getWriter().getNickname()) :
                             ReportedContentInfo.deleted(TargetType.QNA_POST);
 
                 case FREE_COMMENT:
                     FreeComment freeComment = freeCommentRepository.findById(targetId).orElse(null);
                     return (freeComment != null) ?
-                            new ReportedContentInfo(freeComment.getContent(), Status.ACTIVE, freeComment.getWriter().getNickname()) :
+                            new ReportedContentInfo(freeComment.getContent(), AccountStatus.ACTIVE, freeComment.getWriter().getNickname()) :
                             ReportedContentInfo.deleted(TargetType.FREE_COMMENT);
 
                 case QNA_COMMENT:
                     QnAComment qnAComment = qnACommentRepository.findById(targetId).orElse(null);
                     return (qnAComment != null) ?
-                            new ReportedContentInfo(qnAComment.getContent(), Status.ACTIVE, qnAComment.getWriter().getNickname()) :
+                            new ReportedContentInfo(qnAComment.getContent(), AccountStatus.ACTIVE, qnAComment.getWriter().getNickname()) :
                             ReportedContentInfo.deleted(TargetType.QNA_COMMENT);
                     default:
-                        return new ReportedContentInfo("알 수 없는 타입", Status.DELETED, "알 수 없음");
+                        return new ReportedContentInfo("알 수 없는 타입", AccountStatus.DELETED, "알 수 없음");
             }
         } catch (Exception e) {
-            return new ReportedContentInfo("데이터 조회 오류", Status.DELETED, "알 수 없음");
+            return new ReportedContentInfo("데이터 조회 오류", AccountStatus.DELETED, "알 수 없음");
         }
     }
 
@@ -167,7 +168,7 @@ public class AdminDashboardService {
                 .postType(postType)
                 .contentTitle(contentInfo.content())
                 .contentWriter(contentInfo.writer())
-                .status(contentInfo.status())
+                .accountStatus(contentInfo.accountStatus())
                 .reportLogs(reportLogs)
                 .build();
     }
@@ -181,4 +182,6 @@ public class AdminDashboardService {
 
         return "UNKNOWN";
     }
+
+     */
 }

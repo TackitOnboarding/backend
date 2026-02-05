@@ -28,9 +28,10 @@ public class AuthController {
 
     // 로그인
     @PostMapping("/sign-in")
-    public ResponseEntity<TokenDto> signIn(@RequestBody SignInDto signInDto) {
-        TokenDto tokenDto = authService.signIn(signInDto);
-        return ResponseEntity.ok(tokenDto);
+    public ResponseEntity<SignInResponse> signIn(@RequestBody SignInDto signInDto) {
+        // TokenDto tokenDto = authService.signIn(signInDto);
+        return ResponseEntity.ok(authService.signIn(signInDto));
+        // return ResponseEntity.ok(tokenDto);
     }
 
     // 토큰 재발급
@@ -43,6 +44,7 @@ public class AuthController {
     }
 
     // 이메일 찾기
+    /*
     @PostMapping("/find-email")
     public ResponseEntity<FindEmailRespDto> findEmail(
             @RequestBody FindEmailReqDto findEmailReqDto
@@ -68,6 +70,8 @@ public class AuthController {
 
         return ResponseEntity.ok(tokenDto);
     }
+
+     */
 
     // 비밀번호 재설정
     @PatchMapping("/reset-password")

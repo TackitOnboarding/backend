@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 
 import java.time.LocalDateTime;
 
@@ -17,8 +18,8 @@ public class FreeReport {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "member_org_id", nullable = false)
+    private MemberOrg member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "free_post_id", nullable = false)
@@ -31,7 +32,7 @@ public class FreeReport {
     private Post type;
 
     @Builder
-    public FreeReport(Member member, FreePost freePost) {
+    public FreeReport(MemberOrg member, FreePost freePost) {
         this.member = member;
         this.freePost = freePost;
         this.reportedAt = LocalDateTime.now();

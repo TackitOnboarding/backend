@@ -24,6 +24,7 @@ import java.util.List;
 public class QnATagController {
     private final QnATagService qnATagService;
 
+    /*
     // 전체 태그 목록 조회
     @GetMapping("/list")
     public ResponseEntity<List<QnATagResponseDto>> getAllTags(){
@@ -40,4 +41,6 @@ public class QnATagController {
         String organization = userDetails.getOrganization();
         return ResponseEntity.ok(qnATagService.getPostsByTag(tagId, organization, pageable));
     }
+
+     */
 }

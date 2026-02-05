@@ -18,6 +18,7 @@ public class AdminMemberController {
 
     private final AdminMemberService adminMemberService;
 
+    /*
     // [ 전체 유저 조회 ]
     @GetMapping
     public ResponseEntity<List<MemberDTO>> getAllUsers() {
@@ -31,4 +32,6 @@ public class AdminMemberController {
         DeletedMemberResp deletedMembers = adminMemberService.getDeletedMembers();
         return ResponseEntity.ok(deletedMembers);
     }
+
+     */
 }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 
 import java.time.LocalDateTime;
 
@@ -18,10 +19,15 @@ public class MemberLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String memberId;
-    private MemberRole memberRole;
-    private MemberType memberType;
-    private String organization;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_org_id")
+    private MemberOrg memberOrg;
+
+    private String orgName;
 
     private String action;              // view_Post, search, ..
     private String resource;            // 게시글 ID, URL
@@ -33,6 +39,5 @@ public class MemberLog {
 
     private LocalDateTime timestamp;
     private long executionTime;
-
 
 }

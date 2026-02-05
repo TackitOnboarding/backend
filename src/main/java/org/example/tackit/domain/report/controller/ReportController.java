@@ -15,6 +15,7 @@ public class ReportController {
 
     private final ReportService reportService;
 
+    /*
     @PostMapping("/create")
     public ResponseEntity<String> createReport(
             @RequestBody ReportRequestDto request,
@@ -26,5 +27,7 @@ public class ReportController {
         reportService.createReport(request, email, org);
         return ResponseEntity.ok("신고 사유가 접수되었습니다.");
     }
+
+     */
 
 }

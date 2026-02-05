@@ -6,9 +6,10 @@ import org.example.tackit.domain.Tip_board.Tip_comment.dto.req.TipCommentCreateD
 import org.example.tackit.domain.Tip_board.Tip_comment.dto.req.TipCommentUpdateDto;
 import org.example.tackit.domain.Tip_board.Tip_comment.dto.resp.TipCommentResponseDto;
 import org.example.tackit.domain.Tip_board.Tip_comment.repository.TipCommentRepository;
-import org.example.tackit.domain.Tip_board.Tip_post.repository.TipMemberRepository;
 import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostRepository;
+import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,13 @@ import java.util.List;
 public class TipCommentService {
     private final TipCommentRepository tipCommentRepository;
     private final TipPostRepository tipPostRepository;
-    private final TipMemberRepository tipMemberRepository;
     private final NotificationService notificationService;
+    private final MemberOrgRepository memberOrgRepository;
 
     // 댓글 생성 (SENIOR + NEWBIE 둘 다)
     @Transactional
-    public TipCommentResponseDto createComment(TipCommentCreateDto dto, String email, String org){
-        Member member = tipMemberRepository.findByEmailAndOrganization(email, org)
+    public TipCommentResponseDto createComment(TipCommentCreateDto dto, String email, Long orgId){
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         TipPost post = tipPostRepository.findById(dto.getTipPostId())
@@ -36,7 +37,7 @@ public class TipCommentService {
 
         TipComment comment = TipComment.builder()
                 .writer(member)
-                .status(Status.ACTIVE)
+                .accountStatus(AccountStatus.ACTIVE)
                 .tipPost(post)
                 .content(dto.getContent())
                 .createdAt(LocalDateTime.now())
@@ -47,19 +48,18 @@ public class TipCommentService {
 
         // 알림 전송
         if(!post.getWriter().getId().equals(member.getId())) {
-            Member postWriter = post.getWriter();
+            MemberOrg postWriter = post.getWriter();
 
             String message = member.getNickname() + "님이 글에 댓글을 남겼습니다.";
-
             String url = "/api/tip-post/" + post.getId();
 
             // 알림 엔티티 생성
             Notification notification = Notification.builder()
-                    .member(postWriter)
+                    .member(postWriter.getMember())
                     .type(NotificationType.COMMENT)
                     .message(message)
                     .relatedUrl(url)
-                    .fromMemberId(member.getId())
+                    .fromMemberOrgId(member.getId())
                     .build();
 
             // 알림 저장 및 전송
@@ -71,11 +71,11 @@ public class TipCommentService {
 
     // 전체 댓글 조회
     @Transactional (readOnly = true)
-    public List<TipCommentResponseDto> getCommentByPost(long postId, String org){
+    public List<TipCommentResponseDto> getCommentByPost(Long postId, Long orgId) {
         TipPost post = tipPostRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
-        if (!post.getWriter().getOrganization().equals(org)) {
+        if (!post.getWriter().getId().equals(orgId)) {
             throw new AccessDeniedException("해당 조직의 게시글만 조회할 수 있습니다.");
         }
 
@@ -87,16 +87,14 @@ public class TipCommentService {
 
     // 댓글 수정 (작성자만 가능)
     @Transactional
-    public TipCommentResponseDto updateComment(long commentId, TipCommentUpdateDto dto, String email, String org){
-        Member member = tipMemberRepository.findByEmailAndOrganization(email, org)
+    public TipCommentResponseDto updateComment(Long commentId, TipCommentUpdateDto dto, String email, Long orgId){
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         TipComment comment = tipCommentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
 
-        boolean isWriter = comment.getWriter().getId().equals(member.getId());
-
-        if (!isWriter ) {
+        if( !comment.getWriter().getId().equals(member.getId())) {
             throw new AccessDeniedException("작성자만 수정할 수 있습니다.");
         }
 
@@ -107,8 +105,8 @@ public class TipCommentService {
 
     // 댓글 삭제 (작성자, 관리자만 가능)
     @Transactional
-    public void deleteComment(long commentId, String email, String org){
-        Member member = tipMemberRepository.findByEmailAndOrganization(email, org)
+    public void deleteComment(Long commentId, String email, Long orgId) {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         TipComment comment = tipCommentRepository.findById(commentId)
@@ -127,11 +125,12 @@ public class TipCommentService {
 
     // 댓글 신고하기
     @Transactional
-    public void increaseCommentReportCount(long commentId, String org) {
+    public void increaseCommentReportCount(Long commentId, Long orgId) {
         TipComment comment = tipCommentRepository.findById(commentId)
                 .orElseThrow( () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-        if (!comment.getWriter().getOrganization().equals(org)) {
+        // 소속 검증
+        if (!comment.getWriter().getId().equals(orgId)) {
             throw new AccessDeniedException("해당 조직의 댓글만 신고할 수 있습니다.");
         }
         comment.increaseReportCount();

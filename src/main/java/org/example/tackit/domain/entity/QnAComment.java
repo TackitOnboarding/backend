@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
@@ -21,8 +22,8 @@ public class QnAComment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member writer;
+    @JoinColumn(name = "member_org_id", nullable = false)
+    private MemberOrg writer;
 
     @ManyToOne
     @JoinColumn(name = "qna_id", nullable = false)
@@ -34,7 +35,7 @@ public class QnAComment {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private Status status;
+    private AccountStatus accountStatus;
     private int reportCount;
 
     public void updateContent(String content) {

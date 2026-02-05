@@ -24,6 +24,7 @@ public class AdminDashboardController {
     private final AdminMemberService adminMemberService;
     private final AdminDashboardService adminDashboardService;
 
+    /*
     // [ DAU ]
     @GetMapping("/users/dau")
     public ResponseEntity<Long> getDauCount() {
@@ -81,5 +82,7 @@ public class AdminDashboardController {
         MemberStatisticsDTO stats = adminMemberService.getMemberStatistics();
         return ResponseEntity.ok(stats);
     }
+
+     */
 
 }

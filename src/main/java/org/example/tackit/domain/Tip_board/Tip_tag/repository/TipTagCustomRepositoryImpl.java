@@ -2,26 +2,28 @@ package org.example.tackit.domain.Tip_board.Tip_tag.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.example.tackit.domain.Tip_board.Tip_tag.dto.response.TipTagPostResponseDto;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.AccountStatus;
 import org.example.tackit.domain.entity.TipPost;
 import org.example.tackit.domain.entity.TipPostImage;
 import org.example.tackit.domain.entity.TipTagMap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.example.tackit.domain.entity.QMember.member;
+
+// import static org.example.tackit.domain.entity.QMemberOrg.memberOrg;
 import static org.example.tackit.domain.entity.QTipPost.tipPost;
 import static org.example.tackit.domain.entity.QTipPostImage.tipPostImage;
 import static org.example.tackit.domain.entity.QTipTagMap.tipTagMap;
 import static org.example.tackit.domain.entity.QTipTag.tipTag;
 
 
-// @Repository
+@Repository
 public class TipTagCustomRepositoryImpl implements TipTagCustomRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
@@ -31,8 +33,8 @@ public class TipTagCustomRepositoryImpl implements TipTagCustomRepository {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
-    @Override
-    public Page<TipTagPostResponseDto> findPostsByTagId(Long tagId, String organization, Pageable pageable) {
+    // @Override
+    public Page<TipTagPostResponseDto> findPostsByTagId(Long tagId, Long orgId, Pageable pageable) {
         // 1. 태그 ID로 해당 게시글 ID 조회
 
         List<Long> postIds = jpaQueryFactory
@@ -48,10 +50,10 @@ public class TipTagCustomRepositoryImpl implements TipTagCustomRepository {
         // 2. 게시글 + 작성자 정보 조회 (페이징 적용)
         List<TipPost> posts = jpaQueryFactory
                 .selectFrom(tipPost)
-                .join(tipPost.writer, member).fetchJoin()
+                .join(tipPost.writer).fetchJoin()
                 .where(tipPost.id.in(postIds),
-                        tipPost.status.eq(Status.ACTIVE),
-                        tipPost.writer.organization.eq(organization)
+                        tipPost.accountStatus.eq(AccountStatus.ACTIVE)
+                        // memberOrg.id.eq(orgId)
                 )
                 .orderBy(tipPost.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -109,7 +111,7 @@ public class TipTagCustomRepositoryImpl implements TipTagCustomRepository {
                 .join(tipTagMap.tag, tipTag)
                 .where(
                         tipTag.id.eq(tagId),
-                        tipPost.status.eq(Status.ACTIVE)
+                        tipPost.accountStatus.eq(AccountStatus.ACTIVE)
                 )
                 .fetchOne();
 
@@ -117,5 +119,7 @@ public class TipTagCustomRepositoryImpl implements TipTagCustomRepository {
 
     }
 }
+
+
 
 

@@ -1,6 +1,7 @@
 package org.example.tackit.domain.Tip_board.Tip_comment.repository;
 
 import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,5 +12,5 @@ import java.util.List;
 @Repository
 public interface TipCommentRepository extends JpaRepository<TipComment, Long> {
     List<TipComment> findByTipPost(TipPost post);
-    Page<TipComment> findByWriter(Member writer, Pageable pageable);
+    Page<TipComment> findByWriter(MemberOrg writer, Pageable pageable);
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+// @Component
 @RequiredArgsConstructor
 public class QnATagInitializer implements CommandLineRunner {
     private final QnATagRepository tagRepository;
