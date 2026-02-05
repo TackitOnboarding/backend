@@ -10,6 +10,7 @@ import org.example.tackit.domain.Free_board.Free_post.dto.response.FreeScrapResp
 import org.example.tackit.domain.Free_board.Free_post.repository.*;
 import org.example.tackit.domain.Free_board.Free_tag.repository.FreePostTagMapRepository;
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
+import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
@@ -32,6 +33,7 @@ import static org.example.tackit.global.exception.ErrorCode.MEMBER_NOT_FOUND;
 public class FreePostService {
     private final FreePostJPARepository freePostJPARepository;
     private final MemberOrgRepository memberOrgRepository;
+    private final MemberRepository memberRepository;
     private final FreePostTagService tagService;
     private final FreeScrapJPARepository freeScrapJPARepository;
     private final FreePostTagMapRepository freePostTagMapRepository;
@@ -42,8 +44,22 @@ public class FreePostService {
 
     // [ 게시글 전체 조회 ]
     @Transactional
-    public PageResponseDTO<FreePostRespDto> findAll(Long orgId, Pageable pageable ) {
-        Page<FreePost> page = freePostJPARepository.findByWriterIdAndAccountStatus(orgId, AccountStatus.ACTIVE, pageable);
+    public PageResponseDTO<FreePostRespDto> findAll(String email, Long profileId, Pageable pageable) {
+        // 현재 접속한 멀티프로필 정보 조회
+        MemberOrg currProfile = memberOrgRepository.findByMemberEmailAndId(email, profileId)
+                .orElseThrow(() -> new RuntimeException("해당 조직에 대한 접근 권한이 없거나 유효하지 않은 프로필입니다."));
+
+        // 해당 프로필이 속한 조직의 ID 가져오기
+        Long orgId = currProfile.getOrganization().getId();
+
+        // 해당 조직의 게시글만 조회
+        Page<FreePost> page = freePostJPARepository.findAllByOrganizationIdAndAccountStatus(
+                orgId,
+                AccountStatus.ACTIVE,
+                pageable
+        );
+
+
 
         return PageResponseDTO.from(page, post -> {
             List<String> tags = freePostTagMapRepository.findByFreePost(post).stream()
@@ -111,15 +127,23 @@ public class FreePostService {
 
     // [ 게시글 작성 ]
     @Transactional
-    public FreePostRespDto createPost(FreePostReqDto dto, String email, Long orgId) throws IOException {
+    public FreePostRespDto createPost(FreePostReqDto dto, String email, Long profileId) throws IOException {
 
         // 1. 유저 조회
-        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
+
+        System.out.println("로그인 유저 ID: " + member.getId());
+        System.out.println("넘어온 프로필 ID: " + profileId);
+
+        // 2. Member의 Id와 Profile Id로 조회
+        MemberOrg memberOrg = memberOrgRepository.findByMemberIdAndProfileId(member.getId(), profileId)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
         // 2. 게시글 생성
         FreePost post = FreePost.builder()
-                        .writer(member)
+                        .writer(memberOrg)
+                        .organization(memberOrg.getOrganization())
                         .title(dto.getTitle())
                         .content(dto.getContent())
                         .isAnonymous(dto.isAnonymous())
@@ -148,7 +172,7 @@ public class FreePostService {
 
         return FreePostRespDto.builder()
                 .id(post.getId())
-                .writer(post.isAnonymous() ? "익명" : member.getNickname())
+                .writer(post.isAnonymous() ? "익명" : memberOrg.getNickname())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())

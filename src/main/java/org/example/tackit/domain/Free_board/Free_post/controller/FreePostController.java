@@ -37,7 +37,7 @@ public class FreePostController {
             @ActiveProfile ProfileContext profile,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
 
-        PageResponseDTO<FreePostRespDto> pageResponse = freePostService.findAll(profile.id(), pageable);
+        PageResponseDTO<FreePostRespDto> pageResponse = freePostService.findAll(user.getEmail(), profile.id(), pageable);
         return ResponseEntity.ok(pageResponse);
     }
 

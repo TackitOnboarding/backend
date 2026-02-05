@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.tackit.domain.admin.model.ReportablePost;
 import org.example.tackit.domain.entity.Org.MemberOrg;
+import org.example.tackit.domain.entity.Org.Organization;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,7 +33,10 @@ public class FreePost implements ReportablePost {
     private String content;
     private LocalDateTime createdAt;
     private Post type;
-    private String organization;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "org_id")
+    private Organization organization;
 
     @Column(nullable = true)
     private String tag;
