@@ -10,7 +10,6 @@ import org.example.tackit.domain.entity.MemberType;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
 public class OrgJoinReqDto {
     private String nickname;
     private MemberRole memberRole;
