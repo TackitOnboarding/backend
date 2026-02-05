@@ -1,6 +1,5 @@
 package org.example.tackit.domain.auth.login.repository;
 
-import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,28 +11,34 @@ import java.util.Optional;
 
 @Repository
 public interface MemberOrgRepository extends JpaRepository<MemberOrg, Long> {
-    // 이메일과 프로필 ID로 소속 정보 조회
-    Optional<MemberOrg> findByMemberEmailAndId(String email, Long id);
 
-    // 특정 유저가 이 프로필의 주인인지 확인
-    boolean existsByMemberIdAndId(Long memberId, Long id);
+    // 특정 소속(Org) 내에서 닉네임 중복 확인
+    boolean existsByOrganizationIdAndNickname(Long orgId, String nickname);
 
+    // 해당 소속(Org)에 가입된 사람이 있는지 확인 (최초 가입자 판별용)
+    boolean existsByOrganizationId(Long orgId);
+
+    @Query("SELECT mo FROM MemberOrg mo WHERE mo.member.id = :memberId AND mo.id = :profileId")
+    Optional<MemberOrg> findByMemberIdAndProfileId(@Param("memberId") Long memberId, @Param("profileId") Long profileId);
+
+    // 멀티 프로필 : 사용자의 이메일로 가입된 모든 프로필 조회
+    List<MemberOrg> findAllByMemberEmail(String email);
+
+    // 사용자의 ID로 가입된 모든 프로필 조회
     List<MemberOrg> findAllByMemberId(Long memberId);
 
-    // 알림이나 게시글 조회 시 Member 정보까지 한 번에 가져오기
-    // 추후 N+1 문제를 방지하기 위해 @Query와 join fetch를 사용할 것
+    // 이메일과 프로필(MemberOrg) ID로 특정 소속 정보 조회
+    Optional<MemberOrg> findByMemberEmailAndId(String email, Long id);
+
+    Optional<MemberOrg> findByMemberIdAndId(Long memberId, Long profileId);
+
+    // 특정 유저가 해당 프로필의 소유자인지 확인
+    boolean existsByMemberIdAndId(Long memberId, Long id);
+
+    // N+1 문제 방지를 위한 페치 조인 (성능 최적화)
     @Query("SELECT mo FROM MemberOrg mo JOIN FETCH mo.member WHERE mo.id = :id")
     Optional<MemberOrg> findByIdWithMember(@Param("id") Long id);
 
-    Long member(Member member);
-
-    List<MemberOrg> findAllByMemberEmail(String email);
-
-    boolean existsByClubId(Long clubId);
-    boolean existsByCommunityId(Long communityId);
-
-    // 닉네임 중복 체크용
-    boolean existsByClubIdAndNickname(Long clubId, String nickname);
-    boolean existsByCommunityIdAndNickname(Long communityId, String nickname);
+    // 조직 ID와 멤버 ID로 가입 여부 확인 (중복 가입 방지용)
+    boolean existsByMemberIdAndOrganizationId(Long memberId, Long orgId);
 }
-

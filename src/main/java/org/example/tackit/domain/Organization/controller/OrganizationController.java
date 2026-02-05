@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.Organization.dto.req.OrgCreateReqDto;
 import org.example.tackit.domain.Organization.dto.req.OrgJoinReqDto;
 import org.example.tackit.domain.Organization.service.OrganizationService;
-import org.example.tackit.domain.entity.Org.OrgType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/org")
+@RequestMapping("/api/orgs")
 @RequiredArgsConstructor
 public class OrganizationController {
     private final OrganizationService organizationService;
@@ -36,7 +35,6 @@ public class OrganizationController {
     @PostMapping("/{orgId}")
     public ResponseEntity<?> joinOrg(
             @PathVariable Long orgId,
-            @RequestParam OrgType type,
             @RequestBody OrgJoinReqDto dto,
             Authentication authentication //
     ) {
@@ -45,7 +43,7 @@ public class OrganizationController {
         }
 
         String email = authentication.getName();
-        organizationService.joinOrg(orgId, type, email, dto);
+        organizationService.joinOrg(orgId, email, dto);
 
         return ResponseEntity.ok("참여 신청이 완료되었습니다.");
     }
