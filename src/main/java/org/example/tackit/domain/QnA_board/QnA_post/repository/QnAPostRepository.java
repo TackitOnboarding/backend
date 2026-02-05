@@ -25,24 +25,13 @@ public interface QnAPostRepository extends JpaRepository<QnAPost, Long> {
     // 인기 3개
     @Query("SELECT q FROM QnAPost q JOIN q.writer w " +
             "WHERE q.accountStatus = :status AND q.createdAt BETWEEN :start AND :end " +
-            "AND w.club.id = :clubId " +
+            "AND w.organization.id = :orgId " + // w(MemberOrg) 내의 organization 필드 참조
             "ORDER BY q.viewCount DESC, q.scrapCount DESC")
-    List<QnAPost> findTop3PopularByClub(
+    List<QnAPost> findTop3PopularByOrg(
             @Param("status") AccountStatus status,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
-            @Param("clubId") Long clubId,
-            Pageable pageable);
-
-    @Query("SELECT q FROM QnAPost q JOIN q.writer w " +
-            "WHERE q.accountStatus = :status AND q.createdAt BETWEEN :start AND :end " +
-            "AND w.community.id = :communityId " + // 이 부분만 w.community.id로 변경
-            "ORDER BY q.viewCount DESC, q.scrapCount DESC")
-    List<QnAPost> findTop3PopularByCommunity(
-            @Param("status") AccountStatus status,
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end,
-            @Param("communityId") Long communityId,
+            @Param("orgId") Long orgId,
             Pageable pageable);
     // List<QnAPost> findTop3ByStatusOrderByViewCountDescScrapCountDesc(AccountStatus accountStatus);
 

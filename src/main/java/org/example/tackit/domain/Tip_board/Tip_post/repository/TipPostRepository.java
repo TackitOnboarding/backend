@@ -18,24 +18,13 @@ public interface TipPostRepository extends JpaRepository<TipPost, Long> {
     // 인기 3개
     @Query("SELECT t FROM TipPost t JOIN t.writer w " +
             "WHERE t.accountStatus = :status AND t.createdAt BETWEEN :start AND :end " +
-            "AND w.club.id = :clubId " +
+            "AND w.organization.id = :orgId " + // 통합된 organization 필드 참조
             "ORDER BY t.viewCount DESC, t.scrapCount DESC")
-    List<TipPost> findTop3PopularByClub(
+    List<TipPost> findTop3PopularByOrg(
             @Param("status") AccountStatus status,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
-            @Param("clubId") Long clubId,
-            Pageable pageable);
-
-    @Query("SELECT t FROM TipPost t JOIN t.writer w " +
-            "WHERE t.accountStatus = :status AND t.createdAt BETWEEN :start AND :end " +
-            "AND w.community.id = :communityId " + // 이 부분만 w.community.id로 변경
-            "ORDER BY t.viewCount DESC, t.scrapCount DESC")
-    List<TipPost> findTop3PopularByCommunity(
-            @Param("status") AccountStatus status,
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end,
-            @Param("communityId") Long communityId,
+            @Param("orgId") Long orgId,
             Pageable pageable);
 
     List<TipPost> findTop3ByWriterIdOrderByViewCountDescScrapCountDesc(Long orgId);
