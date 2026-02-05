@@ -91,7 +91,10 @@ public class FreePostService {
         FreePost post = freePostJPARepository.findById(id)
                 .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-        if (!post.getWriter().getId().equals(orgId)) {
+        MemberOrg currProfile = memberOrgRepository.findById(orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (post.getOrganization().getId().equals(currProfile.getOrganization().getId()) ) {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_ORGANIZATION);
         }
 
@@ -132,9 +135,6 @@ public class FreePostService {
         // 1. 유저 조회
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
-
-        System.out.println("로그인 유저 ID: " + member.getId());
-        System.out.println("넘어온 프로필 ID: " + profileId);
 
         // 2. Member의 Id와 Profile Id로 조회
         MemberOrg memberOrg = memberOrgRepository.findByMemberIdAndProfileId(member.getId(), profileId)
@@ -364,10 +364,17 @@ public class FreePostService {
          */
     }
 
+    /*
+        public List<FreePopularPostRespDto> getPopularPosts(Long orgId) {
+        return freePostJPARepository.findTop3ByWriterIdAndAccountStatusOrderByViewCountDescScrapCountDesc(orgId, AccountStatus.ACTIVE)
+                .stream()
+                .map(FreePopularPostRespDto::from)
+                .toList();
+     */
     // 인기 3개
     @Transactional(readOnly = true)
     public List<FreePopularPostRespDto> getPopularPosts(Long orgId) {
-        return freePostJPARepository.findTop3ByWriterIdAndAccountStatusOrderByViewCountDescScrapCountDesc(orgId, AccountStatus.ACTIVE)
+        return freePostJPARepository.findTop3ByOrganizationIdAndAccountStatusOrderByViewCountDescScrapCountDesc(orgId, AccountStatus.ACTIVE)
                 .stream()
                 .map(FreePopularPostRespDto::from)
                 .toList();

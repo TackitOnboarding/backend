@@ -18,8 +18,7 @@ public interface FreePostJPARepository extends JpaRepository<FreePost, Long> {
 
     Page<FreePost> findAllByOrganizationIdAndAccountStatus(Long orgId, AccountStatus status, Pageable pageable);
 
-    List<FreePost> findTop3ByWriterIdAndAccountStatusOrderByViewCountDescScrapCountDesc(Long writerId, AccountStatus accountStatus);
-
+    List<FreePost> findTop3ByOrganizationIdAndAccountStatusOrderByViewCountDescScrapCountDesc(Long orgId, AccountStatus accountStatus);
 
     // 인기 3개
     @Query("SELECT f FROM FreePost f " +
