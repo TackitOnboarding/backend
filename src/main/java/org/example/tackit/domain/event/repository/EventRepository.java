@@ -21,4 +21,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("startDateTime") LocalDateTime startDateTime,
             @Param("endDateTime") LocalDateTime endDateTime
     );
+
+    // 현재 시간 이후의 일정을 시작 시간 오름차순 조회
+    List<Event> findByOrganizationIdAndStartsAtAfterOrderByStartsAtAsc(
+            Long orgId,
+            LocalDateTime now
+    );
 }

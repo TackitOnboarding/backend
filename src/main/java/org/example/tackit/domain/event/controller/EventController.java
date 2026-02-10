@@ -75,4 +75,20 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).body(events);
     }
 
+    /**
+     * 다가오는 일정(사이드바) 조회
+     */
+    @GetMapping("/upcoming")
+    public ResponseEntity<?> getUpcomingEvents(
+            @RequestParam Long orgId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보가 없습니다.");
+        }
+
+        List<EventSimpleResDto> events = eventService.getUpcomingEvents(orgId, userDetails.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(events);
+    }
+
 }

@@ -103,6 +103,27 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+
+    // 다가오는 일정 조회
+    public List<EventSimpleResDto> getUpcomingEvents(Long orgId, Long requesterId) {
+        validateMembership(orgId, requesterId);
+
+        List<Event> events = eventRepository.findByOrganizationIdAndStartsAtAfterOrderByStartsAtAsc(
+                orgId,
+                LocalDateTime.now()
+        );
+
+        return events.stream()
+                .map(event -> EventSimpleResDto.builder()
+                        .eventId(event.getId())
+                        .title(event.getTitle())
+                        .startsAt(event.getStartsAt())
+                        .endsAt(event.getEndsAt())
+                        .colorChip(event.getColorChip())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     // 이벤트 참가자 추가 메서드
     private void addParticipants(Event event, List<Long> memberOrgIds) {
         if (memberOrgIds == null || memberOrgIds.isEmpty()) return;
