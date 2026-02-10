@@ -32,6 +32,33 @@ public class EventService {
     private final OrganizationRepository organizationRepository;
     private final MemberOrgRepository memberOrgRepository;
 
+    // 일정 생성
+    @Transactional
+    public Long createEvent(EventCreateReqDto reqDto, Long requesterId) {
+        MemberOrg memberOrg = validateExecutive(reqDto.getOrgId(), requesterId);
+
+        Member creator = memberOrg.getMember();
+
+        Organization organization = organizationRepository.findById(reqDto.getOrgId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 조직입니다."));
+
+        Event event = Event.builder()
+                .organization(organization)
+                .creator(creator)
+                .title(reqDto.getTitle())
+                .startsAt(reqDto.getStartsAt())
+                .endsAt(reqDto.getEndsAt())
+                .description(reqDto.getDescription())
+                .colorChip(reqDto.getColorChip())
+                .eventScope(reqDto.getEventScope())
+                .build();
+
+        // 참여자 추가
+        addParticipants(event, reqDto.getParticipants());
+
+        return eventRepository.save(event).getId();
+    }
+
     // 이벤트 참가자 추가 메서드
     private void addParticipants(Event event, List<Long> memberOrgIds) {
         if (memberOrgIds == null || memberOrgIds.isEmpty()) return;
