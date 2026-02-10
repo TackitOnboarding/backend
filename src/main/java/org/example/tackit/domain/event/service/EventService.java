@@ -59,6 +59,29 @@ public class EventService {
         return eventRepository.save(event).getId();
     }
 
+    // 일정 수정
+    @Transactional
+    public void updateEvent(Long eventId, EventUpdateReqDto reqDto, Long requesterId) {
+        Event event = findEventOrThrow(eventId);
+
+        validateExecutive(event.getOrganization().getId(), requesterId);
+
+        event.update(
+                reqDto.getTitle(),
+                reqDto.getStartsAt(),
+                reqDto.getEndsAt(),
+                reqDto.getDescription(),
+                reqDto.getColorChip(),
+                reqDto.getEventScope()
+        );
+
+        // 참여자 목록 수정 (기존의 데이터 전부 삭제 후 다시 추가)
+        if (reqDto.getParticipants() != null) {
+            event.clearParticipants();
+            addParticipants(event, reqDto.getParticipants());
+        }
+    }
+
     // 이벤트 참가자 추가 메서드
     private void addParticipants(Event event, List<Long> memberOrgIds) {
         if (memberOrgIds == null || memberOrgIds.isEmpty()) return;

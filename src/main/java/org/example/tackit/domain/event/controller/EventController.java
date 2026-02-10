@@ -39,4 +39,22 @@ public class EventController {
         // TODO ResponseEntity 커스텀 공통 양식 추가
         return ResponseEntity.status(HttpStatus.CREATED).body(eventId);
     }
+
+    /**
+     * 일정 수정
+     */
+    @PatchMapping("/{eventId}")
+    public ResponseEntity<?>  updateEvent(
+            @PathVariable Long eventId,
+            @RequestBody EventUpdateReqDto reqDto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보가 없습니다.");
+        }
+
+        eventService.updateEvent(eventId, reqDto, userDetails.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(eventId);
+    }
+
 }
