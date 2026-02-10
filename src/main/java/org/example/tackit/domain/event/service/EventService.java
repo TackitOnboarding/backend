@@ -82,6 +82,27 @@ public class EventService {
         }
     }
 
+    // 월간 일정 조회
+    public List<EventSimpleResDto> getMonthlyEvents(Long orgId, int year, int month, Long requesterId) {
+        validateMembership(orgId, requesterId);
+
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDateTime startDateTime = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime endDateTime = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+
+        List<Event> events = eventRepository.findAllByOrganizationIdAndDateRange(orgId, startDateTime, endDateTime);
+
+        return events.stream()
+                .map(event -> EventSimpleResDto.builder()
+                        .eventId(event.getId())
+                        .title(event.getTitle())
+                        .startsAt(event.getStartsAt())
+                        .endsAt(event.getEndsAt())
+                        .colorChip(event.getColorChip())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     // 이벤트 참가자 추가 메서드
     private void addParticipants(Event event, List<Long> memberOrgIds) {
         if (memberOrgIds == null || memberOrgIds.isEmpty()) return;

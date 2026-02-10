@@ -57,4 +57,22 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).body(eventId);
     }
 
+    /**
+     * 월간 일정 조회
+     */
+    @GetMapping("/monthly")
+    public ResponseEntity<?>  getMonthlyEvents(
+            @RequestParam Long orgId,
+            @RequestParam int year,
+            @RequestParam int month,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보가 없습니다.");
+        }
+
+        List<EventSimpleResDto> events = eventService.getMonthlyEvents(orgId, year, month, userDetails.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(events);
+    }
+
 }
