@@ -82,6 +82,16 @@ public class EventService {
         }
     }
 
+    // 일정 삭제
+    @Transactional
+    public void deleteEvent(Long eventId, Long requesterId) {
+        Event event = findEventOrThrow(eventId);
+
+        validateExecutive(event.getOrganization().getId(), requesterId);
+
+        eventRepository.delete(event);
+    }
+
     // 월간 일정 조회
     public List<EventSimpleResDto> getMonthlyEvents(Long orgId, int year, int month, Long requesterId) {
         validateMembership(orgId, requesterId);

@@ -91,4 +91,20 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).body(events);
     }
 
+
+    /**
+     * 일정 삭제
+     */
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<?> deleteEvent(
+            @PathVariable Long eventId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보가 없습니다.");
+        }
+
+        eventService.deleteEvent(eventId, userDetails.getId());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
 }
