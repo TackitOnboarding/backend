@@ -91,6 +91,21 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).body(events);
     }
 
+    /**
+     * 일정 상세 조회
+     */
+    @GetMapping("/{eventId:[0-9]+}")
+    public ResponseEntity<?>  getEventDetail(
+            @PathVariable Long eventId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보가 없습니다.");
+        }
+
+        EventDetailResDto detail = eventService.getEventDetail(eventId, userDetails.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(detail);
+    }
 
     /**
      * 일정 삭제

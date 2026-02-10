@@ -113,6 +113,30 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    // 일정 상세 조회
+    public EventDetailResDto getEventDetail(Long eventId, Long requesterId) {
+        Event event = findEventOrThrow(eventId);
+
+        validateMembership(event.getOrganization().getId(), requesterId);
+
+        List<EventParticipantDto> participantDtos = event.getParticipants().stream()
+                .map(ep -> EventParticipantDto.builder()
+                        .orgMemberId(ep.getMemberOrg().getId())
+                        .profileImageUrl(ep.getMemberOrg().getProfileImageUrl())
+                        .nickname(ep.getMemberOrg().getNickname())
+                        .build())
+                .collect(Collectors.toList());
+
+        return EventDetailResDto.builder()
+                .eventId(event.getId())
+                .title(event.getTitle())
+                .startsAt(event.getStartsAt())
+                .endsAt(event.getEndsAt())
+                .description(event.getDescription())
+                .colorChip(event.getColorChip())
+                .participants(participantDtos)
+                .build();
+    }
 
     // 다가오는 일정 조회
     public List<EventSimpleResDto> getUpcomingEvents(Long orgId, Long requesterId) {
