@@ -1,7 +1,7 @@
 package org.example.tackit.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.QnA_board.QnA_tag.repository.QnATagRepository;
+import org.example.tackit.domain.qnaBoard.QnA_tag.repository.QnATagRepository;
 import org.example.tackit.domain.entity.QnATag;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

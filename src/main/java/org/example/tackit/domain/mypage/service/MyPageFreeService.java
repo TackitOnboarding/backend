@@ -1,10 +1,10 @@
 package org.example.tackit.domain.mypage.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Free_board.Free_comment.repository.FreeCommentRepository;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepository;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreeScrapJPARepository;
-import org.example.tackit.domain.Free_board.Free_tag.repository.FreePostTagMapRepository;
+import org.example.tackit.domain.freeBoard.Free_comment.repository.FreeCommentRepository;
+import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostJPARepository;
+import org.example.tackit.domain.freeBoard.Free_post.repository.FreeScrapJPARepository;
+import org.example.tackit.domain.freeBoard.Free_tag.repository.FreePostTagMapRepository;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.mypage.dto.response.FreeMyCommentResponseDto;

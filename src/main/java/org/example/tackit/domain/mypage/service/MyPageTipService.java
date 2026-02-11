@@ -1,16 +1,16 @@
 package org.example.tackit.domain.mypage.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Tip_board.Tip_comment.repository.TipCommentRepository;
-import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostRepository;
-import org.example.tackit.domain.Tip_board.Tip_tag.repository.TipPostTagMapRepository;
+import org.example.tackit.domain.tipBoard.Tip_comment.repository.TipCommentRepository;
+import org.example.tackit.domain.tipBoard.Tip_post.repository.TipPostRepository;
+import org.example.tackit.domain.tipBoard.Tip_tag.repository.TipPostTagMapRepository;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.mypage.dto.response.TipMyCommentResponseDto;
 import org.example.tackit.domain.mypage.dto.response.TipMyPostResponseDto;
 import org.example.tackit.domain.mypage.dto.response.TipScrapResponse;
-import org.example.tackit.domain.Tip_board.Tip_post.repository.TipScrapRepository;
+import org.example.tackit.domain.tipBoard.Tip_post.repository.TipScrapRepository;
 import org.example.tackit.common.dto.PageResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

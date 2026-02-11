@@ -1,7 +1,7 @@
 package org.example.tackit.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Tip_board.Tip_tag.repository.TipTagRepository;
+import org.example.tackit.domain.tipBoard.Tip_tag.repository.TipTagRepository;
 import org.example.tackit.domain.entity.TipTag;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

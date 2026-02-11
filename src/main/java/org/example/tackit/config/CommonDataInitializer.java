@@ -1,7 +1,7 @@
 package org.example.tackit.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Organization.repository.SchoolRepository;
+import org.example.tackit.domain.organization.repository.SchoolRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.Org.School;
