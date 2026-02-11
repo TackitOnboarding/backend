@@ -1,13 +1,6 @@
 package org.example.tackit;
 
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import org.example.tackit.domain.admin.repository.AdminMemberRepository;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.MemberType;
-import org.example.tackit.domain.entity.AccountStatus;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;

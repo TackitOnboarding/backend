@@ -29,12 +29,17 @@ public class MyPageQnAService {
   private final QnACommentRepository qnACommentRepository;
   private final QnAPostTagMapRepository qnAPostTagMapRepository;
 
+<<<<<<< HEAD
   // 내가 쓴 게시글 조회
   @Transactional(readOnly = true)
   public PageResponseDTO<QnAMyPostResponseDto> getMyPosts(String email, Long orgId,
       Pageable pageable) {
     MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+=======
+        Page<QnAPost> postPage = qnAPostRepository.findByWriterAndActiveStatus(member, ActiveStatus.ACTIVE, pageable);
+        List<QnAPost> posts = postPage.getContent();
+>>>>>>> 9ab4484 (refactor: #189-accountStatus 명 -> activeStatus로 변경)
 
     Page<QnAPost> postPage = qnAPostRepository.findByWriterAndAccountStatus(member,
         AccountStatus.ACTIVE, pageable);

@@ -38,8 +38,18 @@ public class TipCommentService {
     MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
+<<<<<<< HEAD
     TipPost post = tipPostRepository.findById(dto.getTipPostId())
         .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+=======
+        TipComment comment = TipComment.builder()
+                .writer(member)
+                .activeStatus(ActiveStatus.ACTIVE)
+                .tipPost(post)
+                .content(dto.getContent())
+                .createdAt(LocalDateTime.now())
+                .build();
+>>>>>>> 9ab4484 (refactor: #189-accountStatus 명 -> activeStatus로 변경)
 
     TipComment comment = TipComment.builder()
         .writer(member)

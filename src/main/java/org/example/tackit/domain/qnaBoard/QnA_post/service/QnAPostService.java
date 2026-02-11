@@ -48,8 +48,40 @@ public class QnAPostService {
     MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
         .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
+<<<<<<< HEAD
     if (member.getMemberType() != MemberType.NEWBIE) {
       throw new AccessDeniedException("NEWBIE만 질문을 작성할 수 있습니다.");
+=======
+        if (member.getMemberType() != MemberType.NEWBIE) {
+            throw new AccessDeniedException("NEWBIE만 질문을 작성할 수 있습니다.");
+        }
+
+        QnAPost post = QnAPost.builder()
+                .writer(member)
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .createdAt(LocalDateTime.now())
+                .type(Post.QnA)
+                .activeStatus(ActiveStatus.ACTIVE)
+                .reportCount(0)
+                .isAnonymous(dto.isAnonymous())
+                .build();
+
+        // 이미지가 있으면 추가
+        if (dto.getImageUrl() != null && !dto.getImageUrl().isEmpty()) {
+            String imageUrl = s3UploadService.saveFile(dto.getImageUrl());
+            QnAPostImage image = new QnAPostImage();
+            image.setImageUrl(imageUrl);
+            image.setPost(post);
+            post.addImage(image);
+        }
+
+        qnAPostRepository.save(post);
+
+        List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
+
+        return QnAPostRespDto.fromEntity(post, tagNames, false);
+>>>>>>> 9ab4484 (refactor: #189-accountStatus 명 -> activeStatus로 변경)
     }
 
     QnAPost post = QnAPost.builder()
@@ -190,16 +222,24 @@ public class QnAPostService {
       return "이미 신고한 게시글입니다.";
     }
 
+<<<<<<< HEAD
     qnAPostReportRepository.save(QnAReport.builder()
         .member(member)
         .qnaPost(post)
         .build());
+=======
+    // 게시글 전체 조회
+    public PageResponseDTO<QnAPostRespDto> findAll(Long orgId, Pageable pageable) {
+        Page<QnAPost> page = qnAPostRepository.findByWriterIdAndActiveStatus(orgId, ActiveStatus.ACTIVE, pageable);
+        List<QnAPost> posts = page.getContent();
+>>>>>>> 9ab4484 (refactor: #189-accountStatus 명 -> activeStatus로 변경)
 
     post.increaseReportCount();
 
     return "게시글을 신고하였습니다.";
   }
 
+<<<<<<< HEAD
   // 인기 3개
   @Transactional(readOnly = true)
   public List<QnAPopularPostRespDto> getPopularPosts(Long orgId) {
@@ -208,6 +248,57 @@ public class QnAPostService {
         .stream()
         .map(QnAPopularPostRespDto::from)
         .toList();
+=======
+
+    // 게시글 상세 조회
+    public QnAPostRespDto getPostById(Long id, Long orgId, Long memberId) {
+        QnAPost post = qnAPostRepository.findById(id)
+                .orElseThrow( () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        if (!post.getWriter().getId().equals(orgId)) {
+            throw new AccessDeniedException("해당 조직의 게시글만 조회할 수 있습니다.");
+        }
+
+        post.increaseViewCount();
+        List<String> tagNames = tagService.getTagNamesByPost(post);
+
+        // 스크랩 여부 조회
+        boolean isScrap = qnAScrapRepository.existsByQnaPostIdAndMemberId(id, memberId);
+
+        return QnAPostRespDto.fromEntity(post, tagNames, isScrap);
+    }
+
+    // 게시글 신고하기
+    @Transactional
+    public String reportQnAPost(Long postId, Long orgId) {
+        QnAPost post = qnAPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        MemberOrg member = memberOrgRepository.findById(orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (qnAPostReportRepository.existsByMemberAndQnaPost(member, post)) {
+            return "이미 신고한 게시글입니다.";
+        }
+
+        qnAPostReportRepository.save(QnAReport.builder()
+                .member(member)
+                .qnaPost(post)
+                .build());
+
+        post.increaseReportCount();
+
+        return "게시글을 신고하였습니다.";
+    }
+
+    // 인기 3개
+    @Transactional(readOnly = true)
+    public List<QnAPopularPostRespDto> getPopularPosts(Long orgId) {
+        return qnAPostRepository.findTop3ByWriterIdAndActiveStatusOrderByViewCountDescScrapCountDesc(orgId, ActiveStatus.ACTIVE)
+                .stream()
+                .map(QnAPopularPostRespDto::from)
+                .toList();
+>>>>>>> 9ab4484 (refactor: #189-accountStatus 명 -> activeStatus로 변경)
                 /*
                 .stream()
                 .filter(post -> post.getWriter().getOrganization().equals(organization))

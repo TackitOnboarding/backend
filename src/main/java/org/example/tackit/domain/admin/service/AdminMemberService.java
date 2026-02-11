@@ -1,21 +1,8 @@
 package org.example.tackit.domain.admin.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.admin.dto.DeletedMemberDTO;
-import org.example.tackit.domain.admin.dto.DeletedMemberResp;
-import org.example.tackit.domain.admin.dto.MemberDTO;
-import org.example.tackit.domain.admin.dto.MemberStatisticsDTO;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.AccountStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.ChronoField;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

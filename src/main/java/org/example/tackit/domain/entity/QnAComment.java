@@ -35,7 +35,7 @@ public class QnAComment {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private AccountStatus accountStatus;
+    private ActiveStatus activeStatus;
     private int reportCount;
 
     public void updateContent(String content) {

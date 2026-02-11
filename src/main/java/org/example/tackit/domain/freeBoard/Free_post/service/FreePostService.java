@@ -1,363 +1,346 @@
 package org.example.tackit.domain.freeBoard.Free_post.service;
 
-import static org.example.tackit.global.exception.ErrorCode.MEMBER_NOT_FOUND;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.common.dto.PageResponseDTO;
 import org.example.tackit.config.S3.S3UploadService;
-import org.example.tackit.domain.entity.AccountStatus;
-import org.example.tackit.domain.entity.FreePost;
-import org.example.tackit.domain.entity.FreePostImage;
-import org.example.tackit.domain.entity.FreeReport;
-import org.example.tackit.domain.entity.FreeScrap;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.MemberRole;
-import org.example.tackit.domain.entity.MemberType;
-import org.example.tackit.domain.entity.Notification;
-import org.example.tackit.domain.entity.NotificationType;
-import org.example.tackit.domain.entity.Org.MemberOrg;
-import org.example.tackit.domain.entity.Post;
 import org.example.tackit.domain.freeBoard.Free_post.dto.request.FreePostReqDto;
 import org.example.tackit.domain.freeBoard.Free_post.dto.request.UpdateFreeReqDto;
 import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreePopularPostRespDto;
 import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreePostRespDto;
 import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreeScrapResponseDto;
-import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostImageRepository;
-import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostJPARepository;
-import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostReportRepository;
-import org.example.tackit.domain.freeBoard.Free_post.repository.FreeScrapJPARepository;
+import org.example.tackit.domain.freeBoard.Free_post.repository.*;
 import org.example.tackit.domain.freeBoard.Free_tag.repository.FreePostTagMapRepository;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
-import org.example.tackit.domain.member.repository.MemberRepository;
+import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
+import org.example.tackit.domain.auth.login.repository.MemberRepository;
+import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
-import org.example.tackit.global.exception.AccessDeniedCustomException;
-import org.example.tackit.global.exception.ErrorCode;
-import org.example.tackit.global.exception.MemberNotFoundException;
-import org.example.tackit.global.exception.PostInactiveException;
-import org.example.tackit.global.exception.PostNotFoundException;
+import org.example.tackit.common.dto.PageResponseDTO;
+import org.example.tackit.global.exception.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.example.tackit.global.exception.ErrorCode.MEMBER_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 public class FreePostService {
+    private final FreePostJPARepository freePostJPARepository;
+    private final MemberOrgRepository memberOrgRepository;
+    private final MemberRepository memberRepository;
+    private final FreePostTagService tagService;
+    private final FreeScrapJPARepository freeScrapJPARepository;
+    private final FreePostTagMapRepository freePostTagMapRepository;
+    private final FreePostReportRepository freePostReportRepository;
+    private final S3UploadService s3UploadService;
+    private final FreePostImageRepository freePostImageRepository;
+    private final NotificationService notificationService;
 
-  private final FreePostJPARepository freePostJPARepository;
-  private final MemberOrgRepository memberOrgRepository;
-  private final MemberRepository memberRepository;
-  private final FreePostTagService tagService;
-  private final FreeScrapJPARepository freeScrapJPARepository;
-  private final FreePostTagMapRepository freePostTagMapRepository;
-  private final FreePostReportRepository freePostReportRepository;
-  private final S3UploadService s3UploadService;
-  private final FreePostImageRepository freePostImageRepository;
-  private final NotificationService notificationService;
+    // [ 게시글 전체 조회 ]
+    @Transactional
+    public PageResponseDTO<FreePostRespDto> findAll(String email, Long profileId, Pageable pageable) {
+        // 현재 접속한 멀티프로필 정보 조회
+        MemberOrg currProfile = memberOrgRepository.findByMemberEmailAndId(email, profileId)
+                .orElseThrow(() -> new RuntimeException("해당 조직에 대한 접근 권한이 없거나 유효하지 않은 프로필입니다."));
 
-  // [ 게시글 전체 조회 ]
-  @Transactional
-  public PageResponseDTO<FreePostRespDto> findAll(String email, Long profileId, Pageable pageable) {
-    // 현재 접속한 멀티프로필 정보 조회
-    MemberOrg currProfile = memberOrgRepository.findByMemberEmailAndId(email, profileId)
-        .orElseThrow(() -> new RuntimeException("해당 조직에 대한 접근 권한이 없거나 유효하지 않은 프로필입니다."));
+        // 해당 프로필이 속한 조직의 ID 가져오기
+        Long orgId = currProfile.getOrganization().getId();
 
-    // 해당 프로필이 속한 조직의 ID 가져오기
-    Long orgId = currProfile.getOrganization().getId();
+        // 해당 조직의 게시글만 조회
+        Page<FreePost> page = freePostJPARepository.findAllByOrganizationIdAndAccountStatus(
+                orgId,
+                AccountStatus.ACTIVE,
+                pageable
+        );
 
-    // 해당 조직의 게시글만 조회
-    Page<FreePost> page = freePostJPARepository.findAllByOrganizationIdAndAccountStatus(
-        orgId,
-        AccountStatus.ACTIVE,
-        pageable
-    );
 
-    return PageResponseDTO.from(page, post -> {
-      List<String> tags = freePostTagMapRepository.findByFreePost(post).stream()
-          .map(mapping -> mapping.getTag().getTagName())
-          .toList();
 
-      String imageUrl = post.getImages().isEmpty() ? null
-          : post.getImages().get(0).getImageUrl();
+        return PageResponseDTO.from(page, post -> {
+            List<String> tags = freePostTagMapRepository.findByFreePost(post).stream()
+                    .map(mapping -> mapping.getTag().getTagName())
+                    .toList();
 
-      String profileImageUrl = post.getWriter().getProfileImageUrl();
+            String imageUrl = post.getImages().isEmpty() ? null
+                    : post.getImages().get(0).getImageUrl();
 
-      return FreePostRespDto.builder()
-          .id(post.getId())
-          .writer(post.isAnonymous() ? "익명" : post.getWriter().getNickname())
-          .profileImageUrl(post.isAnonymous() ? null : profileImageUrl)
-          .title(post.getTitle())
-          .content(post.getContent())
-          .createdAt(post.getCreatedAt())
-          .tags(tags)
-          .imageUrl(imageUrl)
-          .isAnonymous(post.isAnonymous())
-          .build();
-    });
-  }
+            String profileImageUrl = post.getWriter().getProfileImageUrl();
 
-  // [ 게시글 상세 조회 ]
-  @Transactional
-  public FreePostRespDto getPostById(Long id, Long orgId, Long memberId) {
-    FreePost post = freePostJPARepository.findById(id)
-        .orElseThrow(() -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND));
-
-    MemberOrg currProfile = memberOrgRepository.findById(orgId)
-        .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-
-    if (post.getOrganization().getId().equals(currProfile.getOrganization().getId())) {
-      throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_ORGANIZATION);
+            return FreePostRespDto.builder()
+                    .id(post.getId())
+                    .writer(post.isAnonymous() ? "익명" : post.getWriter().getNickname())
+                    .profileImageUrl(post.isAnonymous() ? null : profileImageUrl)
+                    .title(post.getTitle())
+                    .content(post.getContent())
+                    .createdAt(post.getCreatedAt())
+                    .tags(tags)
+                    .imageUrl(imageUrl)
+                    .isAnonymous(post.isAnonymous())
+                    .build();
+        });
     }
 
-    if (!post.getAccountStatus().equals(AccountStatus.ACTIVE)) {
-      throw new PostInactiveException(ErrorCode.POST_IS_INACTIVE);
+    // [ 게시글 상세 조회 ]
+    @Transactional
+    public FreePostRespDto getPostById(Long id, Long orgId, Long memberId) {
+        FreePost post = freePostJPARepository.findById(id)
+                .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
+
+        MemberOrg currProfile = memberOrgRepository.findById(orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (post.getOrganization().getId().equals(currProfile.getOrganization().getId()) ) {
+            throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_ORGANIZATION);
+        }
+
+        if (!post.getAccountStatus().equals(AccountStatus.ACTIVE)) {
+            throw new PostInactiveException(ErrorCode.POST_IS_INACTIVE);
+        }
+
+        post.increaseViewCount();
+
+        List<String> tagNames = tagService.getTagNamesByPost(post);
+
+        String imageUrl = post.getImages().isEmpty() ? null
+                : post.getImages().get(0).getImageUrl();
+
+        String profileImageUrl = post.getWriter().getProfileImageUrl();
+
+        // 스크랩 여부 조회
+        boolean isScrap = freeScrapJPARepository.existsByFreePostIdAndMemberId(id, memberId);
+
+        return FreePostRespDto.builder()
+                .id(post.getId())
+                .writer(post.isAnonymous() ? "익명" : post.getWriter().getNickname())
+                .profileImageUrl(post.isAnonymous() ? null : profileImageUrl)
+                .title(post.getTitle())
+                .content(post.getContent())
+                .tags(tagNames)
+                .imageUrl(imageUrl)
+                .createdAt(post.getCreatedAt())
+                .isScrap(isScrap)
+                .isAnonymous(post.isAnonymous())
+                .build();
     }
 
-    post.increaseViewCount();
+    // [ 게시글 작성 ]
+    @Transactional
+    public FreePostRespDto createPost(FreePostReqDto dto, String email, Long profileId) throws IOException {
 
-    List<String> tagNames = tagService.getTagNamesByPost(post);
+        // 1. 유저 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
-    String imageUrl = post.getImages().isEmpty() ? null
-        : post.getImages().get(0).getImageUrl();
+        // 2. Member의 Id와 Profile Id로 조회
+        MemberOrg memberOrg = memberOrgRepository.findByMemberIdAndProfileId(member.getId(), profileId)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
-    String profileImageUrl = post.getWriter().getProfileImageUrl();
+        // 2. 게시글 생성
+        FreePost post = FreePost.builder()
+                        .writer(memberOrg)
+                        .organization(memberOrg.getOrganization())
+                        .title(dto.getTitle())
+                        .content(dto.getContent())
+                        .isAnonymous(dto.isAnonymous())
+                        .createdAt(LocalDateTime.now())
+                        .type(Post.Free)
+                        .accountStatus(AccountStatus.ACTIVE)
+                        .reportCount(0)
+                        .build();
 
-    // 스크랩 여부 조회
-    boolean isScrap = freeScrapJPARepository.existsByFreePostIdAndMemberId(id, memberId);
+        freePostJPARepository.save(post);
 
-    return FreePostRespDto.builder()
-        .id(post.getId())
-        .writer(post.isAnonymous() ? "익명" : post.getWriter().getNickname())
-        .profileImageUrl(post.isAnonymous() ? null : profileImageUrl)
-        .title(post.getTitle())
-        .content(post.getContent())
-        .tags(tagNames)
-        .imageUrl(imageUrl)
-        .createdAt(post.getCreatedAt())
-        .isScrap(isScrap)
-        .isAnonymous(post.isAnonymous())
-        .build();
-  }
+        // 3. 이미지 업로드 → PostImage 저장
+        String imageUrl = null;
+        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
+            imageUrl = s3UploadService.saveFile(dto.getImage());
 
-  // [ 게시글 작성 ]
-  @Transactional
-  public FreePostRespDto createPost(FreePostReqDto dto, String email, Long profileId)
-      throws IOException {
+            FreePostImage image = FreePostImage.builder()
+                    .imageUrl(imageUrl)
+                    .freePost(post)
+                    .build();
 
-    // 1. 유저 조회
-    Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
+            freePostImageRepository.save(image); // 따로 JPARepository 필요
+        }
 
-    // 2. Member의 Id와 Profile Id로 조회
-    MemberOrg memberOrg = memberOrgRepository.findByMemberIdAndProfileId(member.getId(), profileId)
-        .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
+        List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
 
-    // 2. 게시글 생성
-    FreePost post = FreePost.builder()
-        .writer(memberOrg)
-        .organization(memberOrg.getOrganization())
-        .title(dto.getTitle())
-        .content(dto.getContent())
-        .isAnonymous(dto.isAnonymous())
-        .createdAt(LocalDateTime.now())
-        .type(Post.Free)
-        .accountStatus(AccountStatus.ACTIVE)
-        .reportCount(0)
-        .build();
+        return FreePostRespDto.builder()
+                .id(post.getId())
+                .writer(post.isAnonymous() ? "익명" : memberOrg.getNickname())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .createdAt(post.getCreatedAt())
+                .tags(tagNames)
+                .imageUrl(imageUrl)
+                .isAnonymous(post.isAnonymous())
+                .build();
 
-    freePostJPARepository.save(post);
-
-    // 3. 이미지 업로드 → PostImage 저장
-    String imageUrl = null;
-    if (dto.getImage() != null && !dto.getImage().isEmpty()) {
-      imageUrl = s3UploadService.saveFile(dto.getImage());
-
-      FreePostImage image = FreePostImage.builder()
-          .imageUrl(imageUrl)
-          .freePost(post)
-          .build();
-
-      freePostImageRepository.save(image); // 따로 JPARepository 필요
     }
 
-    List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
+    // [ 게시글 수정 ] : 작성자만
+    @Transactional
+    public FreePostRespDto update(Long id, UpdateFreeReqDto req, String email, Long orgId) throws IOException {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
-    return FreePostRespDto.builder()
-        .id(post.getId())
-        .writer(post.isAnonymous() ? "익명" : memberOrg.getNickname())
-        .title(post.getTitle())
-        .content(post.getContent())
-        .createdAt(post.getCreatedAt())
-        .tags(tagNames)
-        .imageUrl(imageUrl)
-        .isAnonymous(post.isAnonymous())
-        .build();
+        FreePost post = freePostJPARepository.findById(id)
+                .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-  }
+        boolean isWriter = post.getWriter().getId().equals(member.getId());
 
-  // [ 게시글 수정 ] : 작성자만
-  @Transactional
-  public FreePostRespDto update(Long id, UpdateFreeReqDto req, String email, Long orgId)
-      throws IOException {
-    MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
-        .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
+        if (!isWriter) {
+            throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_EDIT);
+        }
 
-    FreePost post = freePostJPARepository.findById(id)
-        .orElseThrow(() -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND));
+        post.update(req.getTitle(), req.getContent());
 
-    boolean isWriter = post.getWriter().getId().equals(member.getId());
+        tagService.deleteTagsByPost(post);
+        List<String> tagNames = tagService.assignTagsToPost(post, req.getTagIds());
 
-    if (!isWriter) {
-      throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_EDIT);
+        String imageUrl = null;
+        // 1. "이미지 제거" 요청
+        if (req.isRemoveImage()) {
+            freePostImageRepository.findByFreePostId(post.getId())
+                    .forEach(oldImage -> {
+                        s3UploadService.deleteImage(oldImage.getImageUrl()); // S3 삭제
+                        freePostImageRepository.delete(oldImage);           // DB 삭제
+                    });
+        }
+
+        // 2. 새 이미지 업로드
+        else if (req.getImage() != null && !req.getImage().isEmpty()) {
+            // 기존 이미지 제거
+            freePostImageRepository.findByFreePostId(post.getId())
+                    .forEach(oldImage -> {
+                        s3UploadService.deleteImage(oldImage.getImageUrl());
+                        freePostImageRepository.delete(oldImage);
+                    });
+
+            // 새 이미지 저장
+            imageUrl = s3UploadService.saveFile(req.getImage());
+            FreePostImage newImage = FreePostImage.builder()
+                    .imageUrl(imageUrl)
+                    .freePost(post)
+                    .build();
+
+            freePostImageRepository.save(newImage);
+        }
+
+        // 3. 아무 요청 없으면 기존 이미지 유지
+        else {
+            List<FreePostImage> images = freePostImageRepository.findByFreePostId(post.getId());
+            if (!images.isEmpty()) {
+                imageUrl = images.get(0).getImageUrl();
+            }
+        }
+
+        return FreePostRespDto.builder()
+                .id(post.getId())
+                .writer(post.isAnonymous() ? "익명" : member.getNickname())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .createdAt(post.getCreatedAt())
+                .tags(tagNames)
+                //.imageUrl(imageUrl)
+                .imageUrl(post.isAnonymous() ? null : imageUrl)
+                .isAnonymous(post.isAnonymous())
+                .build();
     }
 
-    post.update(req.getTitle(), req.getContent());
+    // [ 게시글 삭제 ] : 작성자, 관리자만
+    @Transactional
+    public void delete(Long id, String email, Long orgId) {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
-    tagService.deleteTagsByPost(post);
-    List<String> tagNames = tagService.assignTagsToPost(post, req.getTagIds());
+        FreePost post = freePostJPARepository.findById(id)
+                .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-    String imageUrl = null;
-    // 1. "이미지 제거" 요청
-    if (req.isRemoveImage()) {
-      freePostImageRepository.findByFreePostId(post.getId())
-          .forEach(oldImage -> {
-            s3UploadService.deleteImage(oldImage.getImageUrl()); // S3 삭제
-            freePostImageRepository.delete(oldImage);           // DB 삭제
-          });
+        boolean isWriter = post.getWriter().getId().equals(member.getId());
+        boolean isAdmin = (member.getMemberRole() == MemberRole.ADMIN)
+                && (member.getMemberType() == MemberType.ADMIN);
+
+        if (!isAdmin && !isWriter) {
+            throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_DELETE);
+        }
+
+        post.delete(); // Soft Deleted
     }
 
-    // 2. 새 이미지 업로드
-    else if (req.getImage() != null && !req.getImage().isEmpty()) {
-      // 기존 이미지 제거
-      freePostImageRepository.findByFreePostId(post.getId())
-          .forEach(oldImage -> {
-            s3UploadService.deleteImage(oldImage.getImageUrl());
-            freePostImageRepository.delete(oldImage);
-          });
+    // [ 게시글 신고 ]
+    @Transactional
+    public String report(Long postId, Long orgId) {
+        MemberOrg member = memberOrgRepository.findById(orgId)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
-      // 새 이미지 저장
-      imageUrl = s3UploadService.saveFile(req.getImage());
-      FreePostImage newImage = FreePostImage.builder()
-          .imageUrl(imageUrl)
-          .freePost(post)
-          .build();
+        FreePost post = freePostJPARepository.findById(postId)
+                .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-      freePostImageRepository.save(newImage);
+        boolean alreadyReported = freePostReportRepository.existsByMemberAndFreePost(member, post);
+
+        if (alreadyReported) {
+            return "이미 신고한 게시글입니다.";
+        }
+        freePostReportRepository.save(
+                FreeReport.builder()
+                        .member(member)
+                        .freePost(post)
+                        .build()
+        );
+        // 신고 횟수 증가
+        post.increaseReportCount();
+        return "게시글을 신고하였습니다.";
     }
 
-    // 3. 아무 요청 없으면 기존 이미지 유지
-    else {
-      List<FreePostImage> images = freePostImageRepository.findByFreePostId(post.getId());
-      if (!images.isEmpty()) {
-        imageUrl = images.get(0).getImageUrl();
-      }
-    }
 
-    return FreePostRespDto.builder()
-        .id(post.getId())
-        .writer(post.isAnonymous() ? "익명" : member.getNickname())
-        .title(post.getTitle())
-        .content(post.getContent())
-        .createdAt(post.getCreatedAt())
-        .tags(tagNames)
-        //.imageUrl(imageUrl)
-        .imageUrl(post.isAnonymous() ? null : imageUrl)
-        .isAnonymous(post.isAnonymous())
-        .build();
-  }
+    // [ 게시글 스크랩 ]
+    @Transactional
+    public FreeScrapResponseDto toggleScrap(Long postId, String email, Long orgId) {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
 
-  // [ 게시글 삭제 ] : 작성자, 관리자만
-  @Transactional
-  public void delete(Long id, String email, Long orgId) {
-    MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
-        .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
+        FreePost post = freePostJPARepository.findById(postId)
+                .orElseThrow( () -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND) );
 
-    FreePost post = freePostJPARepository.findById(id)
-        .orElseThrow(() -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND));
+        if (!post.getOrganization().equals(orgId)) {
+            throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_ORGANIZATION);
+        }
 
-    boolean isWriter = post.getWriter().getId().equals(member.getId());
-    boolean isAdmin = (member.getMemberRole() == MemberRole.ADMIN)
-        && (member.getMemberType() == MemberType.ADMIN);
+        Optional<FreeScrap> existing = freeScrapJPARepository.findByMemberAndFreePost(member, post);
 
-    if (!isAdmin && !isWriter) {
-      throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_DELETE);
-    }
+        if (existing.isPresent()) {
+            freeScrapJPARepository.delete(existing.get());
+            post.decreaseScrapCount();
+            return new FreeScrapResponseDto(false, null);
+        }
 
-    post.delete(); // Soft Deleted
-  }
+        FreeScrap scrap = FreeScrap.builder()
+                .member(member)
+                .freePost(post)
+                .savedAt(LocalDateTime.now())
+                .build();
 
-  // [ 게시글 신고 ]
-  @Transactional
-  public String report(Long postId, Long orgId) {
-    MemberOrg member = memberOrgRepository.findById(orgId)
-        .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
+        freeScrapJPARepository.save(scrap);
+        post.increaseScrapCount();
 
-    FreePost post = freePostJPARepository.findById(postId)
-        .orElseThrow(() -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND));
-
-    boolean alreadyReported = freePostReportRepository.existsByMemberAndFreePost(member, post);
-
-    if (alreadyReported) {
-      return "이미 신고한 게시글입니다.";
-    }
-    freePostReportRepository.save(
-        FreeReport.builder()
-            .member(member)
-            .freePost(post)
-            .build()
-    );
-    // 신고 횟수 증가
-    post.increaseReportCount();
-    return "게시글을 신고하였습니다.";
-  }
-
-
-  // [ 게시글 스크랩 ]
-  @Transactional
-  public FreeScrapResponseDto toggleScrap(Long postId, String email, Long orgId) {
-    MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
-        .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND));
-
-    FreePost post = freePostJPARepository.findById(postId)
-        .orElseThrow(() -> new PostNotFoundException(ErrorCode.POST_NOT_FOUND));
-
-    if (!post.getOrganization().equals(orgId)) {
-      throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_ORGANIZATION);
-    }
-
-    Optional<FreeScrap> existing = freeScrapJPARepository.findByMemberAndFreePost(member, post);
-
-    if (existing.isPresent()) {
-      freeScrapJPARepository.delete(existing.get());
-      post.decreaseScrapCount();
-      return new FreeScrapResponseDto(false, null);
-    }
-
-    FreeScrap scrap = FreeScrap.builder()
-        .member(member)
-        .freePost(post)
-        .savedAt(LocalDateTime.now())
-        .build();
-
-    freeScrapJPARepository.save(scrap);
-    post.increaseScrapCount();
-
-    // 알림 전송
-    if (!post.getWriter().getId().equals(member.getId())) {
-      notificationService.send(Notification.builder()
-          .member(post.getWriter().getMember())
-          .memberOrgId(post.getWriter().getId())
-          .type(NotificationType.SCRAP)
-          .message(member.getNickname() + "님이 글을 스크랩하였습니다.")
-          .fromMemberOrgId(member.getId())
-          .relatedUrl("/api/free-posts/" + post.getId())
-          .build());
-    }
-    return new FreeScrapResponseDto(true, scrap.getSavedAt());
+        // 알림 전송
+        if( !post.getWriter().getId().equals(member.getId())) {
+            notificationService.send(Notification.builder()
+                            .member(post.getWriter().getMember())
+                            .memberOrgId(post.getWriter().getId())
+                            .type(NotificationType.SCRAP)
+                            .message(member.getNickname() + "님이 글을 스크랩하였습니다.")
+                            .fromMemberOrgId(member.getId())
+                            .relatedUrl("/api/free-posts/" + post.getId())
+                            .build());
+        }
+        return new FreeScrapResponseDto(true, scrap.getSavedAt());
         /*
         if(!post.getWriter().getId().equals(member.getId())){
             Member postWriter = post.getWriter();
@@ -379,23 +362,22 @@ public class FreePostService {
         return new FreeScrapResponseDto(true, scrap.getSavedAt());
 
          */
-  }
+    }
 
-  /*
-      public List<FreePopularPostRespDto> getPopularPosts(Long orgId) {
-      return freePostJPARepository.findTop3ByWriterIdAndAccountStatusOrderByViewCountDescScrapCountDesc(orgId, AccountStatus.ACTIVE)
-              .stream()
-              .map(FreePopularPostRespDto::from)
-              .toList();
-   */
-  // 인기 3개
-  @Transactional(readOnly = true)
-  public List<FreePopularPostRespDto> getPopularPosts(Long orgId) {
-    return freePostJPARepository.findTop3ByOrganizationIdAndAccountStatusOrderByViewCountDescScrapCountDesc(
-            orgId, AccountStatus.ACTIVE)
-        .stream()
-        .map(FreePopularPostRespDto::from)
-        .toList();
+    /*
+        public List<FreePopularPostRespDto> getPopularPosts(Long orgId) {
+        return freePostJPARepository.findTop3ByWriterIdAndAccountStatusOrderByViewCountDescScrapCountDesc(orgId, AccountStatus.ACTIVE)
+                .stream()
+                .map(FreePopularPostRespDto::from)
+                .toList();
+     */
+    // 인기 3개
+    @Transactional(readOnly = true)
+    public List<FreePopularPostRespDto> getPopularPosts(Long orgId) {
+        return freePostJPARepository.findTop3ByOrganizationIdAndAccountStatusOrderByViewCountDescScrapCountDesc(orgId, AccountStatus.ACTIVE)
+                .stream()
+                .map(FreePopularPostRespDto::from)
+                .toList();
                 /*
                 .filter(post -> post.getWriter().getOrganization().equals(organization))
                 .sorted(Comparator
@@ -412,6 +394,6 @@ public class FreePostService {
                 .map(FreePopularPostRespDto::from)
                 .toList();
                  */
-  }
+    }
 
 }

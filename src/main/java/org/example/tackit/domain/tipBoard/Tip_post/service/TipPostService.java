@@ -142,6 +142,7 @@ public class TipPostService {
         .isAnonymous(dto.isAnonymous())
         .build();
 
+<<<<<<< HEAD
     // 3. 이미지 업로드 & 연관관계 매핑 (단일 파일만)
     if (image != null && !image.isEmpty()) {
       String imageUrl = s3UploadService.saveFile(image);
@@ -149,6 +150,52 @@ public class TipPostService {
           .imageUrl(imageUrl)
           .build();
       post.addImage(imageEntity); // 기존 이미지 clear 후 하나만 저장
+=======
+        if (member.getMemberType() != MemberType.SENIOR) {
+            throw new AccessDeniedException("SENIOR만 게시글을 작성할 수 있습니다.");
+        }
+
+        // 2. 게시글 생성
+        TipPost post = TipPost.builder()
+                .writer(member)
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .createdAt(LocalDateTime.now())
+                .type(Post.Tip)
+                .activeStatus(ActiveStatus.ACTIVE)
+                .reportCount(0)
+                .isAnonymous(dto.isAnonymous())
+                .build();
+
+        // 3. 이미지 업로드 & 연관관계 매핑 (단일 파일만)
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = s3UploadService.saveFile(image);
+            TipPostImage imageEntity = TipPostImage.builder()
+                    .imageUrl(imageUrl)
+                    .build();
+            post.addImage(imageEntity); // 기존 이미지 clear 후 하나만 저장
+        }
+
+        tipPostRepository.save(post);
+
+        List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
+
+        boolean anonymous = post.isAnonymous();
+
+        // 응답 DTO 구성 (imageUrl 하나만)
+        return TipPostRespDto.builder()
+                .id(post.getId())
+                .writer(anonymous ? "익명" : member.getNickname())
+                .profileImageUrl(anonymous ? null : member.getProfileImageUrl())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .createdAt(post.getCreatedAt())
+                .tags(tagNames)
+                .imageUrl(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+                .isAnonymous(anonymous)
+                .isScrap(false)
+                .build();
+>>>>>>> 9ab4484 (refactor: #189-accountStatus 명 -> activeStatus로 변경)
     }
 
     tipPostRepository.save(post);
