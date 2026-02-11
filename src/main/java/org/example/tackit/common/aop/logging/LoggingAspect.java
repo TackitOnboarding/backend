@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreeMemberJPARepository;
+import org.example.tackit.domain.freeBoard.Free_post.repository.FreeMemberJPARepository;
 import org.example.tackit.domain.admin.repository.MemberLogRepository;
 import org.example.tackit.domain.entity.*;
 import org.springframework.security.core.Authentication;

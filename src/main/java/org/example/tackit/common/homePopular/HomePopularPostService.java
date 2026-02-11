@@ -1,11 +1,10 @@
 package org.example.tackit.common.homePopular;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepository;
-import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
-import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostRepository;
+import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostJPARepository;
+import org.example.tackit.domain.qnaBoard.QnA_post.repository.QnAPostRepository;
+import org.example.tackit.domain.tipBoard.Tip_post.repository.TipPostRepository;
 import org.example.tackit.domain.entity.*;
-import org.example.tackit.domain.entity.Org.OrgType;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

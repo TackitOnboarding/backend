@@ -1,9 +1,9 @@
 package org.example.tackit.domain.mypage.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.QnA_board.QnA_comment.repository.QnACommentRepository;
-import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
-import org.example.tackit.domain.QnA_board.QnA_tag.repository.QnAPostTagMapRepository;
+import org.example.tackit.domain.qnaBoard.QnA_comment.repository.QnACommentRepository;
+import org.example.tackit.domain.qnaBoard.QnA_post.repository.QnAPostRepository;
+import org.example.tackit.domain.qnaBoard.QnA_tag.repository.QnAPostTagMapRepository;
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.entity.Org.MemberOrg;

@@ -1,29 +1,18 @@
 package org.example.tackit.domain.admin.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Free_board.Free_comment.repository.FreeCommentRepository;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepository;
-import org.example.tackit.domain.QnA_board.QnA_comment.repository.QnACommentRepository;
-import org.example.tackit.domain.QnA_board.QnA_post.repository.QnAPostRepository;
-import org.example.tackit.domain.Tip_board.Tip_post.repository.TipPostRepository;
+import org.example.tackit.domain.freeBoard.Free_comment.repository.FreeCommentRepository;
+import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostJPARepository;
+import org.example.tackit.domain.qnaBoard.QnA_comment.repository.QnACommentRepository;
+import org.example.tackit.domain.qnaBoard.QnA_post.repository.QnAPostRepository;
+import org.example.tackit.domain.tipBoard.Tip_post.repository.TipPostRepository;
 import org.example.tackit.domain.admin.repository.MemberLogRepository;
-import org.example.tackit.domain.entity.*;
-import org.example.tackit.domain.report.dto.ReportContentDetailDto;
-import org.example.tackit.domain.report.dto.ReportLogDto;
-import org.example.tackit.domain.report.dto.ReportListDto;
 import org.example.tackit.domain.report.repository.ReportRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

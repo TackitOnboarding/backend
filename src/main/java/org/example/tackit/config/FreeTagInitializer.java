@@ -1,7 +1,7 @@
 package org.example.tackit.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Free_board.Free_tag.repository.FreeTagRepository;
+import org.example.tackit.domain.freeBoard.Free_tag.repository.FreeTagRepository;
 import org.example.tackit.domain.entity.FreeTag;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

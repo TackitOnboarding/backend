@@ -3,7 +3,7 @@ package org.example.tackit.domain.admin.service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepository;
+import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostJPARepository;
 import org.example.tackit.domain.admin.dto.ReportedPostDTO;
 import org.example.tackit.domain.admin.repository.AdminFreePostRepository;
 import org.example.tackit.domain.entity.FreePost;
