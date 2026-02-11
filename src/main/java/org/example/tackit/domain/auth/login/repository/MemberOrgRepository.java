@@ -1,6 +1,8 @@
 package org.example.tackit.domain.auth.login.repository;
 
+import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.entity.Org.MemberOrg;
+import org.example.tackit.domain.entity.Org.OrgStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -41,4 +43,10 @@ public interface MemberOrgRepository extends JpaRepository<MemberOrg, Long> {
 
     // 조직 ID와 멤버 ID로 가입 여부 확인 (중복 가입 방지용)
     boolean existsByMemberIdAndOrganizationId(Long memberId, Long orgId);
+
+    Optional<MemberOrg> findByMemberIdAndOrganizationId(Long memberId, Long orgId);
+
+    boolean existsByMemberIdAndOrganizationIdAndOrgStatus(Long memberId, Long orgId, OrgStatus status);
+
+    Optional<MemberOrg> findByMemberIdAndOrganizationIdAndOrgStatus(Long memberId, Long orgId, OrgStatus status);
 }

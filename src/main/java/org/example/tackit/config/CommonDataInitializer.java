@@ -24,7 +24,7 @@ public class CommonDataInitializer implements CommandLineRunner {
     // args를 꼭 배열로 넘겨야 하는 건 아니고 가변적으로 받을 수 있다는 의도를 나타냄
     @Override
     public void run(String... args) throws Exception {
-        if (memberRepository.findByEmail("admin").isEmpty()) {
+        if (memberRepository.findByEmail("contact.tackit@gmail.com").isEmpty()) {
             Member admin = Member.builder()
                     .email("contact.tackit@gmail.com")
                     .password(passwordEncoder.encode("admin1")) // BCrypt 인코딩
