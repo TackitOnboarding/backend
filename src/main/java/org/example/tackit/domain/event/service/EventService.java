@@ -1,18 +1,17 @@
 package org.example.tackit.domain.event.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Organization.repository.OrganizationRepository;
 import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
-import org.example.tackit.domain.auth.login.repository.MemberRepository;
-import org.example.tackit.domain.entity.*;
+import org.example.tackit.domain.entity.Event;
+import org.example.tackit.domain.entity.EventParticipant;
+import org.example.tackit.domain.entity.Member;
+import org.example.tackit.domain.entity.MemberRole;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.entity.Org.OrgStatus;
 import org.example.tackit.domain.entity.Org.Organization;
 import org.example.tackit.domain.event.dto.*;
 import org.example.tackit.domain.event.repository.EventRepository;
-import org.example.tackit.global.exception.ErrorCode;
-import org.example.tackit.global.exception.MemberNotFoundException;
-import org.springframework.data.domain.PageRequest;
+import org.example.tackit.domain.organization.repository.OrganizationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

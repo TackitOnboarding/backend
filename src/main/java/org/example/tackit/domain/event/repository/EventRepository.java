@@ -1,7 +1,6 @@
 package org.example.tackit.domain.event.repository;
 
 import org.example.tackit.domain.entity.Event;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
