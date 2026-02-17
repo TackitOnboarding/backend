@@ -88,6 +88,21 @@ public class PollService {
     if (reqDto.getVoteScope() == PollScope.PARTIAL) {
       //TODO events에 있는 리스트에 있는 인원이 멤버가 맞는지 검증하는 로직을 공통으로 빼내서 검증 로직 추가
       List<Long> targets = reqDto.getParticipants().stream().distinct().toList();
+
+      List<MemberOrg> memberOrgs = memberOrgRepository.findAllById(targets);
+
+      // 개수 검증
+      if (memberOrgs.size() != targets.size()) {
+        throw new IllegalArgumentException("존재하지 않는 부원 ID가 포함되어 있습니다.");
+      }
+
+      for (MemberOrg memberOrg : memberOrgs) {
+        // 소속 일치 여부 검증
+        if (!memberOrg.getOrganization().getId().equals(poll.getOrgId())) {
+          throw new IllegalArgumentException("해당 그룹의 소속 회원이 아닙니다.");
+        }
+      }
+      
       for (Long targetId : targets) {
         pollTargetRepository.save(PollTarget.builder()
             .poll(poll)
@@ -313,7 +328,7 @@ public class PollService {
         .build();
   }
 
-  
+
   // 투표 존재 확인 메서드
   private Poll findPollOrThrow(Long pollId) {
     return pollRepository.findById(pollId)
