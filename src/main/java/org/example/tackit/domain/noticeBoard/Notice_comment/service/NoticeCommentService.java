@@ -2,146 +2,152 @@ package org.example.tackit.domain.noticeBoard.Notice_comment.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.domain.entity.MemberRole;
+import org.example.tackit.domain.entity.MemberType;
+import org.example.tackit.domain.entity.NoticeComment;
+import org.example.tackit.domain.entity.NoticePost;
+import org.example.tackit.domain.entity.Notification;
+import org.example.tackit.domain.entity.NotificationType;
+import org.example.tackit.domain.entity.Org.MemberOrg;
+import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.noticeBoard.Notice_comment.dto.req.NoticeCommentCreateDto;
 import org.example.tackit.domain.noticeBoard.Notice_comment.dto.req.NoticeCommentUpdateDto;
 import org.example.tackit.domain.noticeBoard.Notice_comment.dto.resp.NoticeCommentRespDto;
 import org.example.tackit.domain.noticeBoard.Notice_comment.repository.NoticeCommentRepository;
 import org.example.tackit.domain.noticeBoard.Notice_post.repository.NoticePostRepository;
-import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
-import org.example.tackit.domain.auth.login.repository.MemberRepository;
-import org.example.tackit.domain.entity.*;
-import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class NoticeCommentService {
-    private final NoticeCommentRepository noticeCommentRepository;
-    private final NoticePostRepository noticePostRepository;
-    private final MemberRepository memberRepository;
-    private final NotificationService notificationService;
-    private final MemberOrgRepository memberOrgRepository;
 
-    // [ 댓글 생성 ]
-    @Transactional
-    public NoticeCommentRespDto createComment(NoticeCommentCreateDto dto, String email, Long orgId){
-        // 현재 접속한 소속의 프로필 조회
-        MemberOrg memberProfile = memberOrgRepository.findByMemberEmailAndId(email, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+  private final NoticeCommentRepository noticeCommentRepository;
+  private final NoticePostRepository noticePostRepository;
+  private final MemberRepository memberRepository;
+  private final NotificationService notificationService;
+  private final MemberOrgRepository memberOrgRepository;
 
-        NoticePost post = noticePostRepository.findById(dto.getNoticePostId())
-                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+  // [ 댓글 생성 ]
+  @Transactional
+  public NoticeCommentRespDto createComment(NoticeCommentCreateDto dto, String email, Long orgId) {
+    // 현재 접속한 소속의 프로필 조회
+    MemberOrg memberProfile = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        // 댓글 엔티티 생성
-        NoticeComment comment = NoticeComment.builder()
-                .writer(memberProfile)
-                .noticePost(post)
-                .content(dto.getContent())
-                .build();
+    NoticePost post = noticePostRepository.findById(dto.getNoticePostId())
+        .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
-        NoticeComment savedComment = noticeCommentRepository.save(comment);
+    // 댓글 엔티티 생성
+    NoticeComment comment = NoticeComment.builder()
+        .writer(memberProfile)
+        .noticePost(post)
+        .content(dto.getContent())
+        .build();
 
-        // 알림 전송
-        if(!post.getWriter().getId().equals(memberProfile.getId())){
-            // 알림 받을 대상
-            MemberOrg postWriterProfile = post.getWriter();
+    NoticeComment savedComment = noticeCommentRepository.save(comment);
 
-            String message = memberProfile.getNickname() + "님이 글에 댓글을 남겼습니다.";
-            String url = "/api/notice-posts/" + post.getId();
+    // 알림 전송
+    if (!post.getWriter().getId().equals(memberProfile.getId())) {
+      // 알림 받을 대상
+      MemberOrg postWriterProfile = post.getWriter();
 
-            // 3. 알림 엔티티 생성
-            Notification notification = Notification.builder()
-                    .member(postWriterProfile.getMember())
-                    .memberOrgId(postWriterProfile.getId())
-                    .type(NotificationType.COMMENT)
-                    .message(message)
-                    .relatedUrl(url)
-                    .fromMemberOrgId(memberProfile.getId())
-                    .build();
+      String message = memberProfile.getNickname() + "님이 글에 댓글을 남겼습니다.";
+      String url = "/api/notice-posts/" + post.getId();
 
-            // 4. 알림 저장 및 전송을 위해 NotificationService 호출
-            notificationService.send(notification);
-        }
+      // 3. 알림 엔티티 생성
+      Notification notification = Notification.builder()
+          .member(postWriterProfile.getMember())
+          .memberOrgId(postWriterProfile.getId())
+          .type(NotificationType.COMMENT)
+          .message(message)
+          .relatedUrl(url)
+          .fromMemberOrgId(memberProfile.getId())
+          .build();
 
-        return new NoticeCommentRespDto(savedComment);
+      // 4. 알림 저장 및 전송을 위해 NotificationService 호출
+      notificationService.send(notification);
     }
 
-    // [ 게시글 댓글 조회 ]
-    @Transactional
-    public List<NoticeCommentRespDto> getCommentByPost(Long postId, Long orgId){
-        NoticePost post = noticePostRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+    return new NoticeCommentRespDto(savedComment);
+  }
 
-        if (!post.getWriter().getId().equals(orgId)) {
-            throw new AccessDeniedException("해당 조직의 게시글만 조회할 수 있습니다.");
-        }
+  // [ 게시글 댓글 조회 ]
+  @Transactional
+  public List<NoticeCommentRespDto> getCommentByPost(Long postId, Long orgId) {
+    NoticePost post = noticePostRepository.findById(postId)
+        .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
-        return noticeCommentRepository.findByNoticePost(post)
-                .stream()
-                .map(NoticeCommentRespDto::new)
-                .toList();
+    if (!post.getWriter().getId().equals(orgId)) {
+      throw new AccessDeniedException("해당 조직의 게시글만 조회할 수 있습니다.");
     }
 
-    // [ 댓글 수정 ] : 작성자만 가능
-    @Transactional
-    public NoticeCommentRespDto updateComment(Long commentId, NoticeCommentUpdateDto dto, String email, Long orgId){
-        MemberOrg memberProfile = memberOrgRepository.findByMemberEmailAndId(email, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    return noticeCommentRepository.findByNoticePost(post)
+        .stream()
+        .map(NoticeCommentRespDto::new)
+        .toList();
+  }
 
-        NoticeComment comment = noticeCommentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
+  // [ 댓글 수정 ] : 작성자만 가능
+  @Transactional
+  public NoticeCommentRespDto updateComment(Long commentId, NoticeCommentUpdateDto dto,
+      String email, Long orgId) {
+    MemberOrg memberProfile = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        if (!comment.getWriter().getId().equals(memberProfile.getId())) {
-            throw new AccessDeniedException("작성자만 수정할 수 있습니다.");
-        }
+    NoticeComment comment = noticeCommentRepository.findById(commentId)
+        .orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
 
-        comment.updateContent(dto.getContent());
-
-        return new NoticeCommentRespDto(comment);
+    if (!comment.getWriter().getId().equals(memberProfile.getId())) {
+      throw new AccessDeniedException("작성자만 수정할 수 있습니다.");
     }
 
-    // [ 댓글 삭제 ] : 작성자, 관리자만 가능
-    @Transactional
-    public void deleteComment(Long commentId, String email, Long orgId){
-        MemberOrg memberProfile = memberOrgRepository.findByMemberEmailAndId(email, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    comment.updateContent(dto.getContent());
 
-        NoticeComment comment = noticeCommentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
+    return new NoticeCommentRespDto(comment);
+  }
 
-        boolean isWriter = comment.getWriter().getId().equals(memberProfile.getId());
-        boolean isAdmin = (memberProfile.getMemberRole() == MemberRole.ADMIN)
-                && (memberProfile.getMemberType() == MemberType.ADMIN);
+  // [ 댓글 삭제 ] : 작성자, 관리자만 가능
+  @Transactional
+  public void deleteComment(Long commentId, String email, Long orgId) {
+    MemberOrg memberProfile = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        if (!isWriter && !isAdmin) {
-            throw new AccessDeniedException("작성자 또는 관리자만 삭제할 수 있습니다.");
-        }
+    NoticeComment comment = noticeCommentRepository.findById(commentId)
+        .orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
 
-        // Hard Delete
-        noticeCommentRepository.delete(comment);
+    boolean isWriter = comment.getWriter().getId().equals(memberProfile.getId());
+    boolean isAdmin = (memberProfile.getMemberRole() == MemberRole.ADMIN)
+        && (memberProfile.getMemberType() == MemberType.ADMIN);
+
+    if (!isWriter && !isAdmin) {
+      throw new AccessDeniedException("작성자 또는 관리자만 삭제할 수 있습니다.");
     }
 
-    // [ 댓글 신고 ]
-    @Transactional
-    public void increaseCommentReportCount(long commmentId, Long orgId){
+    // Hard Delete
+    noticeCommentRepository.delete(comment);
+  }
 
-        NoticeComment comment = noticeCommentRepository.findById(commmentId)
-                .orElseThrow( () -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+  // [ 댓글 신고 ]
+  @Transactional
+  public void increaseCommentReportCount(long commmentId, Long orgId) {
 
-        if (!comment.getWriter().getId().equals(orgId)) {
-            throw new AccessDeniedException("해당 조직의 댓글만 신고할 수 있습니다.");
-        }
-        comment.increaseReportCount();
+    NoticeComment comment = noticeCommentRepository.findById(commmentId)
+        .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
 
-        if (comment.getReportCount() >= 3) {
-            noticeCommentRepository.delete(comment); // Hard Delete
-        }
+    if (!comment.getWriter().getId().equals(orgId)) {
+      throw new AccessDeniedException("해당 조직의 댓글만 신고할 수 있습니다.");
     }
+    comment.increaseReportCount();
+
+    if (comment.getReportCount() >= 3) {
+      noticeCommentRepository.delete(comment); // Hard Delete
+    }
+  }
 }
 
 
