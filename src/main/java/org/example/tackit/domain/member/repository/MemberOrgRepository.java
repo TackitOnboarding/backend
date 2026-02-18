@@ -52,4 +52,8 @@ public interface MemberOrgRepository extends JpaRepository<MemberOrg, Long> {
       OrgStatus status);
 
   int countByOrganizationIdAndOrgStatus(Long orgId, OrgStatus orgStatus);
+
+  List<MemberOrg> findByOrganizationId(Long orgId);   // 특정 조직의 모든 멤버 관계 조회
+
+  List<MemberOrg> findByOrganizationIdAndOrgStatus(Long orgId, OrgStatus orgStatus);  // 특정 조직 + 특정 상태(PENDING, ACTIVE 등)의 멤버 관계 조회
 }

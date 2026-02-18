@@ -2,74 +2,66 @@ package org.example.tackit.domain.executive.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.domain.entity.Org.MemberOrg;
+import org.example.tackit.domain.entity.Org.OrgStatus;
+import org.example.tackit.domain.member.repository.MemberOrgRepository;
 import org.example.tackit.domain.member.repository.MemberRepository;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.executive.dto.request.MemberStatusRequest;
 import org.example.tackit.domain.executive.dto.response.MemberListResponse;
 import org.example.tackit.domain.executive.repository.ExecutiveMemberRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ExecutiveMemberService {
     private final ExecutiveMemberRepository executiveMemberRepository;
     private final MemberRepository memberRepository;
+    private final MemberOrgRepository memberOrgRepository;
 
-    /*
     // [ 모든 멤버 조회 ]
-    @Transactional
-    public List<MemberListResponse> getMembers(MemberStatusRequest request) {
-        String status = request.getStatus();
-
-        List<Member> members;
+    public List<MemberListResponse> getMembers(Long orgId, String orgStatus) {
+        List<MemberOrg> memberOrgs;
 
         // 상태 조건 없다면 -> 전체
-        if( status == null || status.isBlank() )
-            members = memberRepository.findAll();
+        if( orgStatus == null || orgStatus.isBlank() )
+            memberOrgs = memberOrgRepository.findByOrganizationId(orgId);
 
         // 특정 상태(대기, 이용 중, 탈퇴) 조회
         else {
-
-            // members = memberRepository.findByStatus(status);
+            OrgStatus status = OrgStatus.valueOf(orgStatus.toUpperCase());
+            memberOrgs = memberOrgRepository.findByOrganizationIdAndOrgStatus(orgId, status);
         }
 
-        return members.stream()
-                .map()
-    }
-
-    /*
-    // [ 총 회원 수, 이번 달 신규 회원 수, 이번 주 신규 회원 수 ]
-    @Transactional(readOnly = true)
-    public MemberStatisticsDTO getMemberStatistics() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startOfMonth = now.withDayOfMonth(1).with(LocalTime.MIN);
-        LocalDateTime startOfWeek = now.with(ChronoField.DAY_OF_WEEK, 1).toLocalDate().atStartOfDay();
-
-        long totalCount = adminMemberRepository.countAll();
-        long monthlyCount = adminMemberRepository.countJoinedAfter(startOfMonth);
-        long weeklyCount = adminMemberRepository.countJoinedAfter(startOfWeek);
-
-        return new MemberStatisticsDTO(totalCount, monthlyCount, weeklyCount);
-    }
-
-    // [ 탈퇴 회원 수 조회 ]
-    @Transactional(readOnly = true)
-    public DeletedMemberResp getDeletedMembers() {
-        List<Member> deletedMembers = adminMemberRepository.findByStatus(AccountStatus.DELETED);
-
-        List<DeletedMemberDTO> deletedMemberDTOS = deletedMembers.stream()
-                .map(member -> DeletedMemberDTO.from(member))
+        return memberOrgs.stream()
+                .map( mo -> MemberListResponse.builder()
+                        .memberOrgId(mo.getId())
+                        .nickname(mo.getNickname())
+                        .email(mo.getMember().getEmail())
+                        .orgStatus(mo.getOrgStatus().name())
+                        .createdAt(mo.getCreatedAt())
+                        .build())
                 .collect(Collectors.toList());
 
-        Long deletedCount = (long) deletedMembers.size();
-
-        return new DeletedMemberResp(deletedMemberDTOS, deletedCount);
     }
 
+    // [ 멤버 승인 ]
+    public void approveMember(Long memberOrgId) {
+        MemberOrg memberOrg = memberOrgRepository.findById(memberOrgId)
+                .orElseThrow( () -> new IllegalArgumentException("해당 가입 신청을 찾을 수 없습니다."));
 
-}
+        // 상태를 ACTIVE로 변경
+        memberOrg.updateStatus(OrgStatus.ACTIVE);
+    }
 
-     */
+    // [ 멤버 반려 ]
+    public void rejectMember(Long memberOrgId) {
+        MemberOrg memberOrg = memberOrgRepository.findById(memberOrgId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 가입 신청을 찾을 수 없습니다."));
+
+        // 상태를 REJECTED로 변경
+        memberOrg.updateStatus(OrgStatus.REJECTED);
+    }
 }
