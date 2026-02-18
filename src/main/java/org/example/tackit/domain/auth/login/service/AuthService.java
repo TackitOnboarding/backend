@@ -6,12 +6,11 @@ import org.example.tackit.config.Redis.RedisUtil;
 import org.example.tackit.config.jwt.TokenProvider;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.auth.login.dto.*;
-import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
-import org.example.tackit.domain.auth.login.repository.MemberRepository;
+import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.Org.MemberOrg;
-import org.example.tackit.domain.entity.Org.OrgType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -50,7 +49,7 @@ public class AuthService {
                 .email(signUpDto.getEmail())
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .name(signUpDto.getName())
-                .accountStatus(AccountStatus.ACTIVE)
+                .activeStatus(ActiveStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
 

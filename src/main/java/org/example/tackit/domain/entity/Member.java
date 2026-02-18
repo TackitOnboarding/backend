@@ -28,8 +28,6 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    private ActiveStatus status;
-
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private ActiveStatus activeStatus;  // 탈퇴 계정을 위해

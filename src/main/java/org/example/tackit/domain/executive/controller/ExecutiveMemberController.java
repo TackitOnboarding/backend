@@ -17,12 +17,15 @@ public class ExecutiveMemberController {
 
 
     // [ 전체 회원 조회 ]
+    /*
     @GetMapping
     public ResponseEntity<List<MemberListResponse>> getAllMembers(
             @RequestParam(required = false) String status
     ) {
         return ResponseEntity.ok(users);
     }
+
+     */
 
     /*
     // [ 대기 회원 조회 ]

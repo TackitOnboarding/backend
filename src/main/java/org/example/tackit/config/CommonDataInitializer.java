@@ -3,7 +3,7 @@ package org.example.tackit.config;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.organization.repository.SchoolRepository;
 import org.example.tackit.domain.entity.*;
-import org.example.tackit.domain.auth.login.repository.MemberRepository;
+import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.entity.Org.School;
 import org.example.tackit.domain.entity.Org.SchoolType;
 import org.springframework.boot.CommandLineRunner;
@@ -29,7 +29,7 @@ public class CommonDataInitializer implements CommandLineRunner {
                     .email("contact.tackit@gmail.com")
                     .password(passwordEncoder.encode("admin1")) // BCrypt 인코딩
                     .name("관리자")
-                    .status(AccountStatus.ACTIVE)
+                    .activeStatus(ActiveStatus.ACTIVE)
                     .createdAt(LocalDateTime.now())
                     .build();
 

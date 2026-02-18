@@ -7,7 +7,7 @@ import org.example.tackit.domain.qnaBoard.QnA_comment.dto.request.QnACommentUpda
 import org.example.tackit.domain.qnaBoard.QnA_comment.dto.response.QnACommentResponseDto;
 import org.example.tackit.domain.qnaBoard.QnA_comment.repository.QnACommentRepository;
 import org.example.tackit.domain.qnaBoard.QnA_post.repository.QnAPostRepository;
-import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
+import org.example.tackit.domain.member.repository.MemberOrgRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
@@ -37,7 +37,7 @@ public class QnACommentService {
 
         QnAComment comment = QnAComment.builder()
                 .writer(member)
-                .accountStatus(AccountStatus.ACTIVE)
+                .activeStatus(ActiveStatus.ACTIVE)
                 .qnAPost(post)
                 .content(dto.getContent())
                 .createdAt(LocalDateTime.now())

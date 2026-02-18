@@ -2,7 +2,7 @@ package org.example.tackit.domain.executive.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.auth.login.repository.MemberRepository;
+import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.executive.dto.request.MemberStatusRequest;
 import org.example.tackit.domain.executive.dto.response.MemberListResponse;
@@ -17,6 +17,7 @@ public class ExecutiveMemberService {
     private final ExecutiveMemberRepository executiveMemberRepository;
     private final MemberRepository memberRepository;
 
+    /*
     // [ 모든 멤버 조회 ]
     @Transactional
     public List<MemberListResponse> getMembers(MemberStatusRequest request) {
@@ -67,6 +68,8 @@ public class ExecutiveMemberService {
         return new DeletedMemberResp(deletedMemberDTOS, deletedCount);
     }
 
-     */
 
+}
+
+     */
 }

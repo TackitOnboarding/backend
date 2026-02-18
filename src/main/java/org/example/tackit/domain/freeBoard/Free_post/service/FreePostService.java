@@ -9,8 +9,8 @@ import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreePostRespDt
 import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreeScrapResponseDto;
 import org.example.tackit.domain.freeBoard.Free_post.repository.*;
 import org.example.tackit.domain.freeBoard.Free_tag.repository.FreePostTagMapRepository;
-import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
-import org.example.tackit.domain.auth.login.repository.MemberRepository;
+import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.entity.*;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.notification.service.NotificationService;
@@ -53,9 +53,9 @@ public class FreePostService {
         Long orgId = currProfile.getOrganization().getId();
 
         // 해당 조직의 게시글만 조회
-        Page<FreePost> page = freePostJPARepository.findAllByOrganizationIdAndAccountStatus(
+        Page<FreePost> page = freePostJPARepository.findAllByOrganizationIdAndActiveStatus(
                 orgId,
-                AccountStatus.ACTIVE,
+                ActiveStatus.ACTIVE,
                 pageable
         );
 
@@ -98,7 +98,7 @@ public class FreePostService {
             throw new AccessDeniedCustomException(ErrorCode.ACCESS_DENIED_ORGANIZATION);
         }
 
-        if (!post.getAccountStatus().equals(AccountStatus.ACTIVE)) {
+        if (!post.getActiveStatus().equals(ActiveStatus.ACTIVE)) {
             throw new PostInactiveException(ErrorCode.POST_IS_INACTIVE);
         }
 
@@ -149,7 +149,7 @@ public class FreePostService {
                         .isAnonymous(dto.isAnonymous())
                         .createdAt(LocalDateTime.now())
                         .type(Post.Free)
-                        .accountStatus(AccountStatus.ACTIVE)
+                        .activeStatus(ActiveStatus.ACTIVE)
                         .reportCount(0)
                         .build();
 
@@ -374,7 +374,7 @@ public class FreePostService {
     // 인기 3개
     @Transactional(readOnly = true)
     public List<FreePopularPostRespDto> getPopularPosts(Long orgId) {
-        return freePostJPARepository.findTop3ByOrganizationIdAndAccountStatusOrderByViewCountDescScrapCountDesc(orgId, AccountStatus.ACTIVE)
+        return freePostJPARepository.findTop3ByOrganizationIdAndActiveStatusOrderByViewCountDescScrapCountDesc(orgId, ActiveStatus.ACTIVE)
                 .stream()
                 .map(FreePopularPostRespDto::from)
                 .toList();

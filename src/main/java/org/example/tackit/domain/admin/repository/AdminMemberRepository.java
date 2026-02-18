@@ -12,8 +12,8 @@ import java.util.Optional;
 
 public interface AdminMemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT u FROM Member u WHERE u.email <> 'admin' ORDER BY " +
-            "CASE WHEN u.status = 0 THEN 0 ELSE 1 END")
-    List<Member> findAllOrderByStatus();
+            "CASE WHEN u.activeStatus = 0 THEN 0 ELSE 1 END")
+    List<Member> findAllOrderByActiveStatus();
 
     Optional<Member> findByEmail(String email);
 
@@ -26,7 +26,7 @@ public interface AdminMemberRepository extends JpaRepository<Member, Long> {
     Long countJoinedAfter(@Param("date")LocalDateTime date);
 
     // 탈퇴 회원 통계
-    List<Member> findByStatus(ActiveStatus activeStatus);
+    List<Member> findByActiveStatus(ActiveStatus activeStatus);
 
     // 1년마다 뉴비 -> 시니어 자동 갱신
 
