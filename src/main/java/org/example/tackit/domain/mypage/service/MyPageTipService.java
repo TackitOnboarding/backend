@@ -1,33 +1,24 @@
 package org.example.tackit.domain.mypage.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.domain.admin.repository.AdminMemberRepository;
+import org.example.tackit.domain.member.repository.MemberOrgRepository;
 import org.example.tackit.domain.tipBoard.Tip_comment.repository.TipCommentRepository;
 import org.example.tackit.domain.tipBoard.Tip_post.repository.TipPostRepository;
-import org.example.tackit.domain.tipBoard.Tip_tag.repository.TipPostTagMapRepository;
-import org.example.tackit.domain.admin.repository.AdminMemberRepository;
-import org.example.tackit.domain.auth.login.repository.MemberOrgRepository;
-import org.example.tackit.domain.entity.*;
-import org.example.tackit.domain.mypage.dto.response.TipMyCommentResponseDto;
-import org.example.tackit.domain.mypage.dto.response.TipMyPostResponseDto;
-import org.example.tackit.domain.mypage.dto.response.TipScrapResponse;
 import org.example.tackit.domain.tipBoard.Tip_post.repository.TipScrapRepository;
-import org.example.tackit.common.dto.PageResponseDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.example.tackit.domain.tipBoard.Tip_tag.repository.TipPostTagMapRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MyPageTipService {
-    private final TipScrapRepository tipScrapRepository;
-    private final AdminMemberRepository adminMemberRepository;
-    private final TipPostRepository tipPostRepository;
-    private final TipPostTagMapRepository tipPostTagMapRepository;
-    private final TipCommentRepository tipCommentRepository;
-    private final MemberOrgRepository memberOrgRepository;
+
+  private final TipScrapRepository tipScrapRepository;
+  private final AdminMemberRepository adminMemberRepository;
+  private final TipPostRepository tipPostRepository;
+  private final TipPostTagMapRepository tipPostTagMapRepository;
+  private final TipCommentRepository tipCommentRepository;
+  private final MemberOrgRepository memberOrgRepository;
 
     /*
     // 스크랩한 tip 게시글 조회

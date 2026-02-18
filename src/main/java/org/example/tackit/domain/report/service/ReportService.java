@@ -1,11 +1,7 @@
 package org.example.tackit.domain.report.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.auth.login.repository.MemberRepository;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Report;
-import org.example.tackit.domain.report.dto.ReportRequestDto;
+import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.report.repository.ReportRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +9,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ReportService {
-    private final ReportRepository reportRepository;
-    private final MemberRepository memberRepository;
+
+  private final ReportRepository reportRepository;
+  private final MemberRepository memberRepository;
 
     /*
     @Transactional
