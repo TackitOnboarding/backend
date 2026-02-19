@@ -1,48 +1,67 @@
 package org.example.tackit.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.report.dto.ReportRequestDto;
 
 import java.time.LocalDateTime;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Table(name = "report")
 public class Report {
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     // 신고자
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reporter_id")
+    @JoinColumn(name = "reporter_id", nullable = false)
     private MemberOrg reporter;
 
+    // 작성자
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "writer_id", nullable = false)
+    private MemberOrg writer;
+
+    @Column(nullable = false)
     private Long targetId;
 
-    @Enumerated(EnumType.STRING)  // DB에 문자열 형태로 저장
+    // POST / COMMENT
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TargetType targetType;
 
+    // QNA / TIP / FREE
     @Enumerated(EnumType.STRING)
-    private ReportReason reason;
+    @Column(nullable = false)
+    private Post postType;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReportReason reportReason;
 
-    public static Report fromDto(ReportRequestDto dto, MemberOrg reporter) {
-        Report report = new Report();
-        report.reporter = reporter;
-        report.targetId = dto.getTargetId();
-        report.targetType = dto.getTargetType();
-        report.reason = dto.getReason();
-        report.createdAt = LocalDateTime.now();
-        return report;
+    @Column(nullable = false)
+    private LocalDateTime reportedAt;
+
+    @Enumerated(EnumType.STRING)
+    private ActiveStatus activeStatus;
+
+    public static Report from(ReportRequestDto dto, MemberOrg reporter, MemberOrg writer) {
+        return Report.builder()
+                .reporter(reporter)
+                .writer(writer)
+                .targetId(dto.getTargetId())
+                .targetType(dto.getTargetType())
+                .postType(dto.getPostType())
+                .reportReason(dto.getReason())
+                .activeStatus(ActiveStatus.ACTIVE) // 초기값 설정
+                .build();
     }
+
 }
 
