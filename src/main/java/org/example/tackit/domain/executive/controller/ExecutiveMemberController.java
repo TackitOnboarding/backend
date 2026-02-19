@@ -1,7 +1,7 @@
 package org.example.tackit.domain.executive.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.executive.dto.response.MemberListResponse;
+import org.example.tackit.domain.executive.dto.response.MemberListResDto;
 import org.example.tackit.domain.executive.service.ExecutiveMemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +16,11 @@ public class ExecutiveMemberController {
 
     // [ 전체 회원 조회 ]
     @GetMapping
-    public ResponseEntity<List<MemberListResponse>> getAllMembers(
+    public ResponseEntity<List<MemberListResDto>> getAllMembers(
             @RequestParam Long orgId,
-            @RequestParam(required = false) String orgStatus
+            @RequestParam(value = "orgStatus", defaultValue = "ALL") String orgStatus
     ) {
-        List<MemberListResponse> responses = executiveMemberService.getMembers(orgId, orgStatus);
+        List<MemberListResDto> responses = executiveMemberService.getMembers(orgId, orgStatus);
         return ResponseEntity.ok(responses);
     }
 

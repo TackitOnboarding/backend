@@ -6,7 +6,7 @@ import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.entity.Org.OrgStatus;
 import org.example.tackit.domain.member.repository.MemberOrgRepository;
 import org.example.tackit.domain.member.repository.MemberRepository;
-import org.example.tackit.domain.executive.dto.response.MemberListResponse;
+import org.example.tackit.domain.executive.dto.response.MemberListResDto;
 import org.example.tackit.domain.executive.repository.ExecutiveMemberRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class ExecutiveMemberService {
     private final MemberOrgRepository memberOrgRepository;
 
     // [ 모든 멤버 조회 ]
-    public List<MemberListResponse> getMembers(Long orgId, String orgStatus) {
+    public List<MemberListResDto> getMembers(Long orgId, String orgStatus) {
         List<MemberOrg> memberOrgs;
 
         // 상태 조건 없다면 -> 전체
@@ -36,7 +36,7 @@ public class ExecutiveMemberService {
         }
 
         return memberOrgs.stream()
-                .map( mo -> MemberListResponse.builder()
+                .map( mo -> MemberListResDto.builder()
                         .memberOrgId(mo.getId())
                         .nickname(mo.getNickname())
                         .email(mo.getMember().getEmail())
