@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MemberOrgRepository extends JpaRepository<MemberOrg, Long> {
 
+  Optional<MemberOrg> findByOrganizationIdAndMemberEmail(Long orgId, String email);
+
   // 특정 소속(Org) 내에서 닉네임 중복 확인
   boolean existsByOrganizationIdAndNickname(Long orgId, String nickname);
 

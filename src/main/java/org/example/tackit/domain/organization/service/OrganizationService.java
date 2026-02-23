@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import lombok.AllArgsConstructor;
 import org.example.tackit.domain.entity.Member;
+import org.example.tackit.domain.entity.MemberRole;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.entity.Org.OrgStatus;
 import org.example.tackit.domain.entity.Org.OrgType;
@@ -82,6 +83,12 @@ public class OrganizationService {
     // 최초 가입자 여부 확인
     boolean isFirstMember = !memberOrgRepository.existsByOrganizationId(orgId);
 
+    // 최초 가입자 && 운영진 -> ACTIVE 되도록
+    OrgStatus status = OrgStatus.PENDING;
+    if (isFirstMember && dto.getMemberRole() == MemberRole.EXECUTIVE) {
+      status = OrgStatus.ACTIVE;
+    }
+
     MemberOrg memberOrg = MemberOrg.builder()
         .member(member)
         .organization(organization) // 통합된 필드 사용
@@ -90,7 +97,7 @@ public class OrganizationService {
         .memberRole(dto.getMemberRole())
         .memberType(dto.getMemberType())
         .joinedYear(LocalDate.now().getYear())
-        .orgStatus(isFirstMember ? OrgStatus.ACTIVE : OrgStatus.PENDING) // 삼항 연산자로 깔끔하게
+        .orgStatus(status)
         .build();
 
     memberOrgRepository.save(memberOrg);
