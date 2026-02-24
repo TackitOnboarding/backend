@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.tackit.domain.entity.Post;
 import org.example.tackit.domain.entity.ReportReason;
 import org.example.tackit.domain.entity.TargetType;
 
@@ -12,7 +13,8 @@ import org.example.tackit.domain.entity.TargetType;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReportRequestDto {
-    private Long targetId;           // 신고 대상 글/댓글 ID
+    private Long targetId;
     private TargetType targetType;   // POST / COMMENT
+    private Post postType;
     private ReportReason reason;
 }

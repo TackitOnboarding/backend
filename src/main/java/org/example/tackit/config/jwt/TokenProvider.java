@@ -9,7 +9,7 @@ import org.example.tackit.config.Redis.RedisUtil;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.ActiveStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.example.tackit.domain.auth.login.dto.TokenDto;
 import org.springframework.beans.factory.annotation.Value;
@@ -173,7 +173,7 @@ public class TokenProvider {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 탈퇴 회원 차단
-        if (member.getAccountStatus() == AccountStatus.DELETED) {
+        if (member.getActiveStatus() == ActiveStatus.DELETED) {
             throw new RuntimeException("탈퇴한 회원입니다.");
         }
 

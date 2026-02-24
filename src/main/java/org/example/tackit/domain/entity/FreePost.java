@@ -42,7 +42,7 @@ public class FreePost implements ReportablePost {
     private String tag;
 
     @Enumerated(EnumType.STRING)
-    private AccountStatus accountStatus;
+    private ActiveStatus activeStatus;
     private int reportCount = 0;
 
     private Long viewCount = 0L;
@@ -84,22 +84,22 @@ public class FreePost implements ReportablePost {
      */
 
     public void delete() {
-        this.accountStatus = AccountStatus.DELETED;
+        this.activeStatus = ActiveStatus.DELETED;
     }
 
     public void increaseReportCount() {
         this.reportCount++;
         if (this.reportCount >= 3) {
-            this.accountStatus = AccountStatus.DELETED;
+            this.activeStatus = ActiveStatus.DELETED;
         }
     }
 
     public void activate(){
-        if (this.accountStatus != AccountStatus.DELETED) {
+        if (this.activeStatus != ActiveStatus.DELETED) {
             throw new IllegalStateException("삭제되지 않은 게시글은 활성화할 수 없습니다.");
         }
 
-        this.accountStatus = AccountStatus.ACTIVE;
+        this.activeStatus = ActiveStatus.ACTIVE;
         this.reportCount = 0;
     }
 

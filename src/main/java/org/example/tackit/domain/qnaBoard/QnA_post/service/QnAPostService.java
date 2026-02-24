@@ -7,7 +7,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.common.dto.PageResponseDTO;
 import org.example.tackit.config.S3.S3UploadService;
-import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.MemberRole;
 import org.example.tackit.domain.entity.MemberType;
 import org.example.tackit.domain.entity.Org.MemberOrg;
@@ -42,42 +42,43 @@ public class QnAPostService {
   private final S3UploadService s3UploadService;
   private final QnAScrapRepository qnAScrapRepository;
 
-  // 게시글 작성 (NEWBIE만 가능)
-  @Transactional
-  public QnAPostRespDto createPost(QnAPostReqDto dto, String email, Long orgId) throws IOException {
-    MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
-        .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+    // 게시글 작성 (NEWBIE만 가능)
+    @Transactional
+    public QnAPostRespDto createPost(QnAPostReqDto dto, String email, Long orgId) throws IOException {
+        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-    if (member.getMemberType() != MemberType.NEWBIE) {
-      throw new AccessDeniedException("NEWBIE만 질문을 작성할 수 있습니다.");
+        if (member.getMemberType() != MemberType.NEWBIE) {
+            throw new AccessDeniedException("NEWBIE만 질문을 작성할 수 있습니다.");
+        }
+
+        QnAPost post = QnAPost.builder()
+                .writer(member)
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .createdAt(LocalDateTime.now())
+                .type(Post.QnA)
+                .activeStatus(ActiveStatus.ACTIVE)
+                .reportCount(0)
+                .isAnonymous(dto.isAnonymous())
+                .build();
+
+        // 이미지가 있으면 추가
+        if (dto.getImageUrl() != null && !dto.getImageUrl().isEmpty()) {
+            String imageUrl = s3UploadService.saveFile(dto.getImageUrl());
+            QnAPostImage image = new QnAPostImage();
+            image.setImageUrl(imageUrl);
+            image.setPost(post);
+            post.addImage(image);
+        }
+
+        qnAPostRepository.save(post);
+
+        List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
+
+        return QnAPostRespDto.fromEntity(post, tagNames, false);
     }
 
-    QnAPost post = QnAPost.builder()
-        .writer(member)
-        .title(dto.getTitle())
-        .content(dto.getContent())
-        .createdAt(LocalDateTime.now())
-        .type(Post.QnA)
-        .accountStatus(AccountStatus.ACTIVE)
-        .reportCount(0)
-        .isAnonymous(dto.isAnonymous())
-        .build();
-
-    // 이미지가 있으면 추가
-    if (dto.getImageUrl() != null && !dto.getImageUrl().isEmpty()) {
-      String imageUrl = s3UploadService.saveFile(dto.getImageUrl());
-      QnAPostImage image = new QnAPostImage();
-      image.setImageUrl(imageUrl);
-      image.setPost(post);
-      post.addImage(image);
-    }
-
-    qnAPostRepository.save(post);
-
-    List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
-
-    return QnAPostRespDto.fromEntity(post, tagNames, false);
-  }
 
   // 게시글 수정 (작성자만 가능)
   @Transactional
@@ -145,8 +146,8 @@ public class QnAPostService {
 
   // 게시글 전체 조회
   public PageResponseDTO<QnAPostRespDto> findAll(Long orgId, Pageable pageable) {
-    Page<QnAPost> page = qnAPostRepository.findByWriterIdAndAccountStatus(orgId,
-        AccountStatus.ACTIVE, pageable);
+    Page<QnAPost> page = qnAPostRepository.findByWriterIdAndActiveStatus(orgId,
+        ActiveStatus.ACTIVE, pageable);
     List<QnAPost> posts = page.getContent();
 
     Map<Long, List<String>> tagMap = tagService.getTagNamesByPosts(posts);
@@ -195,20 +196,19 @@ public class QnAPostService {
         .qnaPost(post)
         .build());
 
-    post.increaseReportCount();
-
-    return "게시글을 신고하였습니다.";
+      post.increaseReportCount();
+      return "게시글을 신고하였습니다.";
   }
 
   // 인기 3개
   @Transactional(readOnly = true)
   public List<QnAPopularPostRespDto> getPopularPosts(Long orgId) {
-    return qnAPostRepository.findTop3ByWriterIdAndAccountStatusOrderByViewCountDescScrapCountDesc(
-            orgId, AccountStatus.ACTIVE)
-        .stream()
-        .map(QnAPopularPostRespDto::from)
-        .toList();
-                /*
+      return qnAPostRepository.findTop3ByWriterIdAndActiveStatusOrderByViewCountDescScrapCountDesc(
+                      orgId, ActiveStatus.ACTIVE)
+              .stream()
+              .map(QnAPopularPostRespDto::from)
+              .toList();
+                    /*
                 .stream()
                 .filter(post -> post.getWriter().getOrganization().equals(organization))
                 .sorted(Comparator
@@ -227,6 +227,5 @@ public class QnAPostService {
 
                  */
   }
-
 
 }

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.ActiveStatus;
 
 import java.time.LocalDateTime;
 
@@ -21,7 +21,7 @@ public class DeletedMemberDTO {
     private String nickname;
 
     // 상태
-    private AccountStatus accountStatus;
+    private ActiveStatus activeStatus;
 
     // 가입일자
     private LocalDateTime createdAt;
@@ -30,7 +30,7 @@ public class DeletedMemberDTO {
         return DeletedMemberDTO.builder()
                 .email(member.getEmail())
                 .createdAt(member.getCreatedAt())
-                .accountStatus(member.getAccountStatus())
+                .activeStatus(member.getActiveStatus())
                 .build();
     }
 }

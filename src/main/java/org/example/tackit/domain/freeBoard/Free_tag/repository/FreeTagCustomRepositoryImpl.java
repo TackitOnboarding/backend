@@ -5,7 +5,7 @@ import org.example.tackit.domain.freeBoard.Free_tag.dto.response.FreeTagPostResp
 import org.example.tackit.domain.entity.FreePost;
 import org.example.tackit.domain.entity.FreePostImage;
 import org.example.tackit.domain.entity.FreeTagMap;
-import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.ActiveStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.example.tackit.domain.entity.QFreePostImage.freePostImage;
-import static org.example.tackit.domain.entity.QMember.member;
 import static org.example.tackit.domain.entity.QFreePost.freePost;
 import static org.example.tackit.domain.entity.QFreeTag.freeTag;
 import static org.example.tackit.domain.entity.QFreeTagMap.freeTagMap;
@@ -46,7 +45,7 @@ public class FreeTagCustomRepositoryImpl implements FreeTagCustomRepository{
                 .selectFrom(freePost)
                 .join(freePost.writer).fetchJoin()
                 .where(freePost.id.in(postIds),
-                        freePost.accountStatus.eq(AccountStatus.ACTIVE)
+                        freePost.activeStatus.eq(ActiveStatus.ACTIVE)
                         // freePost.writer.organization.eq(organization)
                 )
                 .orderBy(freePost.createdAt.desc())
@@ -105,7 +104,7 @@ public class FreeTagCustomRepositoryImpl implements FreeTagCustomRepository{
                 .join(freeTagMap.tag, freeTag)
                 .where(
                         freeTag.id.eq(tagId),
-                        freePost.accountStatus.eq(AccountStatus.ACTIVE)
+                        freePost.activeStatus.eq(ActiveStatus.ACTIVE)
                 )
                 .fetchOne();
         return new PageImpl<>(content, pageable, total);

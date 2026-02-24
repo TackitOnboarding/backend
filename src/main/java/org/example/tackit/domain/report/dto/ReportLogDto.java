@@ -19,8 +19,8 @@ public class ReportLogDto {
         return ReportLogDto.builder()
                 .reportId(report.getId())
                 .reporterNickname(report.getReporter().getNickname())
-                .reportReason(report.getReason())
-                .createdAt(report.getCreatedAt())
+                .reportReason(report.getReportReason())
+                .createdAt(report.getReportedAt())
                 .build();
     }
 }

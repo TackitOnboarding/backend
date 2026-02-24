@@ -2,7 +2,7 @@ package org.example.tackit.domain.tipBoard.Tip_tag.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.example.tackit.domain.tipBoard.Tip_tag.dto.response.TipTagPostResponseDto;
-import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.TipPost;
 import org.example.tackit.domain.entity.TipPostImage;
 import org.example.tackit.domain.entity.TipTagMap;
@@ -52,7 +52,7 @@ public class TipTagCustomRepositoryImpl implements TipTagCustomRepository {
                 .selectFrom(tipPost)
                 .join(tipPost.writer).fetchJoin()
                 .where(tipPost.id.in(postIds),
-                        tipPost.accountStatus.eq(AccountStatus.ACTIVE)
+                        tipPost.activeStatus.eq(ActiveStatus.ACTIVE)
                         // memberOrg.id.eq(orgId)
                 )
                 .orderBy(tipPost.createdAt.desc())
@@ -111,7 +111,7 @@ public class TipTagCustomRepositoryImpl implements TipTagCustomRepository {
                 .join(tipTagMap.tag, tipTag)
                 .where(
                         tipTag.id.eq(tagId),
-                        tipPost.accountStatus.eq(AccountStatus.ACTIVE)
+                        tipPost.activeStatus.eq(ActiveStatus.ACTIVE)
                 )
                 .fetchOne();
 

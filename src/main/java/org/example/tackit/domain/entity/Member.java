@@ -28,11 +28,9 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    private AccountStatus status;
-
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    private AccountStatus accountStatus;  // 탈퇴 계정을 위해
+    private ActiveStatus activeStatus;  // 탈퇴 계정을 위해
 
     // 연차 계산 책임은 Member 도메인 내부에 분리
     // member 도메인 내에서만 쓰이기 때문에 private
@@ -65,7 +63,7 @@ public class Member {
 
     // 자신을 비활성화는 책임 부여
     public void deactivate() {
-        this.accountStatus = AccountStatus.DELETED;
+        this.activeStatus = ActiveStatus.DELETED;
     }
 
     /*

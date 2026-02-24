@@ -1,7 +1,7 @@
 package org.example.tackit.domain.freeBoard.Free_post.repository;
 
 import org.example.tackit.domain.entity.FreePost;
-import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.ActiveStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,20 +14,20 @@ import java.util.List;
 
 public interface FreePostJPARepository extends JpaRepository<FreePost, Long> {
 
-    Page<FreePost> findByWriterIdAndAccountStatus(Long writerId, AccountStatus accountStatus, Pageable pageable);
+    Page<FreePost> findByWriterIdAndActiveStatus(Long writerId, ActiveStatus activeStatus, Pageable pageable);
 
-    Page<FreePost> findAllByOrganizationIdAndAccountStatus(Long orgId, AccountStatus status, Pageable pageable);
+    Page<FreePost> findAllByOrganizationIdAndActiveStatus(Long orgId, ActiveStatus status, Pageable pageable);
 
-    List<FreePost> findTop3ByOrganizationIdAndAccountStatusOrderByViewCountDescScrapCountDesc(Long orgId, AccountStatus accountStatus);
+    List<FreePost> findTop3ByOrganizationIdAndActiveStatusOrderByViewCountDescScrapCountDesc(Long orgId, ActiveStatus activeStatus);
 
     // 인기 3개
     @Query("SELECT f FROM FreePost f " +
-            "WHERE f.accountStatus = :status " +
+            "WHERE f.activeStatus = :status " +
             "AND f.createdAt BETWEEN :start AND :end " +
             "AND f.writer.organization.id = :orgId " +
             "ORDER BY f.viewCount DESC, f.scrapCount DESC")
     List<FreePost> findTop3PopularByOrg(
-            @Param("status") AccountStatus status,
+            @Param("status") ActiveStatus status,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             @Param("orgId") Long orgId,

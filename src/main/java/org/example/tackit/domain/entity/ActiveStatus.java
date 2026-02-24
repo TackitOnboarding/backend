@@ -1,5 +1,5 @@
 package org.example.tackit.domain.entity;
 
-public enum AccountStatus {
+public enum ActiveStatus {
     ACTIVE, DELETED
 }

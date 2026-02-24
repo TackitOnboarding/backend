@@ -35,16 +35,6 @@ public class MemberOrg {
     @JoinColumn(name = "org_id")
     private Organization organization;
 
-    /*
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_id")
-    private Club club;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "community_id")
-    private Community community;
-     */
-
     @Enumerated(EnumType.STRING)
     private OrgType orgType; // CLUB, COMMUNITY
 
@@ -63,4 +53,8 @@ public class MemberOrg {
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    public void updateStatus(OrgStatus status) {
+        this.orgStatus = status;
+    }
 }

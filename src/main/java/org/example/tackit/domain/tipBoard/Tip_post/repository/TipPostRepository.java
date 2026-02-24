@@ -1,6 +1,6 @@
 package org.example.tackit.domain.tipBoard.Tip_post.repository;
 
-import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.TipPost;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,11 +17,11 @@ public interface TipPostRepository extends JpaRepository<TipPost, Long> {
 
     // 인기 3개
     @Query("SELECT t FROM TipPost t JOIN t.writer w " +
-            "WHERE t.accountStatus = :status AND t.createdAt BETWEEN :start AND :end " +
+            "WHERE t.activeStatus = :status AND t.createdAt BETWEEN :start AND :end " +
             "AND w.organization.id = :orgId " + // 통합된 organization 필드 참조
             "ORDER BY t.viewCount DESC, t.scrapCount DESC")
     List<TipPost> findTop3PopularByOrg(
-            @Param("status") AccountStatus status,
+            @Param("status") ActiveStatus status,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             @Param("orgId") Long orgId,

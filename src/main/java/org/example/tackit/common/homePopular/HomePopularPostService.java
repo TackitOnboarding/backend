@@ -38,7 +38,7 @@ public class HomePopularPostService {
 
         // Free 게시판
         List<FreePost> freePosts = freePostRepository.findTop3PopularByOrg(
-                AccountStatus.ACTIVE,
+                ActiveStatus.ACTIVE,
                 startOfWeek,
                 now,
                 orgId,
@@ -48,7 +48,7 @@ public class HomePopularPostService {
 
         // QnA 게시판
         List<QnAPost> qnaPosts = qnaPostRepository.findTop3PopularByOrg(
-                AccountStatus.ACTIVE,
+                ActiveStatus.ACTIVE,
                 startOfWeek,
                 now,
                 orgId,
@@ -59,7 +59,7 @@ public class HomePopularPostService {
 
         // Tip 게시판
         List<TipPost> tipPosts = tipPostRepository.findTop3PopularByOrg(
-                AccountStatus.ACTIVE,
+                ActiveStatus.ACTIVE,
                 startOfWeek,
                 now,
                 orgId,

@@ -5,18 +5,16 @@ import org.example.tackit.domain.qnaBoard.QnA_tag.dto.response.QnATagPostRespons
 import org.example.tackit.domain.entity.QnAPost;
 import org.example.tackit.domain.entity.QnAPostImage;
 import org.example.tackit.domain.entity.QnATagMap;
-import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.ActiveStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import static org.example.tackit.domain.entity.QFreePost.freePost;
 import static org.example.tackit.domain.entity.QQnAPost.qnAPost;
 import static org.example.tackit.domain.entity.QQnAPostImage.qnAPostImage;
 import static org.example.tackit.domain.entity.QQnATagMap.qnATagMap;
 import static org.example.tackit.domain.entity.QQnATag.qnATag;
-import static org.example.tackit.domain.entity.QMember.member;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +49,7 @@ public class QnATagCustomRepositoryImpl implements QnATagCustomRepository{
                 .selectFrom(qnAPost)
                 .join(qnAPost.writer).fetchJoin()
                 .where(qnAPost.id.in(postIds),
-                        qnAPost.accountStatus.eq(AccountStatus.ACTIVE)
+                        qnAPost.activeStatus.eq(ActiveStatus.ACTIVE)
                         // qnAPost.writer.organization.eq(organization)
                 )
                 .orderBy(qnAPost.createdAt.desc())
@@ -110,7 +108,7 @@ public class QnATagCustomRepositoryImpl implements QnATagCustomRepository{
                 .join(qnATagMap.tag, qnATag)
                 .where(
                         qnATag.id.eq(tagId),
-                        qnAPost.accountStatus.eq(AccountStatus.ACTIVE)
+                        qnAPost.activeStatus.eq(ActiveStatus.ACTIVE)
                 )
                 .fetchOne();
 

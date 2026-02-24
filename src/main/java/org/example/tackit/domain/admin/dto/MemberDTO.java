@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.tackit.domain.entity.AccountStatus;
+import org.example.tackit.domain.entity.ActiveStatus;
 
 import java.time.LocalDate;
 
@@ -17,6 +17,6 @@ public class MemberDTO {
     private String nickname;
     private String email;
     private String organization;
-    private AccountStatus accountStatus;
+    private ActiveStatus activeStatus;
     private LocalDate createdAt;
 }
