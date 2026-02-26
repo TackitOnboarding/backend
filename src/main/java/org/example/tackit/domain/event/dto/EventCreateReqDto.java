@@ -38,6 +38,6 @@ public class EventCreateReqDto {
   @NotNull(message = "참여자 목록 필드는 필수입니다.")
   private List<Long> participants;
 
-  @NotBlank(message = "색상 코드는 필수입니다.")
+  @NotNull(message = "색상 코드는 필수입니다.")
   private ColorChip colorChip;
 }
