@@ -2,6 +2,7 @@ package org.example.tackit.domain.organization.dto.req;
 
 import lombok.*;
 import org.example.tackit.domain.entity.Org.*;
+import org.example.tackit.domain.entity.Org.University;
 
 @Data
 @Getter
@@ -13,14 +14,14 @@ public class OrgCreateReqDto {
     private OrgType orgType;
     private String orgDescription;
 
-    private Long schoolId;
+    private Long universityId;
 
-    public Organization toEntity(School school) {
+    public Organization toEntity(University university) {
         return Organization.builder()
                 .name(this.orgName)
                 .type(this.orgType)
                 .description(this.orgDescription)
-                .school(this.orgType == OrgType.CLUB ?  school : null)
+                .university(this.orgType == OrgType.CLUB ?  university : null)
                 .build();
     }
 }

@@ -33,8 +33,8 @@ public class Organization {
 
     // Club 필드
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "school_id")
-    private School school;
+    @JoinColumn(name = "university_id")
+    private University university;
 }
 
 
