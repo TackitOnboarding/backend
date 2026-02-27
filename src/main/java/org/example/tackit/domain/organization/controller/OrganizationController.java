@@ -3,6 +3,7 @@ package org.example.tackit.domain.organization.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.organization.dto.req.OrgCreateReqDto;
 import org.example.tackit.domain.organization.dto.req.OrgJoinReqDto;
+import org.example.tackit.domain.organization.dto.resp.OrgRespDto;
 import org.example.tackit.domain.organization.service.OrganizationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,17 +19,17 @@ public class OrganizationController {
 
     // 모임 등록
     @PostMapping
-    public ResponseEntity<?> createOrg(
+    public ResponseEntity<OrgRespDto> createOrg(
             @RequestBody OrgCreateReqDto dto,
             Authentication authentication
     ) {
         if (authentication == null) {
-            return ResponseEntity.status(401).body("인증 정보가 없습니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         String email = authentication.getName();
-        organizationService.createOrg(dto, email);
-        return ResponseEntity.ok("성공");
+        OrgRespDto response = organizationService.createOrg(dto, email);
+        return ResponseEntity.ok(response);
     }
 
     // 모임 참여
