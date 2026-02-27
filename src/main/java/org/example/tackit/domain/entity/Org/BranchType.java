@@ -18,6 +18,6 @@ public enum BranchType {
                 return type;
             }
         }
-        return MAIN; // 기본값 설정 혹은 에러 처리
+        throw new IllegalArgumentException("Invalid BranchType description: " + description);
     }
 }

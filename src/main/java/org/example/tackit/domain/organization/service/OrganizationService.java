@@ -17,6 +17,7 @@ import org.example.tackit.domain.organization.dto.req.OrgJoinReqDto;
 import org.example.tackit.domain.organization.dto.resp.OrgRespDto;
 import org.example.tackit.domain.organization.repository.OrganizationRepository;
 import org.example.tackit.domain.university.repository.UniversityRepository;
+import org.example.tackit.global.exception.CustomBaseException;
 import org.example.tackit.global.exception.ErrorCode;
 import org.example.tackit.global.exception.MemberNotFoundException;
 import org.springframework.stereotype.Service;
@@ -36,22 +37,22 @@ public class OrganizationService {
   public OrgRespDto createOrg(OrgCreateReqDto dto, String email) {
     // 1. 사용자 확인
     Member member = memberRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+            .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
     // 2. 타입별 중복 체크 및 대학 조회
     University university = null;
     if (dto.getOrgType() == OrgType.CLUB) {
       university = universityRepository.findById(dto.getUniversityId())
-              .orElseThrow(() -> new RuntimeException("해당 학교가 등록되어 있지 않습니다."));
+              .orElseThrow(() -> new CustomBaseException(ErrorCode.UNIVERSITY_NOT_FOUND));
 
       // 같은 학교 내 동일 이름 동아리 중복 체크
       if (organizationRepository.existsByNameAndUniversityAndType(dto.getOrgName(), university, OrgType.CLUB)) {
-        throw new RuntimeException("해당 학교에 이미 동일한 이름의 동아리가 존재합니다.");
+        throw new CustomBaseException(ErrorCode.DUPLICATE_ORGANIZATION);
       }
     } else {
       // 전체 서비스 내 동일 이름 소모임 중복 체크
       if (organizationRepository.existsByNameAndType(dto.getOrgName(), OrgType.COMMUNITY)) {
-        throw new RuntimeException("이미 동일한 이름의 소모임이 존재합니다.");
+        throw new CustomBaseException(ErrorCode.DUPLICATE_ORGANIZATION);
       }
     }
 
