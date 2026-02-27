@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.tackit.domain.entity.ColorChip;
 import org.example.tackit.domain.member.dto.SimpleMemberProfileDto;
 
 @Getter
@@ -19,6 +20,6 @@ public class EventDetailResDto {
   private LocalDateTime startsAt;
   private LocalDateTime endsAt;
   private String description;
-  private String colorChip;
+  private ColorChip colorChip;
   private List<SimpleMemberProfileDto> participants;
 }
