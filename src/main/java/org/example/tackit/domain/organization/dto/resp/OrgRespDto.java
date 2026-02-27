@@ -11,7 +11,7 @@ public class OrgRespDto {
     private Long orgId;
     private String orgName;
     private String orgType;
-    private String universityName; // CLUB일 때만 값이 있고, COMMUNITY면 "연합/소모임" 등으로 표시
+    private String universityName; // CLUB일 때만 값이 있음
     private String createdAt;
 
     public static OrgRespDto of(Organization org) {
