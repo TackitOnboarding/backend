@@ -124,11 +124,7 @@ public class EventService {
         requesterMemberOrgId);
 
     List<SimpleMemberProfileDto> participantDtos = event.getParticipants().stream()
-        .map(ep -> SimpleMemberProfileDto.builder()
-            .orgMemberId(ep.getMemberOrg().getId())
-            .profileImageUrl(ep.getMemberOrg().getProfileImageUrl())
-            .nickname(ep.getMemberOrg().getNickname())
-            .build())
+        .map(ep -> SimpleMemberProfileDto.from(ep.getMemberOrg()))
         .toList();
 
     return EventDetailResDto.builder()
