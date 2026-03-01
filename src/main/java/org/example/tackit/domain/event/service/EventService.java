@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.entity.Event;
 import org.example.tackit.domain.entity.EventParticipant;
@@ -114,7 +113,7 @@ public class EventService {
             .endsAt(event.getEndsAt())
             .colorChip(event.getColorChip())
             .build())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // 일정 상세 조회
@@ -130,7 +129,7 @@ public class EventService {
             .profileImageUrl(ep.getMemberOrg().getProfileImageUrl())
             .nickname(ep.getMemberOrg().getNickname())
             .build())
-        .collect(Collectors.toList());
+        .toList();
 
     return EventDetailResDto.builder()
         .eventId(event.getId())
@@ -160,7 +159,7 @@ public class EventService {
             .endsAt(event.getEndsAt())
             .colorChip(event.getColorChip())
             .build())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // 이벤트 참가자 추가 메서드
