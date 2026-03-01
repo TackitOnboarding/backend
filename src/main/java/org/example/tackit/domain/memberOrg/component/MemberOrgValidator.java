@@ -1,10 +1,10 @@
-package org.example.tackit.domain.member.component;
+package org.example.tackit.domain.memberOrg.component;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.entity.MemberRole;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.entity.Org.OrgStatus;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

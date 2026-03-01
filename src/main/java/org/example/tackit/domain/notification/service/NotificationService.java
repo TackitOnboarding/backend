@@ -11,7 +11,7 @@ import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
 import org.example.tackit.domain.entity.Notification;
 import org.example.tackit.domain.entity.Org.MemberOrg;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.notification.dto.NotificationEventDto;
 import org.example.tackit.domain.notification.dto.resp.NotificationRespDto;
 import org.example.tackit.domain.notification.repository.EmitterRepository;

@@ -15,7 +15,7 @@ import org.example.tackit.domain.entity.Post;
 import org.example.tackit.domain.entity.QnAPost;
 import org.example.tackit.domain.entity.QnAPostImage;
 import org.example.tackit.domain.entity.QnAReport;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.qnaBoard.QnA_post.dto.request.QnAPostReqDto;
 import org.example.tackit.domain.qnaBoard.QnA_post.dto.request.UpdateQnARequestDto;
 import org.example.tackit.domain.qnaBoard.QnA_post.dto.response.QnAPopularPostRespDto;
@@ -42,42 +42,42 @@ public class QnAPostService {
   private final S3UploadService s3UploadService;
   private final QnAScrapRepository qnAScrapRepository;
 
-    // 게시글 작성 (NEWBIE만 가능)
-    @Transactional
-    public QnAPostRespDto createPost(QnAPostReqDto dto, String email, Long orgId) throws IOException {
-        MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
-                .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+  // 게시글 작성 (NEWBIE만 가능)
+  @Transactional
+  public QnAPostRespDto createPost(QnAPostReqDto dto, String email, Long orgId) throws IOException {
+    MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
+        .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (member.getMemberType() != MemberType.NEWBIE) {
-            throw new AccessDeniedException("NEWBIE만 질문을 작성할 수 있습니다.");
-        }
-
-        QnAPost post = QnAPost.builder()
-                .writer(member)
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .createdAt(LocalDateTime.now())
-                .type(Post.QnA)
-                .activeStatus(ActiveStatus.ACTIVE)
-                .reportCount(0)
-                .isAnonymous(dto.isAnonymous())
-                .build();
-
-        // 이미지가 있으면 추가
-        if (dto.getImageUrl() != null && !dto.getImageUrl().isEmpty()) {
-            String imageUrl = s3UploadService.saveFile(dto.getImageUrl());
-            QnAPostImage image = new QnAPostImage();
-            image.setImageUrl(imageUrl);
-            image.setPost(post);
-            post.addImage(image);
-        }
-
-        qnAPostRepository.save(post);
-
-        List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
-
-        return QnAPostRespDto.fromEntity(post, tagNames, false);
+    if (member.getMemberType() != MemberType.NEWBIE) {
+      throw new AccessDeniedException("NEWBIE만 질문을 작성할 수 있습니다.");
     }
+
+    QnAPost post = QnAPost.builder()
+        .writer(member)
+        .title(dto.getTitle())
+        .content(dto.getContent())
+        .createdAt(LocalDateTime.now())
+        .type(Post.QnA)
+        .activeStatus(ActiveStatus.ACTIVE)
+        .reportCount(0)
+        .isAnonymous(dto.isAnonymous())
+        .build();
+
+    // 이미지가 있으면 추가
+    if (dto.getImageUrl() != null && !dto.getImageUrl().isEmpty()) {
+      String imageUrl = s3UploadService.saveFile(dto.getImageUrl());
+      QnAPostImage image = new QnAPostImage();
+      image.setImageUrl(imageUrl);
+      image.setPost(post);
+      post.addImage(image);
+    }
+
+    qnAPostRepository.save(post);
+
+    List<String> tagNames = tagService.assignTagsToPost(post, dto.getTagIds());
+
+    return QnAPostRespDto.fromEntity(post, tagNames, false);
+  }
 
 
   // 게시글 수정 (작성자만 가능)
@@ -196,18 +196,18 @@ public class QnAPostService {
         .qnaPost(post)
         .build());
 
-      post.increaseReportCount();
-      return "게시글을 신고하였습니다.";
+    post.increaseReportCount();
+    return "게시글을 신고하였습니다.";
   }
 
   // 인기 3개
   @Transactional(readOnly = true)
   public List<QnAPopularPostRespDto> getPopularPosts(Long orgId) {
-      return qnAPostRepository.findTop3ByWriterIdAndActiveStatusOrderByViewCountDescScrapCountDesc(
-                      orgId, ActiveStatus.ACTIVE)
-              .stream()
-              .map(QnAPopularPostRespDto::from)
-              .toList();
+    return qnAPostRepository.findTop3ByWriterIdAndActiveStatusOrderByViewCountDescScrapCountDesc(
+            orgId, ActiveStatus.ACTIVE)
+        .stream()
+        .map(QnAPopularPostRespDto::from)
+        .toList();
                     /*
                 .stream()
                 .filter(post -> post.getWriter().getOrganization().equals(organization))

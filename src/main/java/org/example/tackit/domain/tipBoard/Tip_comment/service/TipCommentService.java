@@ -12,7 +12,7 @@ import org.example.tackit.domain.entity.NotificationType;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.entity.TipComment;
 import org.example.tackit.domain.entity.TipPost;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.example.tackit.domain.tipBoard.Tip_comment.dto.req.TipCommentCreateDto;
 import org.example.tackit.domain.tipBoard.Tip_comment.dto.req.TipCommentUpdateDto;
@@ -42,13 +42,12 @@ public class TipCommentService {
         .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
     TipComment comment = TipComment.builder()
-            .writer(member)
-            .activeStatus(ActiveStatus.ACTIVE)
-            .tipPost(post)
-            .content(dto.getContent())
-            .createdAt(LocalDateTime.now())
-            .build();
-
+        .writer(member)
+        .activeStatus(ActiveStatus.ACTIVE)
+        .tipPost(post)
+        .content(dto.getContent())
+        .createdAt(LocalDateTime.now())
+        .build();
 
     // 댓글 DB 저장
     TipComment savedComment = tipCommentRepository.save(comment);

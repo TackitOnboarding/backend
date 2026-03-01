@@ -1,4 +1,4 @@
-package org.example.tackit.domain.member.dto;
+package org.example.tackit.domain.memberOrg.dto;
 
 import lombok.Builder;
 import lombok.Getter;

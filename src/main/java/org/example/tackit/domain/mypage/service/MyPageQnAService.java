@@ -9,7 +9,7 @@ import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.entity.QnAComment;
 import org.example.tackit.domain.entity.QnAPost;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.mypage.dto.response.QnAMyCommentResponseDto;
 import org.example.tackit.domain.mypage.dto.response.QnAMyPostResponseDto;
 import org.example.tackit.domain.qnaBoard.QnA_comment.repository.QnACommentRepository;
@@ -36,8 +36,9 @@ public class MyPageQnAService {
     MemberOrg member = memberOrgRepository.findByMemberEmailAndId(email, orgId)
         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        Page<QnAPost> postPage = qnAPostRepository.findByWriterAndActiveStatus(member, ActiveStatus.ACTIVE, pageable);
-        List<QnAPost> posts = postPage.getContent();
+    Page<QnAPost> postPage = qnAPostRepository.findByWriterAndActiveStatus(member,
+        ActiveStatus.ACTIVE, pageable);
+    List<QnAPost> posts = postPage.getContent();
 
     // 태그 일괄 조회 (N+1 방지)
     Map<Long, List<String>> tagMap = qnAPostTagMapRepository.findByQnaPostIn(posts).stream()

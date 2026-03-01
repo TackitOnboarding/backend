@@ -2,7 +2,7 @@ package org.example.tackit.domain.mypage.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.tipBoard.Tip_comment.repository.TipCommentRepository;
 import org.example.tackit.domain.tipBoard.Tip_post.repository.TipPostRepository;
 import org.example.tackit.domain.tipBoard.Tip_post.repository.TipScrapRepository;

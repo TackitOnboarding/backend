@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.tackit.domain.entity.ColorChip;
-import org.example.tackit.domain.member.dto.SimpleMemberProfileDto;
+import org.example.tackit.domain.memberOrg.dto.SimpleMemberProfileDto;
 
 @Getter
 @NoArgsConstructor

@@ -16,7 +16,7 @@ import org.example.tackit.domain.entity.Notification;
 import org.example.tackit.domain.entity.NotificationType;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 import org.example.tackit.domain.entity.Post;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.noticeBoard.Notice_post.dto.request.NoticePostReqDto;
 import org.example.tackit.domain.noticeBoard.Notice_post.dto.request.UpdateNoticeReqDto;
 import org.example.tackit.domain.noticeBoard.Notice_post.dto.response.NoticePostRespDto;
