@@ -1,22 +1,27 @@
 package org.example.tackit.domain.qnaBoard.QnA_comment.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.domain.entity.ActiveStatus;
+import org.example.tackit.domain.entity.MemberRole;
+import org.example.tackit.domain.entity.MemberType;
+import org.example.tackit.domain.entity.Notification;
+import org.example.tackit.domain.entity.NotificationType;
+import org.example.tackit.domain.entity.QnAComment;
+import org.example.tackit.domain.entity.QnAPost;
+import org.example.tackit.domain.entity.org.MemberOrg;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.example.tackit.domain.notification.service.NotificationService;
 import org.example.tackit.domain.qnaBoard.QnA_comment.dto.request.QnACommentCreateDto;
 import org.example.tackit.domain.qnaBoard.QnA_comment.dto.request.QnACommentUpdateDto;
 import org.example.tackit.domain.qnaBoard.QnA_comment.dto.response.QnACommentResponseDto;
 import org.example.tackit.domain.qnaBoard.QnA_comment.repository.QnACommentRepository;
 import org.example.tackit.domain.qnaBoard.QnA_post.repository.QnAPostRepository;
-import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
-import org.example.tackit.domain.entity.*;
-import org.example.tackit.domain.entity.Org.MemberOrg;
-import org.example.tackit.domain.notification.service.NotificationService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

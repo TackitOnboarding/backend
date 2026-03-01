@@ -1,17 +1,16 @@
 package org.example.tackit.domain.executive.service;
 
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.entity.MemberRole;
-import org.example.tackit.domain.entity.Org.MemberOrg;
-import org.example.tackit.domain.entity.Org.OrgStatus;
-import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
-import org.example.tackit.domain.executive.dto.response.MemberListResDto;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.example.tackit.domain.entity.MemberRole;
+import org.example.tackit.domain.entity.org.MemberOrg;
+import org.example.tackit.domain.entity.org.OrgStatus;
+import org.example.tackit.domain.executive.dto.response.MemberListResDto;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

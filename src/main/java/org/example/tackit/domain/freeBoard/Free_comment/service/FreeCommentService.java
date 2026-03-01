@@ -11,7 +11,7 @@ import org.example.tackit.domain.entity.MemberRole;
 import org.example.tackit.domain.entity.MemberType;
 import org.example.tackit.domain.entity.Notification;
 import org.example.tackit.domain.entity.NotificationType;
-import org.example.tackit.domain.entity.Org.MemberOrg;
+import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.freeBoard.Free_comment.dto.req.FreeCommentCreateDto;
 import org.example.tackit.domain.freeBoard.Free_comment.dto.req.FreeCommentUpdateDto;
 import org.example.tackit.domain.freeBoard.Free_comment.dto.resp.FreeCommentRespDto;

@@ -1,16 +1,27 @@
 package org.example.tackit.domain.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.tackit.domain.admin.model.ReportablePost;
-import org.example.tackit.domain.entity.Org.MemberOrg;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import org.example.tackit.domain.entity.org.MemberOrg;
 
 @Entity
 @Getter
@@ -19,97 +30,98 @@ import java.util.List;
 @Builder
 @Table(name = "qna_post")
 public class QnAPost implements ReportablePost {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "member_org_id", nullable = false)
-    private MemberOrg writer;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String title;
+  @ManyToOne
+  @JoinColumn(name = "member_org_id", nullable = false)
+  private MemberOrg writer;
 
-    @Lob
-    private String content;
-    private LocalDateTime createdAt;
-    private Post type;
-    private String organization;
+  private String title;
 
-    @Enumerated(EnumType.STRING)
-    private ActiveStatus activeStatus;
-    private int reportCount;
+  @Lob
+  private String content;
+  private LocalDateTime createdAt;
+  private Post type;
+  private String organization;
 
-    @Builder.Default
-    private Long viewCount = 0L;
-    @Builder.Default
-    private Long scrapCount = 0L;
+  @Enumerated(EnumType.STRING)
+  private ActiveStatus activeStatus;
+  private int reportCount;
 
-    @Column(nullable = false)
-    private boolean isAnonymous;
+  @Builder.Default
+  private Long viewCount = 0L;
+  @Builder.Default
+  private Long scrapCount = 0L;
 
-    // QnATagMap 연관관계 추가
-    @OneToMany(mappedBy = "qnaPost", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<QnATagMap> tagMaps = new ArrayList<>();
+  @Column(nullable = false)
+  private boolean isAnonymous;
 
-    // QnAReport 연관관계 추가
-    @OneToMany(mappedBy = "qnaPost", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @Builder.Default
-    private List<QnAReport> reports = new ArrayList<>();
+  // QnATagMap 연관관계 추가
+  @OneToMany(mappedBy = "qnaPost", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
+  private List<QnATagMap> tagMaps = new ArrayList<>();
 
-    // 이미지 연관관계 추가
-    @OneToMany(mappedBy = "qnaPost", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<QnAPostImage> images = new ArrayList<>();
+  // QnAReport 연관관계 추가
+  @OneToMany(mappedBy = "qnaPost", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  @Builder.Default
+  private List<QnAReport> reports = new ArrayList<>();
 
-    public void update(String title, String content){
-        this.title = title;
-        this.content = content;
+  // 이미지 연관관계 추가
+  @OneToMany(mappedBy = "qnaPost", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
+  private List<QnAPostImage> images = new ArrayList<>();
+
+  public void update(String title, String content) {
+    this.title = title;
+    this.content = content;
+  }
+
+  public void markAsDeleted() {
+    this.activeStatus = ActiveStatus.DELETED;
+  }
+
+  public void increaseReportCount() {
+    this.reportCount++;
+    if (this.reportCount >= 3) {
+      this.activeStatus = ActiveStatus.DELETED;
+    }
+  }
+
+  public void activate() {
+    if (this.activeStatus != ActiveStatus.DELETED) {
+      throw new IllegalStateException("삭제되지 않은 게시글은 활성화할 수 없습니다.");
     }
 
-    public void markAsDeleted() {
-        this.activeStatus = ActiveStatus.DELETED;
-    }
+    this.activeStatus = ActiveStatus.ACTIVE;
+    this.reportCount = 0;
+  }
 
-    public void increaseReportCount() {
-        this.reportCount++;
-        if (this.reportCount >= 3) {
-            this.activeStatus = ActiveStatus.DELETED;
-        }
-    }
+  public void addImage(QnAPostImage image) {
+    images.add(image);
+    image.setPost(this);
+  }
 
-    public void activate(){
-        if (this.activeStatus != ActiveStatus.DELETED) {
-            throw new IllegalStateException("삭제되지 않은 게시글은 활성화할 수 없습니다.");
-        }
+  public void clearImages() {
+    images.forEach(img -> img.setPost(null));
+    images.clear();
+  }
 
-        this.activeStatus = ActiveStatus.ACTIVE;
-        this.reportCount = 0;
-    }
+  public void increaseViewCount() {
+    this.viewCount = (this.viewCount == null ? 0L : this.viewCount) + 1;
+  }
 
-    public void addImage(QnAPostImage image) {
-        images.add(image);
-        image.setPost(this);
-    }
+  public void increaseScrapCount() {
+    this.scrapCount = (this.scrapCount == null ? 0L : this.scrapCount) + 1;
+  }
 
-    public void clearImages() {
-        images.forEach(img -> img.setPost(null));
-        images.clear();
+  public void decreaseScrapCount() {
+    if (this.scrapCount != null && this.scrapCount > 0) {
+      this.scrapCount -= 1;
     }
-
-    public void increaseViewCount() {
-        this.viewCount = (this.viewCount == null ? 0L : this.viewCount) + 1;
-    }
-
-    public void increaseScrapCount() {
-        this.scrapCount = (this.scrapCount == null ? 0L : this.scrapCount) + 1;
-    }
-
-    public void decreaseScrapCount() {
-        if (this.scrapCount != null && this.scrapCount > 0) {
-            this.scrapCount -= 1;
-        }
-    }
+  }
 
 
 }

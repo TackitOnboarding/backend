@@ -1,13 +1,19 @@
 package org.example.tackit.domain.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.tackit.domain.entity.Org.MemberOrg;
-
-import java.time.LocalDateTime;
+import org.example.tackit.domain.entity.org.MemberOrg;
 
 @Getter
 @Entity
@@ -15,29 +21,30 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class MemberLog {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_org_id")
-    private MemberOrg memberOrg;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_id")
+  private Member member;
 
-    private String orgName;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_org_id")
+  private MemberOrg memberOrg;
 
-    private String action;              // view_Post, search, ..
-    private String resource;            // 게시글 ID, URL
+  private String orgName;
 
-    @Column(name = "request_uri")
-    private String requestUri;
-    private String memberAgent;
-    private String ipAddress;
+  private String action;              // view_Post, search, ..
+  private String resource;            // 게시글 ID, URL
 
-    private LocalDateTime timestamp;
-    private long executionTime;
+  @Column(name = "request_uri")
+  private String requestUri;
+  private String memberAgent;
+  private String ipAddress;
+
+  private LocalDateTime timestamp;
+  private long executionTime;
 
 }

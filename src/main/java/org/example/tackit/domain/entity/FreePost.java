@@ -1,17 +1,28 @@
 package org.example.tackit.domain.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.tackit.domain.admin.model.ReportablePost;
-import org.example.tackit.domain.entity.Org.MemberOrg;
-import org.example.tackit.domain.entity.Org.Organization;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import org.example.tackit.domain.entity.org.MemberOrg;
+import org.example.tackit.domain.entity.org.Organization;
 
 @Entity
 @Getter
@@ -19,55 +30,56 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class FreePost implements ReportablePost {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "member_org_id", nullable = false)
-    private MemberOrg writer;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String title;
+  @ManyToOne
+  @JoinColumn(name = "member_org_id", nullable = false)
+  private MemberOrg writer;
 
-    @Lob
-    private String content;
-    private LocalDateTime createdAt;
-    private Post type;
+  private String title;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "org_id")
-    private Organization organization;
+  @Lob
+  private String content;
+  private LocalDateTime createdAt;
+  private Post type;
 
-    @Column(nullable = true)
-    private String tag;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "org_id")
+  private Organization organization;
 
-    @Enumerated(EnumType.STRING)
-    private ActiveStatus activeStatus;
-    private int reportCount = 0;
+  @Column(nullable = true)
+  private String tag;
 
-    private Long viewCount = 0L;
-    private Long scrapCount = 0L;
+  @Enumerated(EnumType.STRING)
+  private ActiveStatus activeStatus;
+  private int reportCount = 0;
+
+  private Long viewCount = 0L;
+  private Long scrapCount = 0L;
 
 
-    @Column(nullable = false)
-    private boolean isAnonymous;
+  @Column(nullable = false)
+  private boolean isAnonymous;
 
-    // FreeTagMap 연관관계 추가
-    @OneToMany(mappedBy = "freePost", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FreeTagMap> tagMaps = new ArrayList<>();
+  // FreeTagMap 연관관계 추가
+  @OneToMany(mappedBy = "freePost", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<FreeTagMap> tagMaps = new ArrayList<>();
 
-    // FreeReport 연관관계 추가
-    @OneToMany(mappedBy = "freePost", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<FreeReport> reports = new ArrayList<>();
+  // FreeReport 연관관계 추가
+  @OneToMany(mappedBy = "freePost", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private List<FreeReport> reports = new ArrayList<>();
 
-    // 이미지 연관관계 추가
-    @OneToMany(mappedBy = "freePost", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FreePostImage> images = new ArrayList<>();
+  // 이미지 연관관계 추가
+  @OneToMany(mappedBy = "freePost", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<FreePostImage> images = new ArrayList<>();
 
-    public void update(String title, String content) {
-        this.title = title;
-        this.content = content;
-    }
+  public void update(String title, String content) {
+    this.title = title;
+    this.content = content;
+  }
 
 
     /*
@@ -83,43 +95,43 @@ public class FreePost implements ReportablePost {
     }
      */
 
-    public void delete() {
-        this.activeStatus = ActiveStatus.DELETED;
+  public void delete() {
+    this.activeStatus = ActiveStatus.DELETED;
+  }
+
+  public void increaseReportCount() {
+    this.reportCount++;
+    if (this.reportCount >= 3) {
+      this.activeStatus = ActiveStatus.DELETED;
+    }
+  }
+
+  public void activate() {
+    if (this.activeStatus != ActiveStatus.DELETED) {
+      throw new IllegalStateException("삭제되지 않은 게시글은 활성화할 수 없습니다.");
     }
 
-    public void increaseReportCount() {
-        this.reportCount++;
-        if (this.reportCount >= 3) {
-            this.activeStatus = ActiveStatus.DELETED;
-        }
-    }
+    this.activeStatus = ActiveStatus.ACTIVE;
+    this.reportCount = 0;
+  }
 
-    public void activate(){
-        if (this.activeStatus != ActiveStatus.DELETED) {
-            throw new IllegalStateException("삭제되지 않은 게시글은 활성화할 수 없습니다.");
-        }
+  public void addImage(FreePostImage image) {
+    images.add(image);
+    image.setFreePost(this);
+  }
 
-        this.activeStatus = ActiveStatus.ACTIVE;
-        this.reportCount = 0;
-    }
+  public void increaseViewCount() {
+    this.viewCount = (this.viewCount == null ? 0L : this.viewCount) + 1;
+  }
 
-    public void addImage(FreePostImage image) {
-        images.add(image);
-        image.setFreePost(this);
-    }
+  public void increaseScrapCount() {
+    this.scrapCount = (this.scrapCount == null ? 0L : this.scrapCount) + 1;
+  }
 
-    public void increaseViewCount() {
-        this.viewCount = (this.viewCount == null ? 0L : this.viewCount) + 1;
+  public void decreaseScrapCount() {
+    if (this.scrapCount != null && this.scrapCount > 0) {
+      this.scrapCount -= 1;
     }
-
-    public void increaseScrapCount() {
-        this.scrapCount = (this.scrapCount == null ? 0L : this.scrapCount) + 1;
-    }
-
-    public void decreaseScrapCount() {
-        if (this.scrapCount != null && this.scrapCount > 0) {
-            this.scrapCount -= 1;
-        }
-    }
+  }
 
 }

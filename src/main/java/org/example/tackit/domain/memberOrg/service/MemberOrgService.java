@@ -2,8 +2,8 @@ package org.example.tackit.domain.memberOrg.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.entity.Org.MemberOrg;
-import org.example.tackit.domain.entity.Org.OrgStatus;
+import org.example.tackit.domain.entity.org.MemberOrg;
+import org.example.tackit.domain.entity.org.OrgStatus;
 import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
 import org.example.tackit.domain.memberOrg.dto.SimpleMemberProfileDto;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;

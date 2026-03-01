@@ -1,32 +1,48 @@
 package org.example.tackit.domain.freeBoard.Free_post.service;
 
-import lombok.RequiredArgsConstructor;
-import org.example.tackit.config.S3.S3UploadService;
-import org.example.tackit.domain.freeBoard.Free_post.dto.request.FreePostReqDto;
-import org.example.tackit.domain.freeBoard.Free_post.dto.request.UpdateFreeReqDto;
-import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreePopularPostRespDto;
-import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreePostRespDto;
-import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreeScrapResponseDto;
-import org.example.tackit.domain.freeBoard.Free_post.repository.*;
-import org.example.tackit.domain.freeBoard.Free_tag.repository.FreePostTagMapRepository;
-import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
-import org.example.tackit.domain.member.repository.MemberRepository;
-import org.example.tackit.domain.entity.*;
-import org.example.tackit.domain.entity.Org.MemberOrg;
-import org.example.tackit.domain.notification.service.NotificationService;
-import org.example.tackit.common.dto.PageResponseDTO;
-import org.example.tackit.global.exception.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import static org.example.tackit.global.exception.ErrorCode.MEMBER_NOT_FOUND;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import static org.example.tackit.global.exception.ErrorCode.MEMBER_NOT_FOUND;
+import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.PageResponseDTO;
+import org.example.tackit.config.S3.S3UploadService;
+import org.example.tackit.domain.entity.ActiveStatus;
+import org.example.tackit.domain.entity.FreePost;
+import org.example.tackit.domain.entity.FreePostImage;
+import org.example.tackit.domain.entity.FreeReport;
+import org.example.tackit.domain.entity.FreeScrap;
+import org.example.tackit.domain.entity.Member;
+import org.example.tackit.domain.entity.MemberRole;
+import org.example.tackit.domain.entity.MemberType;
+import org.example.tackit.domain.entity.Notification;
+import org.example.tackit.domain.entity.NotificationType;
+import org.example.tackit.domain.entity.Post;
+import org.example.tackit.domain.entity.org.MemberOrg;
+import org.example.tackit.domain.freeBoard.Free_post.dto.request.FreePostReqDto;
+import org.example.tackit.domain.freeBoard.Free_post.dto.request.UpdateFreeReqDto;
+import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreePopularPostRespDto;
+import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreePostRespDto;
+import org.example.tackit.domain.freeBoard.Free_post.dto.response.FreeScrapResponseDto;
+import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostImageRepository;
+import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostJPARepository;
+import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostReportRepository;
+import org.example.tackit.domain.freeBoard.Free_post.repository.FreeScrapJPARepository;
+import org.example.tackit.domain.freeBoard.Free_tag.repository.FreePostTagMapRepository;
+import org.example.tackit.domain.member.repository.MemberRepository;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.example.tackit.domain.notification.service.NotificationService;
+import org.example.tackit.global.exception.AccessDeniedCustomException;
+import org.example.tackit.global.exception.ErrorCode;
+import org.example.tackit.global.exception.MemberNotFoundException;
+import org.example.tackit.global.exception.PostInactiveException;
+import org.example.tackit.global.exception.PostNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
