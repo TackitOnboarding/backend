@@ -2,6 +2,8 @@ package org.example.tackit.domain.organization.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
 import org.example.tackit.domain.memberOrg.dto.SimpleMemberProfileDto;
 import org.example.tackit.domain.memberOrg.service.MemberOrgService;
 import org.example.tackit.domain.organization.dto.req.OrgCreateReqDto;
@@ -62,9 +64,11 @@ public class OrganizationController {
 
   @GetMapping("/{orgId}/members")
   public ResponseEntity<ApiResponse<List<SimpleMemberProfileDto>>> getOrgMembers(
-      @PathVariable Long orgId
+      @PathVariable Long orgId,
+      @ActiveProfile ProfileContext profileContext
   ) {
-    List<SimpleMemberProfileDto> members = memberOrgService.getMembersByOrgId(orgId);
+    Long memberOrgId = profileContext.id();
+    List<SimpleMemberProfileDto> members = memberOrgService.getOrgMembers(orgId, memberOrgId);
     return ApiResponse.success(HttpStatus.OK, "모임 소속 인원 조회 성공", members);
   }
 }

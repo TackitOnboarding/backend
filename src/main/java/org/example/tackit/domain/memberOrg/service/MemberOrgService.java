@@ -1,0 +1,34 @@
+package org.example.tackit.domain.memberOrg.service;
+
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.example.tackit.domain.entity.Org.MemberOrg;
+import org.example.tackit.domain.entity.Org.OrgStatus;
+import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
+import org.example.tackit.domain.memberOrg.dto.SimpleMemberProfileDto;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class MemberOrgService {
+
+  private final MemberOrgRepository memberOrgRepository;
+  private final MemberOrgValidator memberOrgValidator;
+
+  // 특정 조직 소속 멤버 조회
+  public List<SimpleMemberProfileDto> getOrgMembers(Long orgId, Long memberOrgId) {
+    memberOrgValidator.validateActiveMembership(orgId, memberOrgId);
+
+    List<MemberOrg> members = memberOrgRepository.findByOrganizationIdAndOrgStatus(
+        orgId,
+        OrgStatus.ACTIVE
+    );
+
+    return members.stream()
+        .map(SimpleMemberProfileDto::from)
+        .toList();
+  }
+}
