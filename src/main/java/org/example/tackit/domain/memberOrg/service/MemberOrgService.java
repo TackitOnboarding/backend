@@ -29,6 +29,7 @@ public class MemberOrgService {
 
     return members.stream()
         .map(SimpleMemberProfileDto::from)
+        .sorted()
         .toList();
   }
 }

@@ -7,7 +7,7 @@ import org.example.tackit.domain.entity.Org.MemberOrg;
 
 @Getter
 @Builder
-public class SimpleMemberProfileDto {
+public class SimpleMemberProfileDto implements Comparable<SimpleMemberProfileDto> {
 
   private Long orgMemberId;
   private String nickname;
@@ -24,5 +24,19 @@ public class SimpleMemberProfileDto {
         .profileImageUrl(memberOrg.getProfileImageUrl())
         .memberRole(memberOrg.getMemberRole())
         .build();
+  }
+
+  @Override
+  public int compareTo(SimpleMemberProfileDto other) {
+    // 운영진 우선 정렬 
+    int myRolePriority = (this.memberRole == MemberRole.EXECUTIVE) ? 0 : 1;
+    int otherRolePriority = (other.memberRole == MemberRole.EXECUTIVE) ? 0 : 1;
+
+    if (myRolePriority != otherRolePriority) {
+      return Integer.compare(myRolePriority, otherRolePriority);
+    }
+
+    // 같은 역할 내에서는 닉네임 가나다순 비교
+    return this.nickname.compareTo(other.nickname);
   }
 }

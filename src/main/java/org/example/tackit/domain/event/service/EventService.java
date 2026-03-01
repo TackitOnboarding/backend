@@ -125,6 +125,7 @@ public class EventService {
 
     List<SimpleMemberProfileDto> participantDtos = event.getParticipants().stream()
         .map(ep -> SimpleMemberProfileDto.from(ep.getMemberOrg()))
+        .sorted()
         .toList();
 
     return EventDetailResDto.builder()

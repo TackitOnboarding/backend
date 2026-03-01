@@ -174,6 +174,7 @@ public class PollService {
         voters = participants.stream()
             .map(p -> SimpleMemberProfileDto.from(memberMap.get(p.getMemberOrgId())))
             .filter(Objects::nonNull)
+            .sorted()
             .toList();
       }
     }
