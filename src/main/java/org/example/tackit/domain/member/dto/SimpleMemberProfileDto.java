@@ -2,6 +2,7 @@ package org.example.tackit.domain.member.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.example.tackit.domain.entity.MemberRole;
 import org.example.tackit.domain.entity.Org.MemberOrg;
 
 @Getter
@@ -11,6 +12,7 @@ public class SimpleMemberProfileDto {
   private Long orgMemberId;
   private String nickname;
   private String profileImageUrl;
+  private MemberRole memberRole;
 
   public static SimpleMemberProfileDto from(MemberOrg memberOrg) {
     if (memberOrg == null) {
@@ -20,6 +22,7 @@ public class SimpleMemberProfileDto {
         .orgMemberId(memberOrg.getId())
         .nickname(memberOrg.getNickname())
         .profileImageUrl(memberOrg.getProfileImageUrl())
+        .memberRole(memberOrg.getMemberRole())
         .build();
   }
 }
