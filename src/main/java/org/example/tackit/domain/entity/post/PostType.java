@@ -4,7 +4,8 @@ public enum PostType {
   TIP("선배가 알려줘요"),
   QNA("신입이 질문해요"),
   FREE("다같이 얘기해요"),
-  NOTICE("공지사항");
+  NOTICE("공지사항"),
+  ACTIVITY("활동일지");
 
   private final String description;
 
