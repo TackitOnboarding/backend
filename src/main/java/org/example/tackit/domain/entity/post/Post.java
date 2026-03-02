@@ -99,9 +99,6 @@ public class Post {
   private final List<Scrap> scraps = new ArrayList<>();
 
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-  private final List<PostTagMap> postTags = new ArrayList<>();
-
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<PostImage> images = new ArrayList<>();
 
   @Builder
