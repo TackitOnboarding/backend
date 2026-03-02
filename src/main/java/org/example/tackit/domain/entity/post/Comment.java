@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.org.MemberOrg;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -61,6 +62,9 @@ public class Comment {
 
   @CreatedDate
   private LocalDateTime createdAt;
+  
+  @LastModifiedDate
+  private LocalDateTime updatedAt;
 
   @Builder
   public Comment(String content, Post post, MemberOrg writer, Comment parent) {
