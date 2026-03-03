@@ -28,9 +28,9 @@ public class PostDetailResDto {
     private String title;
     private SimpleMemberProfileDto writer;
     private String content;
-    private boolean isAnonymous;
-    private boolean isMine;
-    private boolean isScrap;
+    private Boolean isAnonymous;
+    private Boolean isMine;
+    private Boolean isScrap;
     private int viewCount;
     private LocalDateTime createdAt;
   }
