@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.tackit.domain.entity.org.MemberOrg;
@@ -38,4 +39,10 @@ public class Scrap {
 
   @CreatedDate
   private LocalDateTime createdAt;
+
+  @Builder
+  public Scrap(Post post, MemberOrg memberOrg) {
+    this.post = post;
+    this.memberOrg = memberOrg;
+  }
 }

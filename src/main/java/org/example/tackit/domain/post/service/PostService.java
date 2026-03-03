@@ -5,11 +5,13 @@ import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.entity.org.Organization;
 import org.example.tackit.domain.entity.post.Post;
 import org.example.tackit.domain.entity.post.PostType;
+import org.example.tackit.domain.entity.post.Scrap;
 import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.post.dto.PostCreateReqDto;
 import org.example.tackit.domain.post.dto.PostUpdateReqDto;
 import org.example.tackit.domain.post.repository.PostRepository;
+import org.example.tackit.domain.post.repository.ScrapRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,7 @@ public class PostService {
   private final PostRepository postRepository;
   private final MemberOrgRepository memberOrgRepository;
   private final MemberOrgValidator memberOrgValidator;
+  private final ScrapRepository scrapRepository;
 
   /**
    * 게시글 작성
@@ -78,6 +81,41 @@ public class PostService {
 
     post.delete();
   }
+
+  /**
+   * 게시글 스크랩
+   */
+  @Transactional
+  public void scrapPost(Long memberOrgId, Long postId) {
+    MemberOrg memberOrg = memberOrgValidator.validateActiveMembership(memberOrgId);
+    Post post = findPostById(postId);
+
+    if (scrapRepository.existsByMemberOrgIdAndPostId(memberOrgId, postId)) {
+      throw new IllegalArgumentException("이미 스크랩한 게시글입니다.");
+    }
+
+    Scrap scrap = Scrap.builder()
+        .memberOrg(memberOrg)
+        .post(post)
+        .build();
+
+    scrapRepository.save(scrap);
+  }
+
+  /**
+   * 게시글 스크랩 취소
+   */
+  @Transactional
+  public void unscrapPost(Long memberOrgId, Long postId) {
+    memberOrgValidator.validateActiveMembership(memberOrgId);
+    findPostById(postId);
+
+    Scrap scrap = scrapRepository.findByMemberOrgIdAndPostId(memberOrgId, postId)
+        .orElseThrow(() -> new IllegalArgumentException("스크랩하지 않은 게시글입니다."));
+
+    scrapRepository.delete(scrap);
+  }
+
 
   /**
    * PostType 별 작성 권한 검증

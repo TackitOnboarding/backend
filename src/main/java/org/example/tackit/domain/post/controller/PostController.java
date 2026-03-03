@@ -56,4 +56,24 @@ public class PostController {
     postService.deletePost(profileContext.id(), postId);
     return ApiResponse.success(HttpStatus.OK, "게시글 삭제 성공");
   }
+
+  // 게시글 스크랩
+  @PostMapping("/{postId}/scrap")
+  public ResponseEntity<ApiResponse<Object>> scrapPost(
+      @ActiveProfile ProfileContext profileContext,
+      @PathVariable Long postId
+  ) {
+    postService.scrapPost(profileContext.id(), postId);
+    return ApiResponse.success(HttpStatus.OK, "게시글 스크랩 성공");
+  }
+
+  // 게시글 스크랩 취소
+  @DeleteMapping("/{postId}/scrap")
+  public ResponseEntity<ApiResponse<Object>> unscrapPost(
+      @ActiveProfile ProfileContext profileContext,
+      @PathVariable Long postId
+  ) {
+    postService.unscrapPost(profileContext.id(), postId);
+    return ApiResponse.success(HttpStatus.OK, "게시글 스크랩 취소 성공");
+  }
 }
