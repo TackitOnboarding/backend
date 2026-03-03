@@ -4,19 +4,27 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.common.dto.ActiveProfile;
 import org.example.tackit.common.dto.ProfileContext;
+import org.example.tackit.domain.entity.post.PostCategory;
+import org.example.tackit.domain.entity.post.PostType;
 import org.example.tackit.domain.post.dto.PostCreateReqDto;
+import org.example.tackit.domain.post.dto.PostDetailResDto;
 import org.example.tackit.domain.post.dto.PostIdResDto;
+import org.example.tackit.domain.post.dto.PostPagingResDto;
 import org.example.tackit.domain.post.dto.PostUpdateReqDto;
 import org.example.tackit.domain.post.service.PostService;
 import org.example.tackit.global.response.ApiResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -25,6 +33,29 @@ import org.springframework.web.bind.annotation.RestController;
 public class PostController {
 
   private final PostService postService;
+
+  // 게시글 목록 조회
+  @GetMapping
+  public ResponseEntity<ApiResponse<PostPagingResDto>> getPostList(
+      @ActiveProfile ProfileContext profileContext,
+      @RequestParam PostType type,
+      @RequestParam(required = false) PostCategory category,
+      @PageableDefault(size = 5) Pageable pageable
+  ) {
+    PostPagingResDto response = postService.getPostList(profileContext.id(), type, category,
+        pageable);
+    return ApiResponse.success(HttpStatus.OK, "게시글 목록 조회 성공", response);
+  }
+
+  // 게시글 상세 조회
+  @GetMapping("/{postId}")
+  public ResponseEntity<ApiResponse<PostDetailResDto>> getPostDetail(
+      @ActiveProfile ProfileContext profileContext,
+      @PathVariable Long postId
+  ) {
+    PostDetailResDto response = postService.getPostDetail(profileContext.id(), postId);
+    return ApiResponse.success(HttpStatus.OK, "게시글 상세 조회 성공", response);
+  }
 
   // 게시글 작성
   @PostMapping
