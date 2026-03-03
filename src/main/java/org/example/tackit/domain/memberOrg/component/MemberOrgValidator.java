@@ -17,13 +17,9 @@ public class MemberOrgValidator {
   private final MemberOrgRepository memberOrgRepository;
 
   // 활동 회원 체크 메서드
-  public MemberOrg validateActiveMembership(Long orgId, Long memberOrgId) {
+  public MemberOrg validateActiveMembership(Long memberOrgId) {
     MemberOrg memberOrg = memberOrgRepository.findById(memberOrgId)
         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 조직 멤버 프로필입니다."));
-
-    if (!memberOrg.getOrganization().getId().equals(orgId)) {
-      throw new IllegalArgumentException("해당 조직의 프로필이 아닙니다.");
-    }
 
     if (memberOrg.getOrgStatus() != OrgStatus.ACTIVE) {
       throw new IllegalArgumentException("해당 조직의 활동 중인 회원만 접근할 수 있습니다.");
@@ -32,8 +28,8 @@ public class MemberOrgValidator {
   }
 
   // 운영진 체크 메서드
-  public MemberOrg validateExecutive(Long orgId, Long memberOrgId) {
-    MemberOrg memberOrg = validateActiveMembership(orgId, memberOrgId);
+  public MemberOrg validateExecutive(Long memberOrgId) {
+    MemberOrg memberOrg = validateActiveMembership(memberOrgId);
 
     if (memberOrg.getMemberRole() != MemberRole.EXECUTIVE) {
       throw new IllegalArgumentException("해당 조직의 운영진만 접근할 수 있습니다.");
@@ -42,8 +38,8 @@ public class MemberOrgValidator {
   }
 
   // 신입 회원 체크 메서드
-  public MemberOrg validateNewbie(Long orgId, Long memberOrgId) {
-    MemberOrg memberOrg = validateActiveMembership(orgId, memberOrgId);
+  public MemberOrg validateNewbie(Long memberOrgId) {
+    MemberOrg memberOrg = validateActiveMembership(memberOrgId);
 
     if (memberOrg.getMemberType() != MemberType.NEWBIE) {
       throw new IllegalArgumentException("신입 회원(NEWBIE)만 접근할 수 있습니다.");
@@ -52,8 +48,8 @@ public class MemberOrgValidator {
   }
 
   // 선배 회원 체크 메서드
-  public MemberOrg validateSenior(Long orgId, Long memberOrgId) {
-    MemberOrg memberOrg = validateActiveMembership(orgId, memberOrgId);
+  public MemberOrg validateSenior(Long memberOrgId) {
+    MemberOrg memberOrg = validateActiveMembership(memberOrgId);
 
     if (memberOrg.getMemberType() != MemberType.SENIOR) {
       throw new IllegalArgumentException("선배 회원(SENIOR)만 접근할 수 있습니다.");

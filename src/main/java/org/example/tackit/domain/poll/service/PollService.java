@@ -53,7 +53,7 @@ public class PollService {
   // 투표 생성
   @Transactional
   public Long createPoll(Long memberOrgId, PollCreateReqDto reqDto) {
-    MemberOrg requester = memberOrgValidator.validateExecutive(reqDto.getOrgId(), memberOrgId);
+    MemberOrg requester = memberOrgValidator.validateExecutive(memberOrgId);
 
     if (reqDto.getVoteScope() == PollScope.PARTIAL && (reqDto.getParticipants() == null
         || reqDto.getParticipants().isEmpty())) {
@@ -118,7 +118,7 @@ public class PollService {
   public void updatePoll(Long pollId, Long memberOrgId, PollUpdateReqDto reqDto) {
     Poll poll = findPollOrThrow(pollId);
 
-    memberOrgValidator.validateExecutive(poll.getOrgId(), memberOrgId);
+    memberOrgValidator.validateExecutive(memberOrgId);
 
     poll.update(reqDto.getTitle(), reqDto.getEndsAt(), reqDto.getIsMulti());
   }
@@ -128,7 +128,7 @@ public class PollService {
   public void deletePoll(Long pollId, Long memberOrgId) {
     Poll poll = findPollOrThrow(pollId);
 
-    memberOrgValidator.validateExecutive(poll.getOrgId(), memberOrgId);
+    memberOrgValidator.validateExecutive(memberOrgId);
 
     pollRepository.delete(poll);
   }
@@ -136,7 +136,7 @@ public class PollService {
   // 투표 상세 조회
   public PollDetailResDto getPollDetail(Long pollId, Long memberOrgId) {
     Poll poll = findPollOrThrow(pollId);
-    memberOrgValidator.validateActiveMembership(poll.getOrgId(), memberOrgId);
+    memberOrgValidator.validateActiveMembership(memberOrgId);
 
     // 내 투표 여부 및 선택 항목 조회
     Optional<PollParticipant> myParticipant = pollParticipantRepository.findByPollIdAndMemberOrgId(
@@ -201,7 +201,7 @@ public class PollService {
   public void vote(Long pollId, Long memberOrgId, VoteReqDto reqDto) {
     Poll poll = findPollOrThrow(pollId);
 
-    memberOrgValidator.validateActiveMembership(poll.getOrgId(), memberOrgId);
+    memberOrgValidator.validateActiveMembership(memberOrgId);
 
     // 마감 여부 체크
     if (isPollEnded(poll)) {
@@ -255,8 +255,9 @@ public class PollService {
   }
 
   // 월간 조회
-  public List<PollSimpleResDto> getMonthlyPolls(Long orgId, int year, int month, Long memberOrgId) {
-    memberOrgValidator.validateActiveMembership(orgId, memberOrgId);
+  public List<PollSimpleResDto> getMonthlyPolls(int year, int month, Long memberOrgId) {
+    MemberOrg memberOrg = memberOrgValidator.validateActiveMembership(memberOrgId);
+    Long orgId = memberOrg.getOrganization().getId();
 
     LocalDateTime start = LocalDateTime.of(year, month, 1, 0, 0);
     LocalDateTime end = start.plusMonths(1).minusNanos(1);
@@ -271,8 +272,9 @@ public class PollService {
   }
 
   // 사이드바 조회 (마감 임박 + 진행 중)
-  public PollSidebarResDto getSidebarPolls(Long orgId, Long memberOrgId) {
-    memberOrgValidator.validateActiveMembership(orgId, memberOrgId);
+  public PollSidebarResDto getSidebarPolls(Long memberOrgId) {
+    MemberOrg memberOrg = memberOrgValidator.validateActiveMembership(memberOrgId);
+    Long orgId = memberOrg.getOrganization().getId();
 
     // 진행 중인 모든 투표 조회
     List<Poll> activePolls = pollRepository.findAllByOrgIdAndStatusOrderByEndsAtAsc(orgId,

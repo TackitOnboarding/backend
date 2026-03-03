@@ -20,7 +20,7 @@ public class MemberOrgService {
 
   // 특정 조직 소속 멤버 조회
   public List<SimpleMemberProfileDto> getOrgMembers(Long orgId, Long memberOrgId) {
-    memberOrgValidator.validateActiveMembership(orgId, memberOrgId);
+    memberOrgValidator.validateActiveMembership(memberOrgId);
 
     List<MemberOrg> members = memberOrgRepository.findByOrganizationIdAndOrgStatus(
         orgId,

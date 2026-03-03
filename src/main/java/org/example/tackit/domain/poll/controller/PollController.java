@@ -80,24 +80,22 @@ public class PollController {
   // 월간 투표 조회
   @GetMapping("/monthly")
   public ResponseEntity<ApiResponse<List<PollSimpleResDto>>> getMonthlyPolls(
-      @RequestParam Long orgId,
       @RequestParam int year,
       @RequestParam int month,
       @ActiveProfile ProfileContext profileContext
   ) {
     Long memberOrgId = profileContext.id();
-    List<PollSimpleResDto> result = pollService.getMonthlyPolls(orgId, year, month, memberOrgId);
+    List<PollSimpleResDto> result = pollService.getMonthlyPolls(year, month, memberOrgId);
     return ApiResponse.success(HttpStatus.OK, "월간 투표 목록 조회 성공", result);
   }
 
   // 캘린더 사이드바 투표 조회 (마감 임박 + 진행 중)
   @GetMapping("/active")
   public ResponseEntity<ApiResponse<PollSidebarResDto>> getActivePolls(
-      @RequestParam Long orgId,
       @ActiveProfile ProfileContext profileContext
   ) {
     Long memberOrgId = profileContext.id();
-    PollSidebarResDto result = pollService.getSidebarPolls(orgId, memberOrgId);
+    PollSidebarResDto result = pollService.getSidebarPolls(memberOrgId);
     return ApiResponse.success(HttpStatus.OK, "진행 중인 투표 목록 조회 성공", result);
   }
 

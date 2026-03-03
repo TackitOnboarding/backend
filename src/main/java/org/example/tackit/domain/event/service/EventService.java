@@ -35,8 +35,7 @@ public class EventService {
   // 일정 생성
   @Transactional
   public Long createEvent(EventCreateReqDto reqDto, Long requesterMemberOrgId) {
-    MemberOrg memberOrg = memberOrgValidator.validateExecutive(reqDto.getOrgId(),
-        requesterMemberOrgId);
+    MemberOrg memberOrg = memberOrgValidator.validateExecutive(requesterMemberOrgId);
 
     Member creator = memberOrg.getMember();
 
@@ -65,7 +64,7 @@ public class EventService {
   public void updateEvent(Long eventId, EventUpdateReqDto reqDto, Long requesterMemberOrgId) {
     Event event = findEventOrThrow(eventId);
 
-    memberOrgValidator.validateExecutive(event.getOrganization().getId(), requesterMemberOrgId);
+    memberOrgValidator.validateExecutive(requesterMemberOrgId);
 
     event.update(
         reqDto.getTitle(),
@@ -88,15 +87,15 @@ public class EventService {
   public void deleteEvent(Long eventId, Long requesterMemberOrgId) {
     Event event = findEventOrThrow(eventId);
 
-    memberOrgValidator.validateExecutive(event.getOrganization().getId(), requesterMemberOrgId);
+    memberOrgValidator.validateExecutive(requesterMemberOrgId);
 
     eventRepository.delete(event);
   }
 
   // 월간 일정 조회
-  public List<EventSimpleResDto> getMonthlyEvents(Long orgId, int year, int month,
-      Long requesterMemberOrgId) {
-    memberOrgValidator.validateActiveMembership(orgId, requesterMemberOrgId);
+  public List<EventSimpleResDto> getMonthlyEvents(int year, int month, Long requesterMemberOrgId) {
+    MemberOrg memberOrg = memberOrgValidator.validateActiveMembership(requesterMemberOrgId);
+    Long orgId = memberOrg.getOrganization().getId();
 
     YearMonth yearMonth = YearMonth.of(year, month);
     LocalDateTime startDateTime = yearMonth.atDay(1).atStartOfDay();
@@ -120,8 +119,7 @@ public class EventService {
   public EventDetailResDto getEventDetail(Long eventId, Long requesterMemberOrgId) {
     Event event = findEventOrThrow(eventId);
 
-    memberOrgValidator.validateActiveMembership(event.getOrganization().getId(),
-        requesterMemberOrgId);
+    memberOrgValidator.validateActiveMembership(requesterMemberOrgId);
 
     List<SimpleMemberProfileDto> participantDtos = event.getParticipants().stream()
         .map(ep -> SimpleMemberProfileDto.from(ep.getMemberOrg()))
@@ -140,8 +138,9 @@ public class EventService {
   }
 
   // 다가오는 일정 조회
-  public List<EventSimpleResDto> getUpcomingEvents(Long orgId, Long requesterMemberOrgId) {
-    memberOrgValidator.validateActiveMembership(orgId, requesterMemberOrgId);
+  public List<EventSimpleResDto> getUpcomingEvents(Long requesterMemberOrgId) {
+    MemberOrg memberOrg = memberOrgValidator.validateActiveMembership(requesterMemberOrgId);
+    Long orgId = memberOrg.getOrganization().getId();
 
     List<Event> events = eventRepository.findByOrganizationIdAndStartsAtAfterOrderByStartsAtAsc(
         orgId,
