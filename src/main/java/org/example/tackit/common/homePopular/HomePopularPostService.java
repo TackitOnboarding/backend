@@ -1,9 +1,6 @@
-package org.example.tackit.common.homePopular;
+/* package org.example.tackit.common.homePopular;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostJPARepository;
-import org.example.tackit.domain.qnaBoard.QnA_post.repository.QnAPostRepository;
-import org.example.tackit.domain.tipBoard.Tip_post.repository.TipPostRepository;
 import org.example.tackit.domain.entity.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class HomePopularPostService {
-
-    private final FreePostJPARepository freePostRepository;
-    private final QnAPostRepository qnaPostRepository;
-    private final TipPostRepository tipPostRepository;
-
 
     public List<HomePopularPostRespDto> getPopularPosts(Long orgId) {
         LocalDateTime startOfWeek = LocalDate.now()
@@ -133,5 +125,4 @@ public class HomePopularPostService {
                 .toList();
     }
      */
-}
 

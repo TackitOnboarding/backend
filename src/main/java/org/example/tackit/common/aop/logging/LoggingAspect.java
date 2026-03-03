@@ -1,29 +1,17 @@
 package org.example.tackit.common.aop.logging;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.example.tackit.domain.freeBoard.Free_post.repository.FreeMemberJPARepository;
-import org.example.tackit.domain.admin.repository.MemberLogRepository;
-import org.example.tackit.domain.entity.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
 public class LoggingAspect {
-    // private final MemberLogRepository memberLogRepository;
-    private final FreeMemberJPARepository freeMemberJPARepository;
+  // private final MemberLogRepository memberLogRepository;
+  // private final FreeMemberJPARepository freeMemberJPARepository;
 
     /*
     @Around("execution(* org.example.tackit..*Controller.*(..))")
