@@ -80,13 +80,13 @@ public class Post {
   private Organization organization;
 
   @Column(nullable = false)
-  private Long reportCnt;
+  private int reportCnt;
 
   @Column(nullable = false)
-  private Long viewCnt;
+  private int viewCnt;
 
   @Column(nullable = false)
-  private Long scrapCnt;
+  private int scrapCnt;
 
   @Version
   private Long version;
@@ -113,9 +113,9 @@ public class Post {
     this.isAnonymous = (isAnonymous != null) ? isAnonymous : false;
     this.commentEnabled = (commentEnabled != null) ? commentEnabled : true;
     this.activeStatus = ActiveStatus.ACTIVE;
-    this.viewCnt = 0L;
-    this.scrapCnt = 0L;
-    this.reportCnt = 0L;
+    this.viewCnt = 0;
+    this.scrapCnt = 0;
+    this.reportCnt = 0;
   }
 
   // 비즈니스 로직 메서드
@@ -155,7 +155,7 @@ public class Post {
       throw new IllegalStateException("삭제되지 않은 게시글은 활성화할 수 없습니다.");
     }
     this.activeStatus = ActiveStatus.ACTIVE;
-    this.reportCnt = 0L;
+    this.reportCnt = 0;
   }
 
   public void increaseViewCnt() {
