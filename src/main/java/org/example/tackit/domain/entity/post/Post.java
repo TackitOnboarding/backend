@@ -119,13 +119,23 @@ public class Post {
   }
 
   // 비즈니스 로직 메서드
-  public void update(String title, String content, PostCategory category, boolean isAnonymous,
-      boolean commentEnabled) {
-    this.title = title;
-    this.content = content;
-    this.category = category;
-    this.isAnonymous = isAnonymous;
-    this.commentEnabled = commentEnabled;
+  public void update(String title, String content, PostCategory category, Boolean isAnonymous,
+      Boolean commentEnabled) {
+    if (title != null) {
+      this.title = title;
+    }
+    if (content != null) {
+      this.content = content;
+    }
+    if (category != null) {
+      this.category = category;
+    }
+    if (isAnonymous != null) {
+      this.isAnonymous = isAnonymous;
+    }
+    if (commentEnabled != null) {
+      this.commentEnabled = commentEnabled;
+    }
   }
 
   public void delete() {
