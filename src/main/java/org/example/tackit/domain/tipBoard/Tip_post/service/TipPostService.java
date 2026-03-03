@@ -19,7 +19,7 @@ import org.example.tackit.domain.entity.TipPost;
 import org.example.tackit.domain.entity.TipPostImage;
 import org.example.tackit.domain.entity.TipReport;
 import org.example.tackit.domain.entity.TipScrap;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.example.tackit.domain.tipBoard.Tip_post.dto.request.TipPostReqDto;
 import org.example.tackit.domain.tipBoard.Tip_post.dto.request.TipPostUpdateDto;
@@ -146,8 +146,8 @@ public class TipPostService {
     if (image != null && !image.isEmpty()) {
       String imageUrl = s3UploadService.saveFile(image);
       TipPostImage imageEntity = TipPostImage.builder()
-              .imageUrl(imageUrl)
-              .build();
+          .imageUrl(imageUrl)
+          .build();
       post.addImage(imageEntity); // 기존 이미지 clear 후 하나만 저장
     }
 
@@ -159,18 +159,18 @@ public class TipPostService {
 
     // 응답 DTO 구성 (imageUrl 하나만)
     return TipPostRespDto.builder()
-            .id(post.getId())
-            .writer(anonymous ? "익명" : member.getNickname())
-            .profileImageUrl(anonymous ? null : member.getProfileImageUrl())
-            .title(post.getTitle())
-            .content(post.getContent())
-            .createdAt(post.getCreatedAt())
-            .tags(tagNames)
-            .imageUrl(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
-            .isAnonymous(anonymous)
-            .isScrap(false)
-            .build();
-    }
+        .id(post.getId())
+        .writer(anonymous ? "익명" : member.getNickname())
+        .profileImageUrl(anonymous ? null : member.getProfileImageUrl())
+        .title(post.getTitle())
+        .content(post.getContent())
+        .createdAt(post.getCreatedAt())
+        .tags(tagNames)
+        .imageUrl(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+        .isAnonymous(anonymous)
+        .isScrap(false)
+        .build();
+  }
 
 
   // [ 게시글 수정 ] : 작성자만

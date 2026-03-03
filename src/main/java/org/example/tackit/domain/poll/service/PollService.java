@@ -19,9 +19,9 @@ import org.example.tackit.domain.entity.poll.PollScope;
 import org.example.tackit.domain.entity.poll.PollStatus;
 import org.example.tackit.domain.entity.poll.PollTarget;
 import org.example.tackit.domain.entity.poll.Vote;
-import org.example.tackit.domain.member.component.MemberOrgValidator;
-import org.example.tackit.domain.member.dto.SimpleMemberProfileDto;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
+import org.example.tackit.domain.memberOrg.dto.SimpleMemberProfileDto;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.poll.dto.PollCreateReqDto;
 import org.example.tackit.domain.poll.dto.PollDetailResDto;
 import org.example.tackit.domain.poll.dto.PollSidebarResDto;
@@ -86,7 +86,6 @@ public class PollService {
 
     // 투표 참여 대상 저장
     if (reqDto.getVoteScope() == PollScope.PARTIAL) {
-      //TODO events에 있는 리스트에 있는 인원이 멤버가 맞는지 검증하는 로직을 공통으로 빼내서 검증 로직 추가
       List<Long> targets = reqDto.getParticipants().stream().distinct().toList();
 
       List<MemberOrg> memberOrgs = memberOrgRepository.findAllById(targets);
@@ -102,7 +101,7 @@ public class PollService {
           throw new IllegalArgumentException("해당 그룹의 소속 회원이 아닙니다.");
         }
       }
-      
+
       for (Long targetId : targets) {
         pollTargetRepository.save(PollTarget.builder()
             .poll(poll)
@@ -161,7 +160,7 @@ public class PollService {
             .content(opt.getContent())
             .voteCount(voteCountMap.getOrDefault(opt.getId(), 0L).intValue())
             .build())
-        .collect(Collectors.toList());
+        .toList();
 
     // 참여자 목록
     List<SimpleMemberProfileDto> voters = null;
@@ -175,7 +174,8 @@ public class PollService {
         voters = participants.stream()
             .map(p -> SimpleMemberProfileDto.from(memberMap.get(p.getMemberOrgId())))
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .sorted()
+            .toList();
       }
     }
 
@@ -267,7 +267,7 @@ public class PollService {
             .title(p.getTitle())
             .endsAt(p.getEndsAt())
             .build())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // 사이드바 조회 (마감 임박 + 진행 중)

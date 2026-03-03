@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.entity.Event;
 import org.example.tackit.domain.entity.EventParticipant;
@@ -16,9 +15,9 @@ import org.example.tackit.domain.event.dto.EventDetailResDto;
 import org.example.tackit.domain.event.dto.EventSimpleResDto;
 import org.example.tackit.domain.event.dto.EventUpdateReqDto;
 import org.example.tackit.domain.event.repository.EventRepository;
-import org.example.tackit.domain.member.component.MemberOrgValidator;
-import org.example.tackit.domain.member.dto.SimpleMemberProfileDto;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
+import org.example.tackit.domain.memberOrg.dto.SimpleMemberProfileDto;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.organization.repository.OrganizationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -114,7 +113,7 @@ public class EventService {
             .endsAt(event.getEndsAt())
             .colorChip(event.getColorChip())
             .build())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // 일정 상세 조회
@@ -125,12 +124,9 @@ public class EventService {
         requesterMemberOrgId);
 
     List<SimpleMemberProfileDto> participantDtos = event.getParticipants().stream()
-        .map(ep -> SimpleMemberProfileDto.builder()
-            .orgMemberId(ep.getMemberOrg().getId())
-            .profileImageUrl(ep.getMemberOrg().getProfileImageUrl())
-            .nickname(ep.getMemberOrg().getNickname())
-            .build())
-        .collect(Collectors.toList());
+        .map(ep -> SimpleMemberProfileDto.from(ep.getMemberOrg()))
+        .sorted()
+        .toList();
 
     return EventDetailResDto.builder()
         .eventId(event.getId())
@@ -160,7 +156,7 @@ public class EventService {
             .endsAt(event.getEndsAt())
             .colorChip(event.getColorChip())
             .build())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // 이벤트 참가자 추가 메서드

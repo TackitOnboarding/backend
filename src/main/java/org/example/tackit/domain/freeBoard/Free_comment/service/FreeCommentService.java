@@ -17,7 +17,7 @@ import org.example.tackit.domain.freeBoard.Free_comment.dto.req.FreeCommentUpdat
 import org.example.tackit.domain.freeBoard.Free_comment.dto.resp.FreeCommentRespDto;
 import org.example.tackit.domain.freeBoard.Free_comment.repository.FreeCommentRepository;
 import org.example.tackit.domain.freeBoard.Free_post.repository.FreePostJPARepository;
-import org.example.tackit.domain.member.repository.MemberOrgRepository;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.example.tackit.domain.notification.service.NotificationService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
