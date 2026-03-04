@@ -1,14 +1,20 @@
 package org.example.tackit.domain.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.tackit.domain.entity.Org.MemberOrg;
+import org.example.tackit.domain.entity.org.MemberOrg;
 import org.springframework.data.annotation.CreatedDate;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -17,29 +23,33 @@ import java.time.LocalDateTime;
 @Builder
 @Table(name = "free_comment")
 public class FreeComment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "member_org_id", nullable = false)
-    private MemberOrg writer;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "free_id", nullable = false)
-    // 게시글 Id
-    private FreePost freePost;
+  @ManyToOne
+  @JoinColumn(name = "member_org_id", nullable = false)
+  private MemberOrg writer;
 
-    private String content;
+  @ManyToOne
+  @JoinColumn(name = "free_id", nullable = false)
+  // 게시글 Id
+  private FreePost freePost;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  private String content;
 
-    private int reportCount;
+  @CreatedDate
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 
-    public void updateContent(String content) { this.content = content; }
-    public void increaseReportCount() {
-        this.reportCount++;
-    }
+  private int reportCount;
+
+  public void updateContent(String content) {
+    this.content = content;
+  }
+
+  public void increaseReportCount() {
+    this.reportCount++;
+  }
 }

@@ -3,7 +3,7 @@ package org.example.tackit.domain.memberOrg.dto;
 import lombok.Builder;
 import lombok.Getter;
 import org.example.tackit.domain.entity.MemberRole;
-import org.example.tackit.domain.entity.Org.MemberOrg;
+import org.example.tackit.domain.entity.org.MemberOrg;
 
 @Getter
 @Builder

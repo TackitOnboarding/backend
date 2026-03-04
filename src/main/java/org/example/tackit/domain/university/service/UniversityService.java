@@ -1,7 +1,9 @@
 package org.example.tackit.domain.university.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.entity.Org.University;
+import org.example.tackit.domain.entity.org.University;
 import org.example.tackit.domain.university.dto.UniversityRespDto;
 import org.example.tackit.domain.university.repository.UniversityRepository;
 import org.springframework.data.domain.PageRequest;
@@ -10,27 +12,25 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UniversityService {
-    private final UniversityRepository universityRepository;
 
-    public List<UniversityRespDto> searchUniversities(String word) {
-        String trimWord = word.trim();
-        boolean isChosung = trimWord.matches("^[ㄱ-ㅎ]+$");
+  private final UniversityRepository universityRepository;
 
-        Pageable limitTen = PageRequest.of(0, 10, Sort.by("universityName").ascending());
+  public List<UniversityRespDto> searchUniversities(String word) {
+    String trimWord = word.trim();
+    boolean isChosung = trimWord.matches("^[ㄱ-ㅎ]+$");
 
-        List<University> result = isChosung
-                ? universityRepository.findByUniversityChosungContaining(trimWord, limitTen)
-                : universityRepository.findByUniversityNameContaining(trimWord, limitTen);
+    Pageable limitTen = PageRequest.of(0, 10, Sort.by("universityName").ascending());
 
-        return result.stream()
-                .map(UniversityRespDto::from)
-                .collect(Collectors.toList());
-    }
+    List<University> result = isChosung
+        ? universityRepository.findByUniversityChosungContaining(trimWord, limitTen)
+        : universityRepository.findByUniversityNameContaining(trimWord, limitTen);
+
+    return result.stream()
+        .map(UniversityRespDto::from)
+        .collect(Collectors.toList());
+  }
 }

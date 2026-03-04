@@ -2,8 +2,8 @@ package org.example.tackit.domain.memberOrg.repository;
 
 import java.util.List;
 import java.util.Optional;
-import org.example.tackit.domain.entity.Org.MemberOrg;
-import org.example.tackit.domain.entity.Org.OrgStatus;
+import org.example.tackit.domain.entity.org.MemberOrg;
+import org.example.tackit.domain.entity.org.OrgStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -1,8 +1,8 @@
 package org.example.tackit.domain.organization.repository;
 
-import org.example.tackit.domain.entity.Org.OrgType;
-import org.example.tackit.domain.entity.Org.Organization;
-import org.example.tackit.domain.entity.Org.University;
+import org.example.tackit.domain.entity.org.OrgType;
+import org.example.tackit.domain.entity.org.Organization;
+import org.example.tackit.domain.entity.org.University;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
