@@ -1,6 +1,7 @@
 package org.example.tackit.domain.organization.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.AllArgsConstructor;
 import org.example.tackit.domain.entity.Member;
@@ -63,6 +64,16 @@ public class OrganizationService {
 
     // 4. 생성 성공 응답 반환
     return OrgRespDto.of(savedOrg);
+  }
+
+  // [ 모임 검색 ]
+  @Transactional(readOnly = true)
+  public List<OrgRespDto> searchOrgsByTypeAndName(OrgType orgType, String orgName) {
+    List<Organization> orgs = organizationRepository.findByTypeAndNameContaining(orgType, orgName);
+
+    return orgs.stream()
+            .map(OrgRespDto::of)
+            .toList();
   }
 
   // [ 모임 참여 ]

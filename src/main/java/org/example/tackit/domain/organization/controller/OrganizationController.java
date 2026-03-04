@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.common.dto.ActiveProfile;
 import org.example.tackit.common.dto.ProfileContext;
+import org.example.tackit.domain.entity.Org.OrgType;
 import org.example.tackit.domain.memberOrg.dto.SimpleMemberProfileDto;
 import org.example.tackit.domain.memberOrg.service.MemberOrgService;
 import org.example.tackit.domain.organization.dto.req.OrgCreateReqDto;
@@ -14,12 +15,7 @@ import org.example.tackit.global.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -43,6 +39,16 @@ public class OrganizationController {
     String email = authentication.getName();
     OrgRespDto response = organizationService.createOrg(dto, email);
     return ResponseEntity.ok(response);
+  }
+
+  // 모임 검색
+  @GetMapping("/search")
+  public ResponseEntity<ApiResponse<List<OrgRespDto>>> searchOrgs(
+          @RequestParam OrgType orgType,
+          @RequestParam String orgName
+  ) {
+    List<OrgRespDto> results = organizationService.searchOrgsByTypeAndName(orgType, orgName);
+    return ApiResponse.success(HttpStatus.OK, "모임 검색 성공", results);
   }
 
   // 모임 참여
