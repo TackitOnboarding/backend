@@ -63,14 +63,13 @@ public class EventController {
    */
   @GetMapping("/monthly")
   public ResponseEntity<ApiResponse<List<EventSimpleResDto>>> getMonthlyEvents(
-      @RequestParam Long orgId,
       @RequestParam int year,
       @RequestParam int month,
       @ActiveProfile ProfileContext profileContext
   ) {
     Long memberOrgId = profileContext.id();
 
-    List<EventSimpleResDto> events = eventService.getMonthlyEvents(orgId, year, month, memberOrgId);
+    List<EventSimpleResDto> events = eventService.getMonthlyEvents(year, month, memberOrgId);
 
     return ApiResponse.success(HttpStatus.OK, "월간 일정 조회 성공", events);
   }
@@ -80,12 +79,11 @@ public class EventController {
    */
   @GetMapping("/upcoming")
   public ResponseEntity<ApiResponse<List<EventSimpleResDto>>> getUpcomingEvents(
-      @RequestParam Long orgId,
       @ActiveProfile ProfileContext profileContext
   ) {
     Long memberOrgId = profileContext.id();
 
-    List<EventSimpleResDto> events = eventService.getUpcomingEvents(orgId, memberOrgId);
+    List<EventSimpleResDto> events = eventService.getUpcomingEvents(memberOrgId);
 
     return ApiResponse.success(HttpStatus.OK, "다가오는 일정 조회 성공", events);
   }
