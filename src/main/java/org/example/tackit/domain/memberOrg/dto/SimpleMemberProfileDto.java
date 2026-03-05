@@ -15,7 +15,7 @@ public class SimpleMemberProfileDto implements Comparable<SimpleMemberProfileDto
   private String profileImageUrl;
   private MemberRole memberRole;
   private MemberType memberType;
-  private int activityYear;
+  private Integer activityYear;
 
   public static SimpleMemberProfileDto from(MemberOrg memberOrg) {
     if (memberOrg == null) {

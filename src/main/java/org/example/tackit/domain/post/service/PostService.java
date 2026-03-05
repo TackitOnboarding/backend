@@ -276,6 +276,8 @@ public class PostService {
           .nickname("익명")
           .profileImageUrl(null)
           .memberRole(null)
+          .memberType(null)
+          .activityYear(null)
           .build();
     }
     return SimpleMemberProfileDto.builder()
