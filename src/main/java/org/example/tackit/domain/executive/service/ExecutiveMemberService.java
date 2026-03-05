@@ -1,7 +1,6 @@
 package org.example.tackit.domain.executive.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.entity.org.OrgStatus;
@@ -36,14 +35,8 @@ public class ExecutiveMemberService {
     }
 
     return memberOrgs.stream()
-        .map(mo -> MemberListResDto.builder()
-            .memberOrgId(mo.getId())
-            .nickname(mo.getNickname())
-            .email(mo.getMember().getEmail())
-            .orgStatus(mo.getOrgStatus().name())
-            .createdAt(mo.getCreatedAt())
-            .build())
-        .collect(Collectors.toList());
+        .map(MemberListResDto::from)
+        .toList();
   }
 
   // [ 멤버 승인 및 반려 ]
