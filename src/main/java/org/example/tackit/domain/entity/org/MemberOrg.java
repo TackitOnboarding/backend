@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -68,5 +69,13 @@ public class MemberOrg {
 
   public void updateStatus(OrgStatus status) {
     this.orgStatus = status;
+  }
+
+  /**
+   * 프로필 조회 시 n년차 활동 멤버인지 계산하는 메소드
+   */
+  public int getActivityYear() {
+    int currentYear = LocalDate.now().getYear();
+    return currentYear - this.joinedYear + 1;
   }
 }

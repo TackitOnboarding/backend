@@ -3,6 +3,7 @@ package org.example.tackit.domain.memberOrg.dto;
 import lombok.Builder;
 import lombok.Getter;
 import org.example.tackit.domain.entity.MemberRole;
+import org.example.tackit.domain.entity.MemberType;
 import org.example.tackit.domain.entity.org.MemberOrg;
 
 @Getter
@@ -13,6 +14,8 @@ public class SimpleMemberProfileDto implements Comparable<SimpleMemberProfileDto
   private String nickname;
   private String profileImageUrl;
   private MemberRole memberRole;
+  private MemberType memberType;
+  private int activityYear;
 
   public static SimpleMemberProfileDto from(MemberOrg memberOrg) {
     if (memberOrg == null) {
@@ -23,6 +26,8 @@ public class SimpleMemberProfileDto implements Comparable<SimpleMemberProfileDto
         .nickname(memberOrg.getNickname())
         .profileImageUrl(memberOrg.getProfileImageUrl())
         .memberRole(memberOrg.getMemberRole())
+        .memberType(memberOrg.getMemberType())
+        .activityYear(memberOrg.getActivityYear())
         .build();
   }
 
