@@ -1,42 +1,29 @@
 package org.example.tackit.domain.executive.service;
 
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.entity.MemberRole;
 import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.entity.org.OrgStatus;
 import org.example.tackit.domain.executive.dto.response.MemberListResDto;
+import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class ExecutiveMemberService {
 
   private final MemberOrgRepository memberOrgRepository;
-
-  // 공통 권한 검증 : 요청자가 해당 조직의 멤버인지, 운영진인지 확인
-  private void validateExecutiveRole(Long orgId, String email) {
-    MemberOrg requester = memberOrgRepository.findByOrganizationIdAndMemberEmail(orgId, email)
-        .orElseThrow(() -> new IllegalArgumentException("해당 조직의 멤버가 아닙니다."));
-
-    if (requester.getMemberRole() != MemberRole.EXECUTIVE) {
-      throw new AccessDeniedException("운영진 권한이 없습니다.");
-    }
-
-    if (requester.getOrgStatus() != OrgStatus.ACTIVE) {
-      throw new IllegalStateException("활성화되지 않은 운영진 계정입니다.");
-    }
-  }
+  private final MemberOrgValidator memberOrgValidator;
 
   // [ 모든 멤버 조회 ]
-  public List<MemberListResDto> getMembers(Long orgId, String email, String orgStatus) {
+  public List<MemberListResDto> getMembers(Long requestMemberOrgId, String orgStatus) {
     // 1. 운영진 권한 체크
-    validateExecutiveRole(orgId, email);
+    MemberOrg requesterMemberOrg = memberOrgValidator.validateExecutive(requestMemberOrgId);
+    Long orgId = requesterMemberOrg.getOrganization().getId();
 
     List<MemberOrg> memberOrgs;
 
@@ -59,31 +46,24 @@ public class ExecutiveMemberService {
         .collect(Collectors.toList());
   }
 
-  // [ 멤버 승인 ]
-  public void approveMember(Long orgId, String email, Long memberOrgId) {
+  // [ 멤버 승인 및 반려 ]
+  @Transactional
+  public void updateMemberApplicationStatus(Long requesterMemberOrgId, Long targetMemberOrgId,
+      OrgStatus newStatus) {
     // 1. 운영진 권한 체크
-    validateExecutiveRole(orgId, email);
+    MemberOrg requester = memberOrgValidator.validateExecutive(requesterMemberOrgId);
+    Long orgId = requester.getOrganization().getId();
 
-    // 2. 승인 대상 조회 및 상태 변경
-    MemberOrg targetMember = memberOrgRepository.findById(memberOrgId)
+    // 2. 타겟 대상 조회
+    MemberOrg targetMember = memberOrgRepository.findById(targetMemberOrgId)
         .orElseThrow(() -> new IllegalArgumentException("해당 가입 신청을 찾을 수 없습니다."));
 
-    targetMember.updateStatus(OrgStatus.ACTIVE);
-  }
-
-  // [ 멤버 반려 ]
-  public void rejectMember(Long orgId, String email, Long memberOrgId) {
-    // 1. 운영진 권한 체크
-    validateExecutiveRole(orgId, email);
-
-    // 2. 반려 대상 조회 및 상태 변경
-    MemberOrg targetMember = memberOrgRepository.findById(memberOrgId)
-        .orElseThrow(() -> new IllegalArgumentException("해당 가입 신청을 찾을 수 없습니다."));
-
+    // 3. 조직 일치 여부 검증
     if (!targetMember.getOrganization().getId().equals(orgId)) {
       throw new IllegalArgumentException("해당 조직의 가입 신청이 아닙니다.");
     }
 
-    targetMember.updateStatus(OrgStatus.REJECTED);
+    // 4. 상태 변경 (ACTIVE or REJECTED)
+    targetMember.updateStatus(newStatus);
   }
 }
