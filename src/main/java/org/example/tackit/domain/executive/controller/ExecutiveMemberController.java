@@ -8,6 +8,10 @@ import org.example.tackit.domain.entity.org.OrgStatus;
 import org.example.tackit.domain.executive.dto.response.MemberListResDto;
 import org.example.tackit.domain.executive.service.ExecutiveMemberService;
 import org.example.tackit.global.response.ApiResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,13 +29,18 @@ public class ExecutiveMemberController {
 
   // [ 전체 회원 조회 ]
   @GetMapping
-  public ResponseEntity<ApiResponse<List<MemberListResDto>>> getAllMembers(
+  public ResponseEntity<ApiResponse<Page<MemberListResDto>>> getAllMembers(
       @RequestParam(value = "orgStatus", defaultValue = "ALL") String orgStatus,
+      @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
       @ActiveProfile ProfileContext profileContext
   ) {
     Long requesterMemberOrgId = profileContext.id();
-    List<MemberListResDto> responses = executiveMemberService.getMembers(requesterMemberOrgId,
-        orgStatus);
+    Page<MemberListResDto> responses = executiveMemberService.getMembers(
+            requesterMemberOrgId,
+            orgStatus,
+            pageable
+    );
+
     return ApiResponse.success(HttpStatus.OK, "전체 회원 조회 성공", responses);
   }
 

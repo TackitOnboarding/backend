@@ -7,6 +7,8 @@ import org.example.tackit.domain.entity.org.OrgStatus;
 import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
 import org.example.tackit.domain.memberOrg.dto.SimpleMemberProfileDto;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,17 +21,14 @@ public class MemberOrgService {
   private final MemberOrgValidator memberOrgValidator;
 
   // 특정 조직 소속 멤버 조회
-  public List<SimpleMemberProfileDto> getOrgMembers(Long orgId, Long memberOrgId) {
+  public Page<SimpleMemberProfileDto> getOrgMembers(Long orgId, Long memberOrgId, Pageable pageable) {
     memberOrgValidator.validateActiveMembership(memberOrgId);
 
-    List<MemberOrg> members = memberOrgRepository.findByOrganizationIdAndOrgStatus(
+    Page<MemberOrg> members = memberOrgRepository.findByOrganizationIdAndOrgStatus(
         orgId,
-        OrgStatus.ACTIVE
+        OrgStatus.ACTIVE, pageable
     );
 
-    return members.stream()
-        .map(SimpleMemberProfileDto::from)
-        .sorted()
-        .toList();
+    return members.map(SimpleMemberProfileDto::from);
   }
 }
