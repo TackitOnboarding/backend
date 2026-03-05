@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.entity.ActiveStatus;
-import org.example.tackit.domain.entity.MemberRole;
 import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.entity.org.Organization;
 import org.example.tackit.domain.entity.post.Comment;
@@ -280,12 +279,7 @@ public class PostService {
           .activityYear(null)
           .build();
     }
-    return SimpleMemberProfileDto.builder()
-        .orgMemberId(writer.getId())
-        .nickname(writer.getNickname())
-        .profileImageUrl(writer.getProfileImageUrl())
-        .memberRole(MemberRole.valueOf(writer.getMemberRole().name()))
-        .build();
+    return SimpleMemberProfileDto.from(writer);
   }
 
   // 댓글 계층 구조 변환 (List -> Tree)
