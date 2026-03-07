@@ -27,7 +27,7 @@ public class AdminMemberController {
     public ResponseEntity<Page<MemberDTO>> getAllUsers(
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<MemberDTO> users = adminMemberService.getALlMembers(pageable);
+        Page<MemberDTO> users = adminMemberService.getAllMembers(pageable);
         return ResponseEntity.ok(users);
     }
 

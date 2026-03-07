@@ -1,6 +1,5 @@
 package org.example.tackit.domain.admin.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.admin.dto.MemberDTO;
 import org.example.tackit.domain.admin.dto.MemberStatisticsDTO;
@@ -10,6 +9,7 @@ import org.example.tackit.domain.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -17,12 +17,12 @@ import java.time.temporal.ChronoField;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class AdminMemberService {
     private final AdminMemberRepository adminMemberRepository;
 
     // [ 모든 멤버 조회 ]
-    public Page<MemberDTO> getALlMembers(Pageable pageable) {
+    public Page<MemberDTO> getAllMembers(Pageable pageable) {
         return adminMemberRepository.findAllByActiveStatus(ActiveStatus.ACTIVE, pageable)
                 .map(this::convertToDTO);
     }

@@ -5,6 +5,7 @@ import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.entity.ActiveStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -21,6 +22,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     private final MemberRepository memberRepository;
+
+    @Value("${tackit.admin.email}")
+    private String adminEmail;
+
+    public boolean isAdmin(String email) {
+        return adminEmail.equals(email);
+    }
 
     @Override
     @Transactional
@@ -39,8 +47,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserDetails createUserDetails(Member member) {
         List<GrantedAuthority> authorities = new ArrayList<>();
 
-        if ("contact.tackit@gmail.com".equals(member.getEmail())) {
-            authorities.add(new SimpleGrantedAuthority("ADMIN"));
+        if (adminEmail.equals(member.getEmail())) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         } else {
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         }
