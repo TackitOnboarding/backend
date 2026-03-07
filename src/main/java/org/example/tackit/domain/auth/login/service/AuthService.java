@@ -97,16 +97,25 @@ public class AuthService {
       List<MemberOrg> memberOrgs = memberOrgRepository.findAllByMemberEmail(signInDto.getEmail());
 
       List<MultiProfileDto> profiles = memberOrgs.stream()
-          .map(org -> MultiProfileDto.builder()
-              .memberOrgId(org.getId())
-              .orgName(org.getOrganization().getName())
-              .nickname(org.getNickname())
-              .profileImage(org.getProfileImageUrl())
-              .orgType(org.getOrgType().name())
-              .memberRole(org.getMemberRole().name())
-              .memberType(org.getMemberType().name())
-              .build())
-          .collect(Collectors.toList());
+              .map(org -> {
+                MultiProfileDto.MultiProfileDtoBuilder builder = MultiProfileDto.builder()
+                        .memberOrgId(org.getId())
+                        .orgName(org.getOrganization().getName())
+                        .nickname(org.getNickname())
+                        .profileImage(org.getProfileImageUrl())
+                        .orgType(org.getOrgType().name())
+                        .memberRole(org.getMemberRole().name())
+                        .memberType(org.getMemberType().name());
+
+          if ("CLUB".equals(org.getOrgType().name())) {
+            builder.universityName(org.getOrganization().getUniversity().getUniversityName());
+          }
+          else {
+            builder.universityName(null);
+          }
+
+          return builder.build();
+      }).collect(Collectors.toList());
 
       return new SignInResponse(
           tokenDto,

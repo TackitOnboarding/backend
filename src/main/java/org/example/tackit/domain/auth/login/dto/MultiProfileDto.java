@@ -9,6 +9,7 @@ public class MultiProfileDto {
     // 소속 정보
     private Long memberOrgId;
     private String orgName;
+    private String universityName;
     private String orgType;
 
     // 소속에서 사용하는 개인 정보
