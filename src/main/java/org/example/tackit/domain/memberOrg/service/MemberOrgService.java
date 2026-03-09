@@ -21,14 +21,17 @@ public class MemberOrgService {
   private final MemberOrgValidator memberOrgValidator;
 
   // 특정 조직 소속 멤버 조회
-  public Page<SimpleMemberProfileDto> getOrgMembers(Long orgId, Long memberOrgId, Pageable pageable) {
+  public List<SimpleMemberProfileDto> getOrgMembers(Long orgId, Long memberOrgId) {
     memberOrgValidator.validateActiveMembership(memberOrgId);
 
-    Page<MemberOrg> members = memberOrgRepository.findByOrganizationIdAndOrgStatus(
+    List<MemberOrg> members = memberOrgRepository.findByOrganizationIdAndOrgStatus(
         orgId,
-        OrgStatus.ACTIVE, pageable
+        OrgStatus.ACTIVE
     );
 
-    return members.map(SimpleMemberProfileDto::from);
+    return members.stream()
+            .map(SimpleMemberProfileDto::from)
+            .sorted()
+            .toList();
   }
 }
