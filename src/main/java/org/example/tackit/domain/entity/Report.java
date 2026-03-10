@@ -2,6 +2,7 @@ package org.example.tackit.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -19,12 +20,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.report.dto.ReportRequestDto;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "report")
 public class Report {
 
@@ -39,8 +43,8 @@ public class Report {
 
   // 작성자
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "writer_id", nullable = false)
-  private MemberOrg writer;
+  @JoinColumn(name = "targetMember_id", nullable = false)
+  private MemberOrg targetMember;
 
   @Column(nullable = false)
   private Long targetId;
@@ -50,28 +54,26 @@ public class Report {
   @Column(nullable = false)
   private TargetType targetType;
 
-  // QNA / TIP / FREE
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private Post postType;
-
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ReportReason reportReason;
 
-  @Column(nullable = false)
+  @Column(columnDefinition = "TEXT")
+  private String customReason;
+
+  @CreatedDate
   private LocalDateTime reportedAt;
 
   @Enumerated(EnumType.STRING)
   private ActiveStatus activeStatus;
 
-  public static Report from(ReportRequestDto dto, MemberOrg reporter, MemberOrg writer) {
+  //TODO Entity 안에 DTO를 참조하는 메소드가 있는 것이 이상함. 분리해야할듯
+  public static Report from(ReportRequestDto dto, MemberOrg reporter, MemberOrg targetMember) {
     return Report.builder()
         .reporter(reporter)
-        .writer(writer)
+        .targetMember(targetMember)
         .targetId(dto.getTargetId())
         .targetType(dto.getTargetType())
-        .postType(dto.getPostType())
         .reportReason(dto.getReason())
         .activeStatus(ActiveStatus.ACTIVE) // 초기값 설정
         .build();
