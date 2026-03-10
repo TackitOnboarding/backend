@@ -53,8 +53,6 @@ public class TokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        // "ROLE_" prefix 제거
-        String role = authorities.replace("ROLE_", "");
         String accessToken = generateAccessToken(authentication.getName(), authorities);
         String refreshToken = generateRefreshToken(authentication.getName(), authorities);
 

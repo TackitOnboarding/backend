@@ -12,6 +12,9 @@ import org.example.tackit.domain.organization.dto.req.OrgJoinReqDto;
 import org.example.tackit.domain.organization.dto.resp.OrgRespDto;
 import org.example.tackit.domain.organization.service.OrganizationService;
 import org.example.tackit.global.response.ApiResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -77,6 +80,7 @@ public class OrganizationController {
   @GetMapping("/{orgId}/members")
   public ResponseEntity<ApiResponse<List<SimpleMemberProfileDto>>> getOrgMembers(
       @PathVariable Long orgId,
+      @PageableDefault(size = 10, sort = "nickname", direction = Sort.Direction.ASC) Pageable pageable,
       @ActiveProfile ProfileContext profileContext
   ) {
     Long memberOrgId = profileContext.id();

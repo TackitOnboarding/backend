@@ -13,17 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 public class DeletedMemberDTO {
     private Long id;
-
-    // 이메일
     private String email;
-
-    // 닉네임
-    private String nickname;
-
-    // 상태
     private ActiveStatus activeStatus;
-
-    // 가입일자
     private LocalDateTime createdAt;
 
     public static DeletedMemberDTO from(Member member) {

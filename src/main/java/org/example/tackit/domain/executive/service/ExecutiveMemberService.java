@@ -1,12 +1,13 @@
 package org.example.tackit.domain.executive.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.entity.org.OrgStatus;
 import org.example.tackit.domain.executive.dto.response.MemberListResDto;
 import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,24 +20,22 @@ public class ExecutiveMemberService {
   private final MemberOrgValidator memberOrgValidator;
 
   // [ 모든 멤버 조회 ]
-  public List<MemberListResDto> getMembers(Long requestMemberOrgId, String orgStatus) {
+  public Page<MemberListResDto> getMembers(Long requestMemberOrgId, String orgStatus, Pageable pageable) {
     // 1. 운영진 권한 체크
     MemberOrg requesterMemberOrg = memberOrgValidator.validateExecutive(requestMemberOrgId);
     Long orgId = requesterMemberOrg.getOrganization().getId();
 
-    List<MemberOrg> memberOrgs;
+    Page<MemberOrg> memberOrgs;
 
     // 2. 조회
     if ("ALL".equalsIgnoreCase(orgStatus)) {
-      memberOrgs = memberOrgRepository.findByOrganizationId(orgId);
+      memberOrgs = memberOrgRepository.findByOrganizationId(orgId, pageable);
     } else {
       OrgStatus status = OrgStatus.valueOf(orgStatus.toUpperCase());
-      memberOrgs = memberOrgRepository.findByOrganizationIdAndOrgStatus(orgId, status);
+      memberOrgs = memberOrgRepository.findByOrganizationIdAndOrgStatus(orgId, status, pageable);
     }
 
-    return memberOrgs.stream()
-        .map(MemberListResDto::from)
-        .toList();
+    return memberOrgs.map(MemberListResDto::from);
   }
 
   // [ 멤버 승인 및 반려 ]

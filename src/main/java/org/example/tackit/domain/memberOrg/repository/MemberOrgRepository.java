@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.entity.org.OrgStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -55,8 +57,12 @@ public interface MemberOrgRepository extends JpaRepository<MemberOrg, Long> {
 
   int countByOrganizationIdAndOrgStatus(Long orgId, OrgStatus orgStatus);
 
-  List<MemberOrg> findByOrganizationId(Long orgId);   // 특정 조직의 모든 멤버 관계 조회
+  Page<MemberOrg> findByOrganizationId(Long orgId, Pageable pageable);   // 특정 조직의 모든 멤버 관계 조회
 
   List<MemberOrg> findByOrganizationIdAndOrgStatus(Long orgId,
-      OrgStatus orgStatus);  // 특정 조직 + 특정 상태(PENDING, ACTIVE 등)의 멤버 관계 조회
+                                                   OrgStatus orgStatus);  // 특정 조직 + 특정 상태(PENDING, ACTIVE 등)의 멤버 관계 조회
+  Page<MemberOrg> findByOrganizationIdAndOrgStatus(
+          Long orgId,
+          OrgStatus orgStatus,
+          Pageable pageable);  // 특정 조직 + 특정 상태(PENDING, ACTIVE 등)의 멤버 관계 조회
 }
