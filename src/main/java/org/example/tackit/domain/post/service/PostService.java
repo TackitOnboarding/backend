@@ -15,8 +15,8 @@ import org.example.tackit.domain.entity.post.PostType;
 import org.example.tackit.domain.entity.post.Scrap;
 import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
 import org.example.tackit.domain.memberOrg.dto.SimpleMemberProfileDto;
-import org.example.tackit.domain.post.dto.CategoryResponse;
 import org.example.tackit.domain.post.dto.CommentResDto;
+import org.example.tackit.domain.post.dto.PostCategoryResponseDto;
 import org.example.tackit.domain.post.dto.PostCreateReqDto;
 import org.example.tackit.domain.post.dto.PostDetailResDto;
 import org.example.tackit.domain.post.dto.PostDetailResDto.PostInfo;
@@ -259,7 +259,7 @@ public class PostService {
         .id(post.getId())
         .title(post.getTitle())
         .contentSummary(summary)
-        .postCategory(CategoryResponse.from(post.getCategory()))
+        .postCategory(PostCategoryResponseDto.from(post.getCategory()))
         .thumbnail(thumbnail)
         .writer(convertToSimpleProfile(post.getWriter(), post.isAnonymous()))
         .createdAt(post.getCreatedAt())

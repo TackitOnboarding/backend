@@ -16,7 +16,7 @@ public class PostSummaryResDto {
   private Long id;
   private String title;
   private String contentSummary;
-  private CategoryResponse postCategory;
+  private PostCategoryResponseDto postCategory;
   private String thumbnail;
   private SimpleMemberProfileDto writer;
   private LocalDateTime createdAt;
