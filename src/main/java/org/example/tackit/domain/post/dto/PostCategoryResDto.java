@@ -6,12 +6,12 @@ import org.example.tackit.domain.entity.post.PostCategory;
 
 @Getter
 @AllArgsConstructor
-public class PostCategoryResponseDto {
+public class PostCategoryResDto {
 
   private String key;
   private String label;
 
-  public static PostCategoryResponseDto from(PostCategory category) {
-    return new PostCategoryResponseDto(category.name(), category.getDescription());
+  public static PostCategoryResDto from(PostCategory category) {
+    return new PostCategoryResDto(category.name(), category.getDescription());
   }
 }
