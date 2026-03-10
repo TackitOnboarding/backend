@@ -18,7 +18,7 @@ public class AdminPostService implements ReportedPostService {
 
   private final PostRepository postRepository;
 
-  // 비활성화 질문 게시글 전체 조회
+  // 비활성화 게시글 전체 조회
   @Override
   public Page<ReportedPostDTO> getDeletedPosts(Pageable pageable) {
 
