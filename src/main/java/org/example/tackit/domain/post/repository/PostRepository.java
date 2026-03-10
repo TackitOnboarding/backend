@@ -35,4 +35,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
   @Query("SELECT p FROM Post p JOIN FETCH p.writer w " +
       "WHERE p.id = :postId AND p.activeStatus = 'ACTIVE'")
   Optional<Post> findByIdWithWriter(@Param("postId") Long postId);
+
+  // 관리자 신고 게시글 조회
+  Page<Post> findAllByActiveStatusAndReportCntGreaterThanEqual(ActiveStatus activeStatus,
+      int reportCount, Pageable pageable);
 }
