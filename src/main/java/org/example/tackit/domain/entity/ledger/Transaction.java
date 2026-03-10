@@ -55,6 +55,7 @@ public class Transaction {
   @Column(nullable = false)
   private String description;
 
+  @Column(nullable = false)
   private String storeName;
 
   private String receiptImageUrl;
