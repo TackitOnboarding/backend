@@ -79,6 +79,7 @@ public class DataInitializer implements CommandLineRunner {
           Region.builder().regionId(17).regionName("제주특별자치도").sidoCode("50").build()
       ));
 
+
       regionRepository.saveAll(regions);
       log.info("Region data initialized (including Union code 0).");
     }
@@ -110,6 +111,19 @@ public class DataInitializer implements CommandLineRunner {
             .build());
       });
     }
+
+    regionRepository.findById(0).ifPresentOrElse(region -> {
+      universityList.add(University.builder()
+              .universityName("전국(연합)")
+              .universityChosung(HangulUtils.getChosung("전국(연합)"))
+              .branchType(BranchType.ETC)
+              .region(region)
+              .address("전국")
+              .build());
+    }, () -> {
+      log.warn("Region ID 0 (전국)이 존재하지 않아 전국(연합) 데이터를 추가하지 못했습니다.");
+    });
+
     universityRepository.saveAll(universityList);
     log.info("Successfully initialized {} universities.", universityList.size());
   }

@@ -18,6 +18,7 @@ import org.example.tackit.domain.organization.dto.req.OrgJoinReqDto;
 import org.example.tackit.domain.organization.dto.resp.OrgRespDto;
 import org.example.tackit.domain.organization.repository.OrganizationRepository;
 import org.example.tackit.domain.university.repository.UniversityRepository;
+import org.example.tackit.global.exception.BusinessException;
 import org.example.tackit.global.exception.CustomBaseException;
 import org.example.tackit.global.exception.ErrorCode;
 import org.example.tackit.global.exception.MemberNotFoundException;
@@ -84,11 +85,11 @@ public class OrganizationService {
 
     // 조직 존재 유무 검토
     Organization organization = organizationRepository.findById(orgId)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 모임입니다. ID: " + orgId));
+        .orElseThrow(() -> new BusinessException(ErrorCode.ORGANIZATION_NOT_FOUND));
 
     // 같은 모임 내 닉네임 중복 검토
     if (memberOrgRepository.existsByOrganizationIdAndNickname(orgId, dto.getNickname())) {
-      throw new IllegalStateException("해당 모임에서 이미 사용 중인 닉네임입니다: " + dto.getNickname());
+      throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
     }
 
     // 최초 가입자 여부 확인
