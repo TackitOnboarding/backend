@@ -17,6 +17,7 @@ import org.example.tackit.domain.auth.login.dto.TokenDto;
 import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.entity.org.MemberOrg;
+import org.example.tackit.domain.entity.org.OrgType;
 import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -107,7 +108,8 @@ public class AuthService {
                         .memberRole(org.getMemberRole().name())
                         .memberType(org.getMemberType().name());
 
-          if ("CLUB".equals(org.getOrgType().name())) {
+          if (OrgType.CLUB.name().equals(org.getOrgType().name())
+                  && org.getOrganization().getUniversity() != null) {
             builder.universityName(org.getOrganization().getUniversity().getUniversityName());
           }
           else {

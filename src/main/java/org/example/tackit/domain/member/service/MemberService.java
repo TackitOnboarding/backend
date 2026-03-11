@@ -33,10 +33,9 @@ public class MemberService {
                 .map(org -> {
                     MemberProfileResp.MemberProfileRespBuilder builder = MemberProfileResp.builder()
                             .profileId(org.getId())
-                            .orgId(org.getId())
+                            .orgId(org.getOrganization().getId())
                             .orgType(org.getOrgType().name())
                             .orgName(org.getOrganization().getName())
-                            .orgStatus(org.getOrgType().name())
                             .nickname(org.getNickname())
                             .imageUrl(org.getProfileImageUrl())
                             .memberType(org.getMemberType().name())
