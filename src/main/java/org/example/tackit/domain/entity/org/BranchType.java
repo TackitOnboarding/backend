@@ -7,7 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum BranchType {
   MAIN("본교"),
-  BRANCH("분교");
+  BRANCH("분교"),
+  ETC("기타");
 
   private final String description;
 

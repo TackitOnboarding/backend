@@ -1,6 +1,5 @@
 package org.example.tackit.domain.memberOrg.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.entity.org.OrgStatus;

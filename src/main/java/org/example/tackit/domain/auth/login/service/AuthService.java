@@ -17,6 +17,7 @@ import org.example.tackit.domain.auth.login.dto.TokenDto;
 import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.Member;
 import org.example.tackit.domain.entity.org.MemberOrg;
+import org.example.tackit.domain.entity.org.OrgType;
 import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -97,16 +98,26 @@ public class AuthService {
       List<MemberOrg> memberOrgs = memberOrgRepository.findAllByMemberEmail(signInDto.getEmail());
 
       List<MultiProfileDto> profiles = memberOrgs.stream()
-          .map(org -> MultiProfileDto.builder()
-              .memberOrgId(org.getId())
-              .orgName(org.getOrganization().getName())
-              .nickname(org.getNickname())
-              .profileImage(org.getProfileImageUrl())
-              .orgType(org.getOrgType().name())
-              .memberRole(org.getMemberRole().name())
-              .memberType(org.getMemberType().name())
-              .build())
-          .collect(Collectors.toList());
+              .map(org -> {
+                MultiProfileDto.MultiProfileDtoBuilder builder = MultiProfileDto.builder()
+                        .memberOrgId(org.getId())
+                        .orgName(org.getOrganization().getName())
+                        .nickname(org.getNickname())
+                        .profileImage(org.getProfileImageUrl())
+                        .orgType(org.getOrgType().name())
+                        .memberRole(org.getMemberRole().name())
+                        .memberType(org.getMemberType().name());
+
+          if (OrgType.CLUB.name().equals(org.getOrgType().name())
+                  && org.getOrganization().getUniversity() != null) {
+            builder.universityName(org.getOrganization().getUniversity().getUniversityName());
+          }
+          else {
+            builder.universityName(null);
+          }
+
+          return builder.build();
+      }).collect(Collectors.toList());
 
       return new SignInResponse(
           tokenDto,
