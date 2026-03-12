@@ -16,6 +16,7 @@ public class MemberScheduler {
     private final AdminMemberRepository adminMemberRepository;
 
     // 매년 1월 1일 0시 0분 0초에 실행
+    /*
     @Transactional
     @Scheduled(cron = "0 0 0 1 1 *")
     public void updateSeniorMembers() {
@@ -23,6 +24,8 @@ public class MemberScheduler {
         int updatedCount = adminMemberRepository.bulkUpdateType(MemberType.NEWBIE, MemberType.SENIOR, currentYear);
         System.out.println("업데이트된 멤버 수 = " + updatedCount);
     }
+
+     */
 
 }
 

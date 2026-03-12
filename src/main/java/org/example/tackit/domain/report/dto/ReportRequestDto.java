@@ -12,7 +12,8 @@ import org.example.tackit.domain.entity.TargetType;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReportRequestDto {
-    private Long targetId;           // 신고 대상 글/댓글 ID
-    private TargetType targetType;   // POST / COMMENT
-    private ReportReason reason;
+
+  private Long targetId;
+  private TargetType targetType;   // POST / COMMENT
+  private ReportReason reason;
 }

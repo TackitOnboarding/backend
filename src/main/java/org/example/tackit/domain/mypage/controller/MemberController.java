@@ -4,13 +4,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.example.tackit.domain.mypage.dto.request.UpdatePasswordRequest;
-import org.example.tackit.domain.mypage.dto.response.MemberMypageResponse;
 import org.example.tackit.domain.mypage.dto.request.UpdateNicknameRequest;
 import org.example.tackit.domain.mypage.dto.response.UpdateNicknameResponse;
 import org.example.tackit.domain.mypage.dto.response.UpdatePasswordResponse;
 import org.example.tackit.domain.mypage.dto.response.UpdateProfileImageResponse;
-import org.example.tackit.domain.mypage.service.MemberService;
-import org.example.tackit.domain.mypage.service.UpdateMemberService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+/*
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/members")
@@ -78,3 +76,5 @@ public class MemberController {
 
 
 }
+
+ */

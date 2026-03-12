@@ -1,12 +1,9 @@
 package org.example.tackit.domain.mypage.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.admin.repository.AdminMemberRepository;
-import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.mypage.dto.response.MemberMypageResponse;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/*
 @RequiredArgsConstructor
 @Service
 public class MemberService {
@@ -21,3 +18,5 @@ public class MemberService {
     }
 
 }
+
+ */

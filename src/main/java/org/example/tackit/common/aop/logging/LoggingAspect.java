@@ -1,31 +1,19 @@
 package org.example.tackit.common.aop.logging;
 
-
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreeMemberJPARepository;
-import org.example.tackit.domain.admin.repository.UserLogRepository;
-import org.example.tackit.domain.entity.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
 public class LoggingAspect {
-    private final UserLogRepository userLogRepository;
-    private final FreeMemberJPARepository freeMemberJPARepository;
+  // private final MemberLogRepository memberLogRepository;
+  // private final FreeMemberJPARepository freeMemberJPARepository;
 
+    /*
     @Around("execution(* org.example.tackit..*Controller.*(..))")
     public Object logUserAction(ProceedingJoinPoint joinPoint) throws Throwable {
         HttpServletRequest request =
@@ -43,15 +31,10 @@ public class LoggingAspect {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth != null ? auth.getName() : "anonymous";
 
-        MemberRole memberRole = null;
-        MemberType memberType = null;
         String org = null;
         if (!"anonymous".equals(email)) {
             Member member = freeMemberJPARepository.findByEmail(email).orElse(null);
             if (member != null) {
-                memberRole = member.getMemberRole();
-                memberType = member.getMemberType();
-                // role = member.getRole();
                 org = member.getOrganization();
             }
         }
@@ -82,10 +65,12 @@ public class LoggingAspect {
                     .resource(resource)
                     .build();
 
-            userLogRepository.save(memberLog);
+            memberLogRepository.save(memberLog);
 
             log.info("User [{}] performed [{}] on [{}] in {}ms from [{}]",
                     email, action, uri, execTime, ip);
         }
     }
+
+     */
 }

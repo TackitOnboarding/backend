@@ -1,9 +1,9 @@
 package org.example.tackit.domain.auth.login.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.auth.login.repository.MemberRepository;
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.ActiveStatus;
+import org.example.tackit.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -15,9 +15,9 @@ public class RejoinCheckService {
 
     // 회원 상태 조회
     public String checkEmailStatus(String email) {
-        if (memberRepository.existsByEmailAndStatus(email, Status.DELETED)) {
+        if (memberRepository.existsByEmailAndActiveStatus(email, ActiveStatus.DELETED)) {
             return "DELETED";
-        } else if (memberRepository.existsByEmailAndStatus(email, Status.ACTIVE)) {
+        } else if (memberRepository.existsByEmailAndActiveStatus(email, ActiveStatus.ACTIVE)) {
             return "ACTIVE";
         } else {
             return "AVAILABLE";
@@ -26,7 +26,7 @@ public class RejoinCheckService {
 
     // 탈퇴한 회원 삭제
     public boolean deleteDeletedMember(String email) {
-        Optional<Member> deletedMember = memberRepository.findByEmailAndStatus(email, Status.DELETED);
+        Optional<Member> deletedMember = memberRepository.findByEmailAndActiveStatus(email, ActiveStatus.DELETED);
         if (deletedMember.isPresent()) {
             memberRepository.delete(deletedMember.get());
             return true;

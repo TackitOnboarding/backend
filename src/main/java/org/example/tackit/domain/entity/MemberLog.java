@@ -1,12 +1,19 @@
 package org.example.tackit.domain.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import org.example.tackit.domain.entity.org.MemberOrg;
 
 @Getter
 @Entity
@@ -14,25 +21,30 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class MemberLog {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    private String memberId;
-    private MemberRole memberRole;
-    private MemberType memberType;
-    private String organization;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String action;              // view_Post, search, ..
-    private String resource;            // 게시글 ID, URL
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_id")
+  private Member member;
 
-    @Column(name = "request_uri")
-    private String requestUri;
-    private String memberAgent;
-    private String ipAddress;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_org_id")
+  private MemberOrg memberOrg;
 
-    private LocalDateTime timestamp;
-    private long executionTime;
+  private String orgName;
 
+  private String action;              // view_Post, search, ..
+  private String resource;            // 게시글 ID, URL
+
+  @Column(name = "request_uri")
+  private String requestUri;
+  private String memberAgent;
+  private String ipAddress;
+
+  private LocalDateTime timestamp;
+  private long executionTime;
 
 }

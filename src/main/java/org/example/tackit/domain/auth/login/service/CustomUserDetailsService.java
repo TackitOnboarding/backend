@@ -1,10 +1,11 @@
 package org.example.tackit.domain.auth.login.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.auth.login.repository.MemberRepository;
+import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.auth.login.security.CustomUserDetails;
 import org.example.tackit.domain.entity.Member;
-import org.example.tackit.domain.entity.Status;
+import org.example.tackit.domain.entity.ActiveStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -22,6 +23,13 @@ import java.util.List;
 public class CustomUserDetailsService implements UserDetailsService {
     private final MemberRepository memberRepository;
 
+    @Value("${tackit.admin.email}")
+    private String adminEmail;
+
+    public boolean isAdmin(String email) {
+        return adminEmail.equals(email);
+    }
+
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -29,27 +37,26 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(email + " -> 데이터베이스에서 찾을 수 없습니다."));
 
         // 상태 확인 추가
-        if (member.getStatus() == Status.DELETED) {
+        if (member.getActiveStatus() == ActiveStatus.DELETED) {
             throw new UsernameNotFoundException(email + " -> 탈퇴한 회원입니다.");
         }
 
         return createUserDetails(member);
     }
 
-    // DB에 Member 값이 존재한다면 UserDetails 객체로 만들어서 리턴
     private UserDetails createUserDetails(Member member) {
-        // 1. 여러 권한을 담을 리스트 생성
         List<GrantedAuthority> authorities = new ArrayList<>();
 
-        // 2. memberRole 추가
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + member.getMemberRole().name()));
+        if (adminEmail.equals(member.getEmail())) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
 
         return new CustomUserDetails(
                 member.getId(),
                 member.getEmail(),
                 member.getPassword(),
-                member.getOrganization(),
-                member.getMemberType(),
                 authorities
         );
     }

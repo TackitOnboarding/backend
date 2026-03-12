@@ -1,32 +1,16 @@
 package org.example.tackit.domain.mypage.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.Free_board.Free_comment.repository.FreeCommentRepository;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreePostJPARepository;
-import org.example.tackit.domain.Free_board.Free_post.repository.FreeScrapJPARepository;
-import org.example.tackit.domain.Free_board.Free_tag.repository.FreePostTagMapRepository;
 import org.example.tackit.domain.admin.repository.AdminMemberRepository;
-import org.example.tackit.domain.entity.*;
-import org.example.tackit.domain.mypage.dto.response.FreeMyCommentResponseDto;
-import org.example.tackit.domain.mypage.dto.response.FreeMyPostResponseDto;
-import org.example.tackit.domain.mypage.dto.response.FreeScrapResponse;
-import org.example.tackit.common.dto.PageResponseDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MyPageFreeService {
-    private final FreeScrapJPARepository freeScrapJPARepository;
-    private final AdminMemberRepository adminMemberRepository;
-    private final FreePostJPARepository freePostJPARepository;
-    private final FreePostTagMapRepository freePostTagMapRepository;
-    private final FreeCommentRepository freeCommentRepository;
 
+  private final AdminMemberRepository adminMemberRepository;
+
+    /*
     // 스크랩한 자유 게시글 조회
     @Transactional
     public PageResponseDTO<FreeScrapResponse> getScrapListByMember(String email, Pageable pageable) {
@@ -53,7 +37,7 @@ public class MyPageFreeService {
         Member member = adminMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        Page<FreePost> page = freePostJPARepository.findByWriterAndStatus(member, Status.ACTIVE, pageable);
+        Page<FreePost> page = freePostJPARepository.findByWriterAndStatus(member, AccountStatus.ACTIVE, pageable);
 
         return PageResponseDTO.from(page, post -> {
             List<String> tags = freePostTagMapRepository.findByFreePost(post).stream()
@@ -83,4 +67,6 @@ public class MyPageFreeService {
                 .build()
         );
     }
+
+     */
 }
