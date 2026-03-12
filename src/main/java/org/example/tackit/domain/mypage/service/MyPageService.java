@@ -1,14 +1,29 @@
 package org.example.tackit.domain.mypage.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.admin.repository.AdminMemberRepository;
+import org.example.tackit.domain.entity.org.MemberOrg;
+import org.example.tackit.domain.member.repository.MemberRepository;
+import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
+import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.example.tackit.domain.mypage.dto.response.MypageInfoResp;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class MyPageFreeService {
+public class MyPageService {
 
-  private final AdminMemberRepository adminMemberRepository;
+  private final MemberRepository memberRepository;
+  private final MemberOrgRepository memberOrgRepository;
+  private final MemberOrgValidator memberOrgValidator;
+
+  // 내 정보 조회(닉네임, 조직(동아리라면 대학), 이메일)
+  @Transactional(readOnly = true)
+  public MypageInfoResp getMypageInfo(Long memberOrgId) {
+    MemberOrg memberOrg = memberOrgValidator.validateActiveMembership(memberOrgId);
+
+    return MypageInfoResp.from(memberOrg);
+  }
 
     /*
     // 스크랩한 자유 게시글 조회
