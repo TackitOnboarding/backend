@@ -78,7 +78,7 @@ public class Report {
   private ReportReason reportReason;
 
   @Column(columnDefinition = "TEXT")
-  private String customReason;
+  private String detailReason;
 
   @CreatedDate
   private LocalDateTime reportedAt;
