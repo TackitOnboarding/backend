@@ -12,7 +12,7 @@ import org.example.tackit.domain.entity.org.Organization;
 @Getter
 @Builder
 @AllArgsConstructor
-public class MypageInfoResp {
+public class MyPageInfoResp {
     private String nickname;
     private String email;
     private OrgType orgType;
@@ -22,14 +22,14 @@ public class MypageInfoResp {
     private MemberType memberType;
     private MemberRole memberRole;
 
-    public static MypageInfoResp from(MemberOrg memberOrg) {
+    public static MyPageInfoResp from(MemberOrg memberOrg) {
         Organization organization = memberOrg.getOrganization();
 
         String universityName = (organization.getType() == OrgType.CLUB && organization.getUniversity() != null)
                 ? organization.getUniversity().getUniversityName()
                 : null;
 
-        return MypageInfoResp.builder()
+        return MyPageInfoResp.builder()
                 .nickname(memberOrg.getNickname())
                 .email(memberOrg.getMember().getEmail())
                 .orgType(organization.getType())

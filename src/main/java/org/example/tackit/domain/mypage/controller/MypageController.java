@@ -1,15 +1,17 @@
 package org.example.tackit.domain.mypage.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.mypage.dto.response.MypageInfoResp;
+import org.example.tackit.domain.mypage.dto.response.MyCommentListResp;
+import org.example.tackit.domain.mypage.dto.response.MyPostListResp;
+import org.example.tackit.domain.mypage.dto.response.MyPageInfoResp;
+import org.example.tackit.domain.mypage.dto.response.MyScrapListResp;
 import org.example.tackit.domain.mypage.service.MyPageService;
 import org.example.tackit.global.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/mypage")
@@ -19,40 +21,41 @@ public class MypageController {
 
     // 내 정보 조회(닉네임, 조직(동아리라면 대학), 이메일)
     @GetMapping("/profiles/{memberOrgId}")
-    public ResponseEntity<ApiResponse<MypageInfoResp>> getMyPageInfo(@PathVariable Long memberOrgId) {
-        MypageInfoResp response = myPageService.getMypageInfo(memberOrgId);
+    public ResponseEntity<ApiResponse<MyPageInfoResp>> getMyPageInfo(@PathVariable Long memberOrgId) {
+        MyPageInfoResp response = myPageService.getMypageInfo(memberOrgId);
 
         return ApiResponse.success(HttpStatus.OK, "마이 프로필 조회 성공", response);
     }
+
+    // 작성한 글 조회
+    @GetMapping("/posts")
+    public ResponseEntity<ApiResponse<List<MyPostListResp>>> getMyPosts(@RequestParam Long memberOrgId) {
+        List<MyPostListResp> response = myPageService.getMyPosts(memberOrgId);
+
+        return ApiResponse.success(HttpStatus.OK, "작성한 글 목록 조회 성공", response);
+    }
+
+    // 작성한 댓글 조회
+    @GetMapping("/comments")
+    public ResponseEntity<ApiResponse<List<MyCommentListResp>>> getMyComments(@RequestParam Long memberOrgId) {
+        List<MyCommentListResp> response = myPageService.getMyComments(memberOrgId);
+        return ApiResponse.success(HttpStatus.OK, "작성한 댓글 목록 조회 성공", response);
+    }
+
+    // 스크랩 게시글 조회
+    @GetMapping("/scraps")
+    public ResponseEntity<ApiResponse<List<MyScrapListResp>>> getMyScraps(@RequestParam Long memberOrgId) {
+
+        List<MyScrapListResp> response = myPageService.getMyScraps(memberOrgId);
+        return ApiResponse.success(HttpStatus.OK, "스크랩한 글 목록 조회 성공", response);
+    }
+
     /*
+    // 비밀번호 및 닉네임 수정
+    @PatchMapping("/profiles/{memberOrgId}")
 
-    // 스크랩한 자유 게시글
-    @GetMapping("/free-scraps")
-    public ResponseEntity<PageResponseDTO<FreeScrapResponse>> getMyFreeScraps(
-            @AuthenticationPrincipal CustomUserDetails user,
-            @PageableDefault(size = 5, sort = "savedAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        return ResponseEntity.ok(myPageFreeService.getScrapListByMember(user.getEmail(), pageable));
-    }
-
-    // 내가 작성한 자유 게시글
-    @GetMapping("/free-posts")
-    public ResponseEntity<PageResponseDTO<FreeMyPostResponseDto>> getMyFreePosts(
-            @AuthenticationPrincipal CustomUserDetails user,
-            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-
-        return ResponseEntity.ok(myPageFreeService.getMyPosts(user.getUsername(), pageable));
-    }
-
-    // 내가 쓴 댓글 조회
-    @GetMapping("/free-comments")
-    public ResponseEntity<PageResponseDTO<FreeMyCommentResponseDto>> getMyFreeComments(
-         @AuthenticationPrincipal CustomUserDetails user,
-         @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-
-        return ResponseEntity.ok(myPageFreeService.getMyComments(user.getUsername(), pageable));
-
-    }
+    // 프로필 전환
+    @PostMapping("/{memberOrgId}/switch")
 
      */
 }
