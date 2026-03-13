@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.tackit.domain.entity.org.MemberOrg;
+import org.example.tackit.domain.entity.post.PostType;
 import org.example.tackit.domain.report.dto.ReportRequestDto;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -46,6 +47,7 @@ public class Report {
   @JoinColumn(name = "targetMember_id", nullable = false)
   private MemberOrg targetMember;
 
+  // POST 혹은 COMMENT의 id
   @Column(nullable = false)
   private Long targetId;
 
@@ -53,6 +55,23 @@ public class Report {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private TargetType targetType;
+
+  // 타겟 대상 postId comment면 comment가 달린 post의 id, post는 본인.
+  @Column(nullable = false)
+  private Long postId;
+
+  // 게시판
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 50)
+  private PostType postType;
+
+  // 신고 당시 게시글 제목
+  @Column(nullable = false, length = 100)
+  private String reportedPostTitle;
+
+  // 신고 당시 타겟 게시글/댓글 내용
+  @Column(columnDefinition = "LONGTEXT", nullable = false)
+  private String reportedContent;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
