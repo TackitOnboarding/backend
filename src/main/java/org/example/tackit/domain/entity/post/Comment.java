@@ -60,9 +60,12 @@ public class Comment {
   @Enumerated(EnumType.STRING)
   private ActiveStatus activeStatus = ActiveStatus.ACTIVE;
 
+  @Column(nullable = false)
+  private int reportCnt;
+
   @CreatedDate
   private LocalDateTime createdAt;
-  
+
   @LastModifiedDate
   private LocalDateTime updatedAt;
 
@@ -72,11 +75,29 @@ public class Comment {
     this.post = post;
     this.writer = writer;
     this.parent = parent;
+    this.reportCnt = 0;
   }
 
   public void addReply(Comment reply) {
     this.children.add(reply);
     reply.setParent(this);
+  }
+
+  // 관리자에 의한 활성화
+  public void activate() {
+    if (this.activeStatus != ActiveStatus.DELETED) {
+      throw new IllegalStateException("삭제되지 않은 댓글은 활성화할 수 없습니다.");
+    }
+    this.activeStatus = ActiveStatus.ACTIVE;
+    this.reportCnt = 0;
+  }
+
+  public void receiveReport() {
+    this.reportCnt++;
+
+    if (this.reportCnt >= 3) {
+      this.activeStatus = ActiveStatus.DELETED;
+    }
   }
 
   private void setParent(Comment parent) {
