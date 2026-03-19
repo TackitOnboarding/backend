@@ -14,20 +14,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.tackit.domain.entity.org.MemberOrg;
-import org.example.tackit.domain.report.dto.ReportRequestDto;
+import org.example.tackit.domain.entity.post.PostType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "report")
 public class Report {
@@ -46,6 +43,7 @@ public class Report {
   @JoinColumn(name = "targetMember_id", nullable = false)
   private MemberOrg targetMember;
 
+  // POST 혹은 COMMENT의 id
   @Column(nullable = false)
   private Long targetId;
 
@@ -54,12 +52,29 @@ public class Report {
   @Column(nullable = false)
   private TargetType targetType;
 
+  // 타겟 대상 postId comment면 comment가 달린 post의 id, post는 본인.
+  @Column(nullable = false)
+  private Long postId;
+
+  // 게시판
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 50)
+  private PostType postType;
+
+  // 신고 당시 게시글 제목
+  @Column(nullable = false, length = 100)
+  private String reportedPostTitle;
+
+  // 신고 당시 타겟 게시글/댓글 내용
+  @Column(columnDefinition = "LONGTEXT", nullable = false)
+  private String reportedContent;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ReportReason reportReason;
 
   @Column(columnDefinition = "TEXT")
-  private String customReason;
+  private String detailReason;
 
   @CreatedDate
   private LocalDateTime reportedAt;
@@ -67,17 +82,21 @@ public class Report {
   @Enumerated(EnumType.STRING)
   private ActiveStatus activeStatus;
 
-  //TODO Entity 안에 DTO를 참조하는 메소드가 있는 것이 이상함. 분리해야할듯
-  public static Report from(ReportRequestDto dto, MemberOrg reporter, MemberOrg targetMember) {
-    return Report.builder()
-        .reporter(reporter)
-        .targetMember(targetMember)
-        .targetId(dto.getTargetId())
-        .targetType(dto.getTargetType())
-        .reportReason(dto.getReason())
-        .activeStatus(ActiveStatus.ACTIVE) // 초기값 설정
-        .build();
+  @Builder
+  public Report(MemberOrg reporter, MemberOrg targetMember, Long targetId, TargetType targetType,
+      Long postId, PostType postType, String reportedPostTitle, String reportedContent,
+      ReportReason reportReason, String detailReason, ActiveStatus activeStatus) {
+    this.reporter = reporter;
+    this.targetMember = targetMember;
+    this.targetId = targetId;
+    this.targetType = targetType;
+    this.postId = postId;
+    this.postType = postType;
+    this.reportedPostTitle = reportedPostTitle;
+    this.reportedContent = reportedContent;
+    this.reportReason = reportReason;
+    this.detailReason = detailReason;
+    this.activeStatus = (activeStatus != null) ? activeStatus : ActiveStatus.ACTIVE;
   }
-
 }
 

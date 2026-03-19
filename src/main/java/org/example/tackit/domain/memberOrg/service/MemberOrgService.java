@@ -6,10 +6,11 @@ import org.example.tackit.domain.entity.org.OrgStatus;
 import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
 import org.example.tackit.domain.memberOrg.dto.SimpleMemberProfileDto;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
