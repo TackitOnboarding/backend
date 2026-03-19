@@ -25,6 +25,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -82,51 +83,58 @@ public class AuthService {
 
   @Transactional
   public SignInResponse signIn(SignInDto signInDto) {
-    // 인증 토큰 생성
+
     UsernamePasswordAuthenticationToken authenticationToken =
-        new UsernamePasswordAuthenticationToken(signInDto.getEmail(), signInDto.getPassword());
+            new UsernamePasswordAuthenticationToken(
+                    signInDto.getEmail(),
+                    signInDto.getPassword()
+            );
 
-    try {
-      log.info("로그인 시도: {}", signInDto.getEmail());
-      Authentication authentication = authenticationManager.authenticate(authenticationToken);
-      log.info("로그인 성공: {}", authentication.getName());
+    Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
-      TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
-      redisUtil.save(signInDto.getEmail(), tokenDto.getRefreshToken());
+    return buildSignInResponse(signInDto.getEmail(), authentication);
+  }
 
-      // 멀티 프로필 목록 조회
-      List<MemberOrg> memberOrgs = memberOrgRepository.findAllByMemberEmail(signInDto.getEmail());
+  // 프로필 전환
+  @Transactional
+  public SignInResponse switchProfile() {
 
-      List<MultiProfileDto> profiles = memberOrgs.stream()
-              .map(org -> {
-                MultiProfileDto.MultiProfileDtoBuilder builder = MultiProfileDto.builder()
-                        .memberOrgId(org.getId())
-                        .orgName(org.getOrganization().getName())
-                        .nickname(org.getNickname())
-                        .profileImage(org.getProfileImageUrl())
-                        .orgType(org.getOrgType().name())
-                        .memberRole(org.getMemberRole().name())
-                        .memberType(org.getMemberType().name());
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
 
-          if (OrgType.CLUB.name().equals(org.getOrgType().name())
-                  && org.getOrganization().getUniversity() != null) {
-            builder.universityName(org.getOrganization().getUniversity().getUniversityName());
-          }
-          else {
-            builder.universityName(null);
-          }
+    return buildSignInResponse(email, authentication);
+  }
 
-          return builder.build();
-      }).collect(Collectors.toList());
+  // 로그인 응답 객체를 만드는 메서드
+  public SignInResponse buildSignInResponse(String email, Authentication authentication) {
 
-      return new SignInResponse(
-          tokenDto,
-          profiles
-      );
-    } catch (Exception e) {
-      log.error("로그인 실패: {}", signInDto.getEmail(), e);
-      throw e;
-    }
+    TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+    redisUtil.save(email, tokenDto.getRefreshToken());
+
+    List<MemberOrg> memberOrgs = memberOrgRepository.findAllByMemberEmail(email);
+
+    List<MultiProfileDto> profiles = memberOrgs.stream()
+            .map(org -> {
+              MultiProfileDto.MultiProfileDtoBuilder builder = MultiProfileDto.builder()
+                      .memberOrgId(org.getId())
+                      .orgName(org.getOrganization().getName())
+                      .nickname(org.getNickname())
+                      .profileImage(org.getProfileImageUrl())
+                      .orgType(org.getOrgType().name())
+                      .memberRole(org.getMemberRole().name())
+                      .memberType(org.getMemberType().name());
+
+              if (OrgType.CLUB.name().equals(org.getOrgType().name())
+                      && org.getOrganization().getUniversity() != null) {
+                builder.universityName(org.getOrganization().getUniversity().getUniversityName());
+              } else {
+                builder.universityName(null);
+              }
+
+              return builder.build();
+            }).toList();
+
+    return new SignInResponse(tokenDto, profiles);
   }
 
   // Bearer 제거 및 형식 검증
@@ -254,7 +262,7 @@ public class AuthService {
         .orElseThrow(() -> new UsernameNotFoundException(email + " not found"));
 
     String encodedNewPassword = passwordEncoder.encode(newPassword);
-    member.changePassword(encodedNewPassword);
+    member.updatePassword(encodedNewPassword);
 
     // 6. Redis에서 토큰 삭제
     redisUtil.delete("reset:" + email);
