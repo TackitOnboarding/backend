@@ -35,7 +35,7 @@ public class MyScrapListResp {
         Post post = scrap.getPost();
         MemberOrg writer = post.getWriter();
 
-        String imageUrl = (post.getImages() != null && !post.getImages().isEmpty())
+        String imageUrl = !post.getImages().isEmpty()
                 ? post.getImages().get(0).getImageUrl()
                 : null;
 
