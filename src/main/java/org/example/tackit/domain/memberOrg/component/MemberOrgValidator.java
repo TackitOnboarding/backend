@@ -6,6 +6,8 @@ import org.example.tackit.domain.entity.MemberType;
 import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.entity.org.OrgStatus;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.example.tackit.global.exception.CustomBaseException;
+import org.example.tackit.global.exception.ErrorCode;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,5 +57,12 @@ public class MemberOrgValidator {
       throw new IllegalArgumentException("선배 회원(SENIOR)만 접근할 수 있습니다.");
     }
     return memberOrg;
+  }
+
+  // 소유자 검증 메서드
+  public void validateOwner(MemberOrg memberOrg, String email) {
+    if( !memberOrg.getMember().getEmail().equals(email)) {
+      throw new CustomBaseException(ErrorCode.ACCESS_DENIED_PROFILE);
+    }
   }
 }
