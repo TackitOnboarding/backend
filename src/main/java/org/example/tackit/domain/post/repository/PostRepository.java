@@ -1,5 +1,6 @@
 package org.example.tackit.domain.post.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.post.Post;
@@ -39,4 +40,12 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
   // 관리자 신고 게시글 조회
   Page<Post> findAllByActiveStatusAndReportCntGreaterThanEqual(ActiveStatus activeStatus,
       int reportCount, Pageable pageable);
+
+  // 마이페이지 ) 작성한 글 조회
+  @Query("select distinct p from Post p " +
+          "join fetch p.writer w " +
+          "left join fetch p.images " +
+          "where w.id = :memberOrgId " +
+          "order by p.createdAt desc")
+  List<Post> findAllByWriterIdWithDetails(@Param("memberOrgId") Long memberOrgId);
 }

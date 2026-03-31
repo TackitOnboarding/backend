@@ -78,4 +78,13 @@ public class MemberOrg {
     int currentYear = LocalDate.now().getYear();
     return currentYear - this.joinedYear + 1;
   }
+
+  // 프로필 수정
+  public void updateNickname(String nickname) {
+    this.nickname = nickname;
+  }
+
+  public void updateProfileImage(String profileImageUrl) {
+    this.profileImageUrl = profileImageUrl;
+  }
 }
