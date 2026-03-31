@@ -158,6 +158,14 @@ public class Post {
     this.reportCnt = 0;
   }
 
+  public void receiveReport() {
+    this.reportCnt++;
+
+    if (this.reportCnt >= 3) {
+      this.activeStatus = ActiveStatus.DELETED;
+    }
+  }
+
   public void increaseViewCnt() {
     this.viewCnt++;
   }

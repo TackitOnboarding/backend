@@ -57,7 +57,7 @@ public class Member {
      */
 
     // 비밀번호 변경 책임은 Member 도메인 내부에 분리
-    public void changePassword(String encodedNewPassword) {
+    public void updatePassword(String encodedNewPassword) {
         this.password = encodedNewPassword;
     }
 

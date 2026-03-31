@@ -5,15 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.tackit.domain.entity.ReportReason;
-import org.example.tackit.domain.entity.TargetType;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportRequestDto {
+public class ReportReqDto {
 
-  private Long targetId;
-  private TargetType targetType;   // POST / COMMENT
-  private ReportReason reason;
+  private ReportReason reportReason;
+  private String detailReason;
 }

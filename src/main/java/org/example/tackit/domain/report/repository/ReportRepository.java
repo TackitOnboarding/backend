@@ -26,6 +26,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
   boolean existsByReporterIdAndTargetIdAndTargetType(Long reporterId, Long targetId,
       TargetType targetType);
 
+  // TODO 해당 부분은 별도 DTO로 빼는 게 좋을 것 같습니다
   interface ReportedTargetInfo {
 
     Long getTargetId();
