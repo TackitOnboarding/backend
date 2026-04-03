@@ -14,6 +14,22 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
+  // 신고 횟수가 1~2회인 게시글의 최신 신고 내역)
+  @Query("SELECT r FROM Report r WHERE r.id IN " +
+          "(SELECT MAX(r2.id) FROM Report r2 GROUP BY r2.postId) " +
+          "AND r.postId IN (SELECT p.id FROM Post p WHERE p.reportCnt BETWEEN 1 AND 2)")
+  Page<Report> findPendingReports(Pageable pageable);
+
+  // 신고 횟수가 3회 이상으로 비활성화된 게시글의 최신 신고 내역
+  @Query("SELECT r FROM Report r WHERE r.id IN " +
+          "(SELECT MAX(r2.id) FROM Report r2 GROUP BY r2.postId) " +
+          "AND r.postId IN (SELECT p.id FROM Post p WHERE p.reportCnt >= 3)")
+  Page<Report> findDeletedReports(Pageable pageable);
+
+  // 전체 : 신고 횟수가 1회 이상인 모든 게시글의 최신 신고 내역
+  @Query("SELECT r FROM Report r WHERE r.id IN " +
+          "(SELECT MAX(r2.id) FROM Report r2 GROUP BY r2.postId)")
+  Page<Report> findAllLatestReports(Pageable pageable);
 
   // 전체/필터링 조회 (Fetch Join으로 신고자와 작성자 정보를 한 번에 가져옴)
   @Query("select r from Report r " +
@@ -21,6 +37,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
       "join fetch r.targetMember " +
       "where (:status is null or r.activeStatus = :status)")
   Page<Report> findAllByActiveStatus(@Param("status") ActiveStatus activeStatus, Pageable pageable);
+
 
   // 필요하다면 신고 중복 방지를 위한 조회 메서드도 추가 가능
   boolean existsByReporterIdAndTargetIdAndTargetType(Long reporterId, Long targetId,
