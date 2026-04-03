@@ -21,9 +21,10 @@ public enum ErrorCode {
     ACCESS_DENIED_PROFILE(HttpStatus.FORBIDDEN, "A005", "해당 프로필에 대한 접근 권한이 없습니다."),
 
     // 400
-    POST_IS_INACTIVE(HttpStatus.BAD_REQUEST, "P001", "비활성화된 게시글입니다."),
-    ALREADY_ACTIVE_POST(HttpStatus.BAD_REQUEST, "P002", "이미 활성화된 게시글입니다."),
+    POST_IS_INACTIVE(HttpStatus.BAD_REQUEST, "P002", "비활성화된 게시글입니다."),
+
     CANNOT_ACTIVATE_DELETED_POST(HttpStatus.BAD_REQUEST, "P003", "삭제되지 않은 게시글은 활성화할 수 없습니다."),
+    ALREADY_ACTIVE_POST(HttpStatus.BAD_REQUEST, "P004", "이미 활성화된 게시글입니다."),
 
     // 409 CONFLICT : 중복 데이터
     DUPLICATE_ORGANIZATION(HttpStatus.CONFLICT, "O001", "이미 존재하는 조직(동아리/소모임)입니다."),

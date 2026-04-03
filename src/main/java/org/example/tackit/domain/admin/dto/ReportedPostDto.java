@@ -32,18 +32,4 @@ public class ReportedPostDto {
             .reportedAt(report.getReportedAt())
             .build();
   }
-
-  /*
-  public static ReportedPostDTO from(Post post) {
-    return ReportedPostDTO.builder()
-            .id(post.getId())
-            .reportedPostTitle(post.getTitle()) // 게시글 제목
-            .reportCnt(post.getReportCnt())     // 신고 횟수
-            .activeStatus(post.getActiveStatus())
-            // .reportReason(...) <- 만약 Post에 사유가 없다면 우선 비워두거나
-            //                       첫 번째 신고 사유를 가져오는 로직 추가
-            .build();
-  }
-
-   */
 }

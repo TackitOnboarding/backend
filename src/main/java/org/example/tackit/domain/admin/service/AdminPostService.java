@@ -15,6 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -28,17 +32,29 @@ public class AdminPostService implements ReportedPostService {
     Page<Report> reports;
     String filterType = (type == null) ? "ALL" : type.toUpperCase();
 
+    // 1. 신고 내역 먼저 조회 (1번의 쿼리)
     reports = switch (filterType) {
       case "PENDING" -> reportRepository.findPendingReports(pageable);
       case "DELETED" -> reportRepository.findDeletedReports(pageable);
       default ->        reportRepository.findAllLatestReports(pageable);
     };
 
+    // 2. N+1 방지: 현재 페이지의 모든 postId 추출 후 게시글 일괄 조회 (1번의 쿼리)
+    List<Long> postIds = reports.getContent().stream()
+            .map(Report::getPostId)
+            .distinct() // 중복 제거
+            .toList();
+
+    Map<Long, Post> postMap = postRepository.findAllById(postIds).stream()
+            .collect(Collectors.toMap(Post::getId, p -> p));
+
+    // 3. 메모리에 로드된 postMap을 이용해 DTO 변환
     return reports.map(report -> {
-      // 현재 게시글의 실시간 상태와 신고 횟수를 가져옴
-      Post post = postRepository.findById(report.getPostId()).orElse(null);
+      Post post = postMap.get(report.getPostId());
+
+      // 게시글이 존재하면 해당 게시글의 신고수와 상태를 사용, 없으면 기본값
       int currentCnt = (post != null) ? post.getReportCnt() : 0;
-      ActiveStatus currentStatus = (post != null) ? post.getActiveStatus() : report.getActiveStatus();
+      ActiveStatus currentStatus = (post != null) ? post.getActiveStatus() : ActiveStatus.ACTIVE;
 
       return ReportedPostDto.from(report, currentCnt, currentStatus);
     });
