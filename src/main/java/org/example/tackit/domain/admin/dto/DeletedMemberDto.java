@@ -11,14 +11,14 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 @Builder
-public class DeletedMemberDTO {
+public class DeletedMemberDto {
     private Long id;
     private String email;
     private ActiveStatus activeStatus;
     private LocalDateTime createdAt;
 
-    public static DeletedMemberDTO from(Member member) {
-        return DeletedMemberDTO.builder()
+    public static DeletedMemberDto from(Member member) {
+        return DeletedMemberDto.builder()
                 .email(member.getEmail())
                 .createdAt(member.getCreatedAt())
                 .activeStatus(member.getActiveStatus())
