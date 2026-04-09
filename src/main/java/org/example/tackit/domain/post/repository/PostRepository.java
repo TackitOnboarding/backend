@@ -37,23 +37,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
       "WHERE p.id = :postId AND p.activeStatus = 'ACTIVE'")
   Optional<Post> findByIdWithWriter(@Param("postId") Long postId);
 
-  // 신고 게시글 전체 조회
-  @Query("""
-  SELECT p, r
-  FROM Post p
-  LEFT JOIN Report r
-    ON r.reportedAt = (
-      SELECT MAX(r2.reportedAt)
-      FROM Report r2
-      WHERE r2.postId = p.id
-    )
-  WHERE p.reportCnt > 0
-  AND (:type = 'ALL'
-       OR (:type = 'PENDING' AND p.reportCnt BETWEEN 1 AND 2)
-       OR (:type = 'DELETED' AND p.reportCnt >= 3))
-  ORDER BY r.reportedAt DESC
-""")
-  Page<Object[]> findPostsWithLatestReport(@Param("type") String type, Pageable pageable);
 
   // 마이페이지 ) 작성한 글 조회
   @Query("select distinct p from Post p " +

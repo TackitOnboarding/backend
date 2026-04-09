@@ -27,7 +27,7 @@ public class AdminPostService implements ReportedPostService {
   public Page<ReportedPostDto> getReportedPosts(String type, Pageable pageable) {
     String filterType = (type == null) ? "ALL" : type.toUpperCase();
 
-    Page<Object[]> result = postRepository.findPostsWithLatestReport(filterType, pageable);
+    Page<Object[]> result = reportRepository.findPostsWithLatestReport(filterType, pageable);
 
     return result.map(tuple -> {
       Post post = (Post) tuple[0];
