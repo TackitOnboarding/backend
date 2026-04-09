@@ -7,6 +7,7 @@ import org.example.tackit.domain.entity.Report;
 import org.example.tackit.domain.entity.ReportReason;
 import org.example.tackit.domain.entity.TargetType;
 import org.example.tackit.domain.entity.post.Post;
+import org.example.tackit.domain.entity.post.PostType;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ReportedPostDetailDto {
     private Long postId;
+    private PostType postType;
     private String postLink;       // 게시글 상세 페이지 링크
     private String title;
     private String content;        // 신고 당시 게시글 내용
@@ -24,13 +26,13 @@ public class ReportedPostDetailDto {
     private int reportCnt;
     private LocalDateTime reportedAt;
 
-
     private String reporterNickname; // 신고자
     private String writerNickname;   // 작성자
 
     public static ReportedPostDetailDto from(Report report, Post post) {
         return ReportedPostDetailDto.builder()
                 .postId(post.getId())
+                .postType(post.getPostType())
                 .postLink("/api/posts/" + post.getId())
                 .title(report.getReportedPostTitle())
                 .content(report.getReportedContent())

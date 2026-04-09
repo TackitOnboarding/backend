@@ -6,7 +6,6 @@ import org.example.tackit.domain.admin.dto.ReportedPostDto;
 import org.example.tackit.domain.admin.service.AdminPostService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +22,7 @@ public class AdminPostController {
     @GetMapping
     public ResponseEntity<Page<ReportedPostDto>> getReportedPosts(
             @RequestParam(value = "type", required = false, defaultValue = "ALL") String type,
-            @PageableDefault(size = 10, sort = "reportedAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(size = 10) Pageable pageable
     ) {
         Page<ReportedPostDto> reportedPosts = adminPostService.getReportedPosts(type, pageable);
         return ResponseEntity.ok(reportedPosts);

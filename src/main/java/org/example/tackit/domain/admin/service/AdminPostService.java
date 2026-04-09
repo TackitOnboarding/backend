@@ -15,10 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -29,60 +25,38 @@ public class AdminPostService implements ReportedPostService {
 
   @Override
   public Page<ReportedPostDto> getReportedPosts(String type, Pageable pageable) {
-    Page<Report> reports;
     String filterType = (type == null) ? "ALL" : type.toUpperCase();
 
-    // 1. 신고 내역 먼저 조회 (1번의 쿼리)
-    reports = switch (filterType) {
-      case "PENDING" -> reportRepository.findPendingReports(pageable);
-      case "DELETED" -> reportRepository.findDeletedReports(pageable);
-      default ->        reportRepository.findAllLatestReports(pageable);
-    };
+    Page<Object[]> result = postRepository.findPostsWithLatestReport(filterType, pageable);
 
-    // 2. N+1 방지: 현재 페이지의 모든 postId 추출 후 게시글 일괄 조회 (1번의 쿼리)
-    List<Long> postIds = reports.getContent().stream()
-            .map(Report::getPostId)
-            .distinct() // 중복 제거
-            .toList();
+    return result.map(tuple -> {
+      Post post = (Post) tuple[0];
+      Report report = (Report) tuple[1];
 
-    Map<Long, Post> postMap = postRepository.findAllById(postIds).stream()
-            .collect(Collectors.toMap(Post::getId, p -> p));
+      int reportCnt = post.getReportCnt();
+      ActiveStatus status = post.getActiveStatus();
 
-    // 3. 메모리에 로드된 postMap을 이용해 DTO 변환
-    return reports.map(report -> {
-      Post post = postMap.get(report.getPostId());
-
-      // 게시글이 존재하면 해당 게시글의 신고수와 상태를 사용, 없으면 기본값
-      int currentCnt = (post != null) ? post.getReportCnt() : 0;
-      ActiveStatus currentStatus = (post != null) ? post.getActiveStatus() : ActiveStatus.ACTIVE;
-
-      return ReportedPostDto.from(report, currentCnt, currentStatus);
+      return ReportedPostDto.from(report, reportCnt, status);
     });
-  }
-
-  // 비활성화 게시글 전체 조회
-  @Override
-  public Page<ReportedPostDto> getDeletedPosts(Pageable pageable) {
-    return getReportedPosts("DELETED", pageable);
-    /*
-
-    return postRepository.findAllByActiveStatusAndReportCntGreaterThanEqual(
-            ActiveStatus.DELETED, 3, pageable)
-        .map(ReportedPostDTO::from);
-     */
   }
 
   @Override
   public ReportedPostDetailDto getReportedPostDetail(Long reportId) {
-    // 1. 신고 내역 조회 및 예외 처리
-    Report report = reportRepository.findById(reportId)
+    // 1. report 조회
+    Report baseReport = reportRepository.findById(reportId)
             .orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
 
-    // 2. 원본 게시글 조회 및 예외 처리
-    Post post = postRepository.findById(report.getPostId())
+    Long postId = baseReport.getPostId();
+
+    // 2. 최신 신고 게시글만 조회되도록(중복 게시글 방지)
+    Report latestReport = reportRepository.findLatestReportByPostId(postId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
+
+    // 3. 게시글 조회
+    Post post = postRepository.findById(postId)
             .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-    return ReportedPostDetailDto.from(report, post);
+    return ReportedPostDetailDto.from(latestReport, post);
   }
 
 

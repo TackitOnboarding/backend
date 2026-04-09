@@ -2,6 +2,8 @@ package org.example.tackit.domain.report.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
 import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.Report;
 import org.example.tackit.domain.entity.TargetType;
@@ -14,22 +16,17 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
-  // 신고 횟수가 1~2회인 게시글의 최신 신고 내역)
-  @Query("SELECT r FROM Report r WHERE r.id IN " +
-          "(SELECT MAX(r2.id) FROM Report r2 GROUP BY r2.postId) " +
-          "AND r.postId IN (SELECT p.id FROM Post p WHERE p.reportCnt BETWEEN 1 AND 2)")
-  Page<Report> findPendingReports(Pageable pageable);
-
-  // 신고 횟수가 3회 이상으로 비활성화된 게시글의 최신 신고 내역
-  @Query("SELECT r FROM Report r WHERE r.id IN " +
-          "(SELECT MAX(r2.id) FROM Report r2 GROUP BY r2.postId) " +
-          "AND r.postId IN (SELECT p.id FROM Post p WHERE p.reportCnt >= 3)")
-  Page<Report> findDeletedReports(Pageable pageable);
-
-  // 전체 : 신고 횟수가 1회 이상인 모든 게시글의 최신 신고 내역
-  @Query("SELECT r FROM Report r WHERE r.id IN " +
-          "(SELECT MAX(r2.id) FROM Report r2 GROUP BY r2.postId)")
-  Page<Report> findAllLatestReports(Pageable pageable);
+  // 신고 게시글 상세 조회
+  @Query("""
+SELECT r FROM Report r
+WHERE r.postId = :postId
+AND r.reportedAt = (
+  SELECT MAX(r2.reportedAt)
+  FROM Report r2
+  WHERE r2.postId = :postId
+)
+""")
+  Optional<Report> findLatestReportByPostId(@Param("postId") Long postId);
 
   // 전체/필터링 조회 (Fetch Join으로 신고자와 작성자 정보를 한 번에 가져옴)
   @Query("select r from Report r " +

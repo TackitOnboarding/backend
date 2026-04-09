@@ -11,8 +11,6 @@ public interface ReportedPostService {
 
     ReportedPostDetailDto getReportedPostDetail(Long reportId);
 
-    Page<ReportedPostDto> getDeletedPosts(Pageable pageable);
-
     void deletePost(Long id);
 
     void activatePost(Long id);
