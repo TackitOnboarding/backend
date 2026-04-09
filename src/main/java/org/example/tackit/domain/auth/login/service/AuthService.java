@@ -20,6 +20,8 @@ import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.entity.org.OrgType;
 import org.example.tackit.domain.member.repository.MemberRepository;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.example.tackit.global.exception.BusinessException;
+import org.example.tackit.global.exception.ErrorCode;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,7 +49,7 @@ public class AuthService {
   @Transactional
   public void signup(SignUpDto signUpDto) {
     if (memberRepository.existsByEmail(signUpDto.getEmail())) {
-      throw new RuntimeException("이미 가입되어 있는 유저입니다");
+      throw new BusinessException(ErrorCode.DUPLICATE_MEMBER);
     }
 
     Member member = Member.builder()
