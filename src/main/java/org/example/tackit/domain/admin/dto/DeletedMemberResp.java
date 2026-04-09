@@ -9,9 +9,9 @@ import java.util.List;
 @AllArgsConstructor
 public class DeletedMemberResp {
     private long totalCount;
-    private List<DeletedMemberDTO> members;
+    private List<DeletedMemberDto> members;
 
-    public DeletedMemberResp(List<DeletedMemberDTO> members, long totalCount) {
+    public DeletedMemberResp(List<DeletedMemberDto> members, long totalCount) {
         this.members = members;
         this.totalCount = totalCount;
     }

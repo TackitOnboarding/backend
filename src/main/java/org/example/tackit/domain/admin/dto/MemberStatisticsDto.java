@@ -6,12 +6,12 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class MemberStatisticsDTO {
+public class MemberStatisticsDto {
     private final long totalCount;
     private final long monthlyCount;
     private final long weeklyCount;
 
-    public MemberStatisticsDTO toDTO() {
-        return new MemberStatisticsDTO(totalCount, monthlyCount, weeklyCount);
+    public MemberStatisticsDto toDTO() {
+        return new MemberStatisticsDto(totalCount, monthlyCount, weeklyCount);
     }
 }

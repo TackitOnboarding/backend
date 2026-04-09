@@ -2,6 +2,8 @@ package org.example.tackit.domain.report.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
 import org.example.tackit.domain.entity.ActiveStatus;
 import org.example.tackit.domain.entity.Report;
 import org.example.tackit.domain.entity.TargetType;
@@ -14,6 +16,35 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
+  // 신고 게시글 전체 조회
+  @Query("""
+  SELECT p, r
+  FROM Post p
+  LEFT JOIN Report r
+    ON r.reportedAt = (
+      SELECT MAX(r2.reportedAt)
+      FROM Report r2
+      WHERE r2.postId = p.id
+    )
+  WHERE p.reportCnt > 0
+  AND (:type = 'ALL'
+       OR (:type = 'PENDING' AND p.reportCnt BETWEEN 1 AND 2)
+       OR (:type = 'DELETED' AND p.reportCnt >= 3))
+  ORDER BY r.reportedAt DESC
+""")
+  Page<Object[]> findPostsWithLatestReport(@Param("type") String type, Pageable pageable);
+
+  // 신고 게시글 상세 조회
+  @Query("""
+SELECT r FROM Report r
+WHERE r.postId = :postId
+AND r.reportedAt = (
+  SELECT MAX(r2.reportedAt)
+  FROM Report r2
+  WHERE r2.postId = :postId
+)
+""")
+  Optional<Report> findLatestReportByPostId(@Param("postId") Long postId);
 
   // 전체/필터링 조회 (Fetch Join으로 신고자와 작성자 정보를 한 번에 가져옴)
   @Query("select r from Report r " +
@@ -21,6 +52,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
       "join fetch r.targetMember " +
       "where (:status is null or r.activeStatus = :status)")
   Page<Report> findAllByActiveStatus(@Param("status") ActiveStatus activeStatus, Pageable pageable);
+
 
   // 필요하다면 신고 중복 방지를 위한 조회 메서드도 추가 가능
   boolean existsByReporterIdAndTargetIdAndTargetType(Long reporterId, Long targetId,

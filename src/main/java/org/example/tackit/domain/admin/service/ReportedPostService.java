@@ -1,13 +1,18 @@
 package org.example.tackit.domain.admin.service;
 
-import org.example.tackit.domain.admin.dto.ReportedPostDTO;
+import org.example.tackit.domain.admin.dto.ReportedPostDetailDto;
+import org.example.tackit.domain.admin.dto.ReportedPostDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
 public interface ReportedPostService {
-    Page<ReportedPostDTO> getDeletedPosts(Pageable pageable);
+    Page<ReportedPostDto> getReportedPosts(String type, Pageable pageable);
+
+    ReportedPostDetailDto getReportedPostDetail(Long reportId);
+
     void deletePost(Long id);
+
     void activatePost(Long id);
 
 }
