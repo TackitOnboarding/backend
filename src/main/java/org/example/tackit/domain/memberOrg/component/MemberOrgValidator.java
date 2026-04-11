@@ -6,6 +6,7 @@ import org.example.tackit.domain.entity.MemberType;
 import org.example.tackit.domain.entity.org.MemberOrg;
 import org.example.tackit.domain.entity.org.OrgStatus;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.example.tackit.global.exception.BusinessException;
 import org.example.tackit.global.exception.CustomBaseException;
 import org.example.tackit.global.exception.ErrorCode;
 import org.springframework.stereotype.Component;
@@ -21,10 +22,10 @@ public class MemberOrgValidator {
   // 활동 회원 체크 메서드
   public MemberOrg validateActiveMembership(Long memberOrgId) {
     MemberOrg memberOrg = memberOrgRepository.findById(memberOrgId)
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 조직 멤버 프로필입니다."));
+        .orElseThrow(() -> new BusinessException(ErrorCode.ACCESS_DENIED_ORGANIZATION));
 
     if (memberOrg.getOrgStatus() != OrgStatus.ACTIVE) {
-      throw new IllegalArgumentException("해당 조직의 활동 중인 회원만 접근할 수 있습니다.");
+      throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
     }
     return memberOrg;
   }
@@ -34,7 +35,7 @@ public class MemberOrgValidator {
     MemberOrg memberOrg = validateActiveMembership(memberOrgId);
 
     if (memberOrg.getMemberRole() != MemberRole.EXECUTIVE) {
-      throw new IllegalArgumentException("해당 조직의 운영진만 접근할 수 있습니다.");
+      throw new BusinessException(ErrorCode.ACCESS_DENIED_EXECUTIVE);
     }
     return memberOrg;
   }
