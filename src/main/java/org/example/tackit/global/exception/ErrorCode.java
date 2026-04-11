@@ -19,6 +19,7 @@ public enum ErrorCode {
     ACCESS_DENIED_DELETE(HttpStatus.FORBIDDEN, "A003", "작성자 또는 관리자만 삭제할 수 있습니다."),
     ACCESS_DENIED_NOTICE(HttpStatus.FORBIDDEN, "A004", "운영진만 공지 게시글을 작성할 수 있습니다."),
     ACCESS_DENIED_PROFILE(HttpStatus.FORBIDDEN, "A005", "해당 프로필에 대한 접근 권한이 없습니다."),
+    ACCESS_DENIED_EXECUTIVE(HttpStatus.FORBIDDEN, "A006", "운영진만 접근할 수 있습니다."),
 
     // 400
     POST_IS_INACTIVE(HttpStatus.BAD_REQUEST, "P002", "비활성화된 게시글입니다."),
