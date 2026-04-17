@@ -30,22 +30,22 @@ public class MemberService {
         List<MemberOrg> memberOrgs = memberOrgRepository.findAllByMemberEmail(email);
 
         List<MemberProfileResp> profileList = memberOrgs.stream()
-                .map(org -> {
+                .map(memberOrg -> {
                     MemberProfileResp.MemberProfileRespBuilder builder = MemberProfileResp.builder()
-                            .profileId(org.getId())
-                            .orgId(org.getOrganization().getId())
-                            .orgType(org.getOrgType().name())
-                            .orgName(org.getOrganization().getName())
-                            .nickname(org.getNickname())
-                            .imageUrl(org.getProfileImageUrl())
-                            .memberType(org.getMemberType().name())
-                            .memberRole(org.getMemberRole().name())
-                            .orgStatus(org.getOrgStatus().name());
+                            .memberOrgId(memberOrg.getId())
+                            .orgId(memberOrg.getOrganization().getId())
+                            .orgType(memberOrg.getOrgType().name())
+                            .orgName(memberOrg.getOrganization().getName())
+                            .nickname(memberOrg.getNickname())
+                            .imageUrl(memberOrg.getProfileImageUrl())
+                            .memberType(memberOrg.getMemberType().name())
+                            .memberRole(memberOrg.getMemberRole().name())
+                            .orgStatus(memberOrg.getOrgStatus().name());
 
                     // 동아리(CLUB)일 경우 대학교 이름 주입
-                    if ("CLUB".equals(org.getOrgType().name())) {
-                        if (org.getOrganization().getUniversity() != null) {
-                            builder.universityName(org.getOrganization().getUniversity().getUniversityName());
+                    if ("CLUB".equals(memberOrg.getOrgType().name())) {
+                        if (memberOrg.getOrganization().getUniversity() != null) {
+                            builder.universityName(memberOrg.getOrganization().getUniversity().getUniversityName());
                         }
                     }
                     return builder.build();

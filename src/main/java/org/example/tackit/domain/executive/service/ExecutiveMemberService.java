@@ -6,6 +6,8 @@ import org.example.tackit.domain.entity.org.OrgStatus;
 import org.example.tackit.domain.executive.dto.response.MemberListResDto;
 import org.example.tackit.domain.memberOrg.component.MemberOrgValidator;
 import org.example.tackit.domain.memberOrg.repository.MemberOrgRepository;
+import org.example.tackit.global.exception.BusinessException;
+import org.example.tackit.global.exception.ErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -48,11 +50,11 @@ public class ExecutiveMemberService {
 
     // 2. 타겟 대상 조회
     MemberOrg targetMember = memberOrgRepository.findById(targetMemberOrgId)
-        .orElseThrow(() -> new IllegalArgumentException("해당 가입 신청을 찾을 수 없습니다."));
+        .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
     // 3. 조직 일치 여부 검증
     if (!targetMember.getOrganization().getId().equals(orgId)) {
-      throw new IllegalArgumentException("해당 조직의 가입 신청이 아닙니다.");
+      throw new BusinessException(ErrorCode.ORGANIZATION_NOT_FOUND);
     }
 
     // 4. 상태 변경 (ACTIVE or REJECTED)

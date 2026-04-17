@@ -1,12 +1,16 @@
 package org.example.tackit.domain.admin.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.tackit.domain.admin.dto.ReportedPostDTO;
+import org.example.tackit.domain.admin.dto.ReportedPostDetailDto;
+import org.example.tackit.domain.admin.dto.ReportedPostDto;
 import org.example.tackit.domain.entity.ActiveStatus;
+import org.example.tackit.domain.entity.Report;
 import org.example.tackit.domain.entity.post.Post;
 import org.example.tackit.domain.post.repository.PostRepository;
+import org.example.tackit.domain.report.repository.ReportRepository;
+import org.example.tackit.global.exception.BusinessException;
+import org.example.tackit.global.exception.ErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,22 +21,45 @@ import org.springframework.stereotype.Service;
 public class AdminPostService implements ReportedPostService {
 
   private final PostRepository postRepository;
+  private final ReportRepository reportRepository;
 
-  // 비활성화 게시글 전체 조회
   @Override
-  public Page<ReportedPostDTO> getDeletedPosts(Pageable pageable) {
+  public Page<ReportedPostDto> getReportedPosts(String type, Pageable pageable) {
+    String filterType = (type == null) ? "ALL" : type.toUpperCase();
 
-    return postRepository.findAllByActiveStatusAndReportCntGreaterThanEqual(
-            ActiveStatus.DELETED, 3, pageable)
-        .map(ReportedPostDTO::from);
+    Page<Object[]> result = reportRepository.findPostsWithLatestReportsForAdmin(filterType, pageable);
+
+    return result.map(tuple -> {
+      Post post = (Post) tuple[0];
+      Report report = (Report) tuple[1];
+
+      int reportCnt = post.getReportCnt();
+      ActiveStatus status = post.getActiveStatus();
+
+      return ReportedPostDto.from(report, reportCnt, status);
+    });
   }
+
+  @Override
+  public ReportedPostDetailDto getReportedPostDetail(Long reportId) {
+    // 1. report 조회
+    Report report = reportRepository.findById(reportId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
+
+    // 2. 게시글 조회
+    Post post = postRepository.findById(report.getPostId())
+            .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
+
+    return ReportedPostDetailDto.from(report, post);
+  }
+
 
   // 신고 게시글 완전 삭제
   @Override
   @Transactional
   public void deletePost(Long id) {
     Post post = postRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("해당 게시글이 존재하지 않습니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
     postRepository.delete(post);
   }
@@ -42,7 +69,12 @@ public class AdminPostService implements ReportedPostService {
   @Transactional
   public void activatePost(Long id) {
     Post post = postRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("해당 게시글이 존재하지 않습니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
+
+    // 이미 활성 상태인지 체크하는 비즈니스 로직 예시
+    if (post.getActiveStatus() == ActiveStatus.ACTIVE) {
+      throw new BusinessException(ErrorCode.ALREADY_ACTIVE_POST);
+    }
 
     post.activate();
   }

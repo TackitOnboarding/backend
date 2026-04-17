@@ -1,6 +1,5 @@
 package org.example.tackit.domain.executive.controller;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.tackit.common.dto.ActiveProfile;
 import org.example.tackit.common.dto.ProfileContext;

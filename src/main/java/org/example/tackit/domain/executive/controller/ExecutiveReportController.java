@@ -1,71 +1,68 @@
-//package org.example.tackit.domain.executive.controller;
-//
-//import lombok.RequiredArgsConstructor;
-//import org.example.tackit.common.dto.PageResponseDTO;
-//import org.example.tackit.domain.admin.dto.ReportedPostDTO;
-//import org.example.tackit.domain.entity.Post;
-//import org.example.tackit.domain.executive.dto.response.ReportedPostResDto;
-//import org.example.tackit.domain.executive.service.ExecutiveReportedPostService;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.data.domain.Sort;
-//import org.springframework.data.web.PageableDefault;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//
-//@RestController
-//@RequestMapping("/api/executive/reports")
-//@RequiredArgsConstructor
-//public class ExecutiveReportController {
-//    private final ExecutiveReportedPostService executiveReportedPostService;
-//
-//    // [ 신고 게시글 전체 조회 ]
-//    @GetMapping
-//    public ResponseEntity<PageResponseDTO<ReportedPostResDto>> getReportList(
-//            @RequestParam(value = "status", defaultValue = "ALL") String status,
-//            @PageableDefault(size = 10, sort = "reportedAt", direction = Sort.Direction.DESC) Pageable pageable) {
-//
-//        Page<ReportedPostResDto> reports = executiveReportedPostService.getReportList(status, pageable);
-//        return ResponseEntity.ok(PageResponseDTO.from(reports));
-//    }
-//
-//    // [ 신고 게시글 상세 조회 ]
-//    @GetMapping("/{reportId}")
-//    public ResponseEntity<ReportedPostResDto> getReportDetail(@PathVariable Long reportId) {
-//        return ResponseEntity.ok(executiveReportedPostService.getReportDetail(reportId));
-//    }
-//
-//    // [ 신고 게시글 복구 ]
-//
-//    // [ 신고 게시글 완전 삭제 ]
-//    /*
-//    @DeleteMapping("/{postType}/posts/{postId}")
-//    public ResponseEntity<Void> deleteReportedPost(
-//            @PathVariable("postType") Post postType,
-//            @PathVariable("postId") Long postId) {
-//
-//        ReportedPostService service = reportedPostServices.get(postType);
-//        if (service == null) {
-//            throw new IllegalArgumentException("지원하지 않는 게시글 유형입니다: " + postType);
-//        }
-//
-//        service.deletePost(postId);
-//        return ResponseEntity.noContent().build();
-//    }
-//
-//    // 게시글 활성화
-//    @PatchMapping("/{postType}/posts/{postId}/activate")
-//    public ResponseEntity<String> activateReportedPost(
-//            @PathVariable("postType") Post postType,
-//            @PathVariable("postId") Long postId) {
-//
-//        ReportedPostService service = reportedPostServices.get(postType);
-//        if (service == null) {
-//            throw new IllegalArgumentException("지원하지 않는 게시글 유형입니다: " + postType);
-//        }
-//
-//        service.activatePost(postId);
-//        return ResponseEntity.ok("게시글이 활성화되었습니다.");
-//    }
-//         */
-//}
+package org.example.tackit.domain.executive.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.example.tackit.common.dto.ActiveProfile;
+import org.example.tackit.common.dto.ProfileContext;
+import org.example.tackit.domain.admin.dto.ReportedPostDetailDto;
+import org.example.tackit.domain.admin.dto.ReportedPostDto;
+import org.example.tackit.domain.executive.service.ExecutiveReportService;
+import org.example.tackit.global.response.ApiResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/executive/posts")
+@RequiredArgsConstructor
+public class ExecutiveReportController {
+    private final ExecutiveReportService executiveReportService;
+
+    // [ 신고 게시글 목록 조회 (전체/신고접수/비활성화) ]
+    // 파라미터 type: "ALL", "PENDING", "DELETED" (기본값 ALL)
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<ReportedPostDto>>> getReportedPosts(
+            @ActiveProfile ProfileContext profileContext,
+            @RequestParam(value = "type", required = false, defaultValue = "ALL") String type,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Page<ReportedPostDto> reportedPosts = executiveReportService.getReportedPosts(profileContext.id(), type, pageable);
+
+        return ApiResponse.success(HttpStatus.OK, "신고 게시글 목록 조회 성공", reportedPosts);
+    }
+
+    // [ 신고 게시글 상세 조회 ]
+    @GetMapping("/{reportId}")
+    public ResponseEntity<ApiResponse<ReportedPostDetailDto>> getReportedPostDetail(
+            @ActiveProfile ProfileContext profileContext,
+            @PathVariable Long reportId) {
+        ReportedPostDetailDto detail = executiveReportService.getReportedPostDetail(profileContext.id(), reportId);
+
+        return ApiResponse.success(HttpStatus.OK, "신고 게시글 상세 조회 성공", detail);
+    }
+
+
+    // [ 신고 게시글 복구(활성화) ]
+    @PatchMapping("/{postId}/activate")
+    public ResponseEntity<ApiResponse<Void>> activatePost(
+            @ActiveProfile ProfileContext profileContext,
+            @PathVariable Long postId) {
+        executiveReportService.activatePost(profileContext.id(), postId);
+
+        return ApiResponse.success(HttpStatus.OK, "게시글 활성화 성공", null);
+
+    }
+
+    // [ 신고 게시글 완전 삭제 ]
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<ApiResponse<Void>> deletePost(
+            @ActiveProfile ProfileContext profileContext,
+            @PathVariable Long postId) {
+        executiveReportService.deletePost(profileContext.id(), postId);
+
+        return ApiResponse.success(HttpStatus.OK, "게시글 완전 삭제 성공", null);
+    }
+}
+

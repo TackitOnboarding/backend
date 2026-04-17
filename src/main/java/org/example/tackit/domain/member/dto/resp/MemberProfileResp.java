@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class MemberProfileResp {
-    private Long profileId;
+    private Long memberOrgId;
     private Long orgId;
 
     private String orgType;
