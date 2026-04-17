@@ -50,7 +50,7 @@ public class ExecutiveMemberService {
 
     // 2. 타겟 대상 조회
     MemberOrg targetMember = memberOrgRepository.findById(targetMemberOrgId)
-        .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));;
+        .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
     // 3. 조직 일치 여부 검증
     if (!targetMember.getOrganization().getId().equals(orgId)) {

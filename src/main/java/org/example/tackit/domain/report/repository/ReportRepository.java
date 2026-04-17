@@ -21,8 +21,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
   SELECT p, r
   FROM Post p
   LEFT JOIN Report r
-    ON r.reportedAt = (
-      SELECT MAX(r2.reportedAt)
+    ON r.id = (
+      SELECT MAX(r2.id)
       FROM Report r2
       WHERE r2.postId = p.id
     )
@@ -30,17 +30,17 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
   AND (:type = 'ALL'
        OR (:type = 'PENDING' AND p.reportCnt BETWEEN 1 AND 2)
        OR (:type = 'DELETED' AND p.reportCnt >= 3))
-  ORDER BY r.reportedAt DESC
+  ORDER BY r.id DESC
 """)
-  Page<Object[]> findPostsWithLatestReport(@Param("type") String type, Pageable pageable);
+  Page<Object[]> findPostsWithLatestReportsForAdmin(@Param("type") String type, Pageable pageable);
 
   // 운영진 ) 신고 게시글 전체 조회
   @Query("""
 SELECT p, r
 FROM Post p
 LEFT JOIN Report r
-  ON r.reportedAt = (
-    SELECT MAX(r2.reportedAt)
+  ON r.id = (
+    SELECT MAX(r2.id)
     FROM Report r2
     WHERE r2.postId = p.id
   )
@@ -49,9 +49,9 @@ AND p.organization.id = :orgId
 AND (:type = 'ALL'
      OR (:type = 'PENDING' AND p.reportCnt BETWEEN 1 AND 2)
      OR (:type = 'DELETED' AND p.reportCnt >= 3))
-ORDER BY r.reportedAt DESC
+ORDER BY r.id DESC
 """)
-  Page<Object[]> findPostsWithLatestReport(
+  Page<Object[]> findPostsWithLatestReportsForExecutive(
           @Param("type") String type,
           @Param("orgId") Long orgId,
           Pageable pageable

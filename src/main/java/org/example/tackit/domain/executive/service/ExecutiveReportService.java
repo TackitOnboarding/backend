@@ -46,7 +46,7 @@ public class ExecutiveReportService {
         MemberOrg requester = memberOrgValidator.validateExecutive(memberOrgId);
         Long orgId = requester.getOrganization().getId();
 
-        Page<Object[]> result = reportRepository.findPostsWithLatestReport(filterType, orgId, pageable);
+        Page<Object[]> result = reportRepository.findPostsWithLatestReportsForExecutive(filterType, orgId, pageable);
 
         return result.map(tuple -> {
             Post post = (Post) tuple[0];
@@ -62,19 +62,17 @@ public class ExecutiveReportService {
     // 신고 게시글 상세 조회
     public ReportedPostDetailDto getReportedPostDetail(Long memberOrgId, Long reportId) {
         // 1. report 조회
-        Report baseReport = reportRepository.findById(reportId)
+        Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
 
-        Long postId = baseReport.getPostId();
-
-        // 2. 최신 신고 게시글만 조회되도록(중복 게시글 방지)
-        Report latestReport = reportRepository.findLatestReportByPostId(postId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
+        // 2. 권한 검증
+        memberOrgValidator.validateExecutive(memberOrgId);
 
         // 3. 게시글 조회
-        Post post = validateExecutiveAndPostOrg(memberOrgId, postId);
+        Post post = postRepository.findById(report.getPostId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        return ReportedPostDetailDto.from(latestReport, post);
+        return ReportedPostDetailDto.from(report, post);
     }
 
 

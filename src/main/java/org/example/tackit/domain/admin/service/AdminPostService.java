@@ -27,7 +27,7 @@ public class AdminPostService implements ReportedPostService {
   public Page<ReportedPostDto> getReportedPosts(String type, Pageable pageable) {
     String filterType = (type == null) ? "ALL" : type.toUpperCase();
 
-    Page<Object[]> result = reportRepository.findPostsWithLatestReport(filterType, pageable);
+    Page<Object[]> result = reportRepository.findPostsWithLatestReportsForAdmin(filterType, pageable);
 
     return result.map(tuple -> {
       Post post = (Post) tuple[0];
@@ -43,20 +43,14 @@ public class AdminPostService implements ReportedPostService {
   @Override
   public ReportedPostDetailDto getReportedPostDetail(Long reportId) {
     // 1. report 조회
-    Report baseReport = reportRepository.findById(reportId)
+    Report report = reportRepository.findById(reportId)
             .orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
 
-    Long postId = baseReport.getPostId();
-
-    // 2. 최신 신고 게시글만 조회되도록(중복 게시글 방지)
-    Report latestReport = reportRepository.findLatestReportByPostId(postId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
-
-    // 3. 게시글 조회
-    Post post = postRepository.findById(postId)
+    // 2. 게시글 조회
+    Post post = postRepository.findById(report.getPostId())
             .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-    return ReportedPostDetailDto.from(latestReport, post);
+    return ReportedPostDetailDto.from(report, post);
   }
 
 
